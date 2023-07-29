@@ -16,6 +16,15 @@ class ExactSimulation:
         self.eig_val, self.eig_vec = np.linalg.eig(ham)
         self.eig_vec_inv = np.linalg.inv(self.eig_vec)
 
+        lam_0 = np.min(self.eig_val)
+        self.eig_val -= lam_0
+
+        ground_pos = np.argmin(self.eig_val)
+        # assert eigenval[ground_pos] == 0
+
+        # Ground state is the eigenvector corresponding to the smallest eigenvalue
+        self._ground_state = self.eig_vec[:, ground_pos]
+
         if isinstance(observable, SparsePauliOp):
             self.observable = observable.to_matrix()
         else:
@@ -27,6 +36,10 @@ class ExactSimulation:
             @ np.diag(np.exp(complex(0, -1) * t * self.eig_val))
             @ self.eig_vec_inv
         )
+
+    @property
+    def ground_state(self) -> NDArray:
+        return self._ground_state
 
     def get_observations(
         self,

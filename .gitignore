@@ -162,4 +162,4 @@ cython_debug/
 
 
 # CUSTOM IGNORES
-Ising/data/output/
+ising/data/output/
