@@ -1,0 +1,11 @@
+{
+  "observable": "magnetization",
+  "methods": [
+    "qiskit_trotter",
+    "exact"
+  ],
+  "input_file": "data/input/ising-one-qubit.json",
+  "fig_folder": "plots/qiskit_trotter",
+  "scale": [1.5, 1.5],
+  "labels": ["x", "L"]
+}

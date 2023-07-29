@@ -1,0 +1,10 @@
+{
+  "start_qubit": "1",
+  "end_qubit": "4",
+  "observable": "magnetization",
+  "methods": [
+    "exact"
+  ],
+  "input_file": "data/input/ising-one-qubit.json",
+  "fig_folder": "plots/qiskit_trotter"
+}

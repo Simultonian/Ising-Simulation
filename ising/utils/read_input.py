@@ -13,3 +13,10 @@ def read_input_file(file_name):
         else:
             data[key] = float(value)
     return data
+
+
+def read_json(file_name):
+    with open(file_name, "r") as file:
+        json_str = file.read()
+        data = json.loads(json_str)
+    return data

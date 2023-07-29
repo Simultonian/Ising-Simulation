@@ -50,8 +50,9 @@ def main():
     parameters = read_input_file(args.input)
     results = run_exact(parameters)
 
-    file_name = f"data/output/ising_exact_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
+    file_name = f"data/output/magnetization_exact_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
 
+    print(f"Saving results at: {file_name}")
     with open(file_name, "w") as file:
         json.dump(results, file)
 
