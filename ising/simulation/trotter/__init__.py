@@ -1,3 +1,10 @@
 from .qiskit_trotter import QiskitTrotter
+from .lie import Lie
 
-__all__ = ["QiskitTrotter"]
+
+TROTTER_MAP = {
+    "lie": Lie,
+}
+
+
+__all__ = ["QiskitTrotter", "Lie", "TROTTER_MAP"]

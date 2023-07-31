@@ -6,10 +6,13 @@ def read_input_file(file_name):
         data = json.load(file)
 
     INTEGERS = {"start_qubit", "end_qubit", "steps", "count_h", "count_time"}
+    STRING = {"method"}
 
     for key, value in data.items():
         if key in INTEGERS:
             data[key] = int(value)
+        elif key in STRING:
+            continue
         else:
             data[key] = float(value)
     return data

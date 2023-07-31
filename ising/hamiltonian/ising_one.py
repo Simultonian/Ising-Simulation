@@ -3,6 +3,20 @@ from qiskit.quantum_info import SparsePauliOp
 import numpy as np
 
 
+def trotter_reps(ham: SparsePauliOp, time: float, eps: float) -> int:
+    """
+    Calculate the Trotter error for Ising model specifically
+    """
+    l = len(ham.coeffs)
+    coeff_sum = sum(ham.coeffs)
+
+    numr = np.abs(l * (coeff_sum * time) ** 2)
+    dr = np.abs(2 * eps)
+    final = int(np.ceil(numr / dr))
+    return 15
+    return final
+
+
 def parametrized_ising(qubits: int, h: Parameter) -> SparsePauliOp:
     """
     One dimensional Transverse-field Ising model parameterized by external

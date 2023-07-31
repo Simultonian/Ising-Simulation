@@ -1,4 +1,6 @@
-from .ising_one import parametrized_ising
+from .ising_one import parametrized_ising, trotter_reps
 
 
-__all__ = ["parametrized_ising"]
+TROTTER_REP_FUNC = {"lie": trotter_reps}
+
+__all__ = ["parametrized_ising", "trotter_reps", "TROTTER_REP_FUNC"]

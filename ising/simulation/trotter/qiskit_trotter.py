@@ -1,11 +1,11 @@
-from typing import Union
+from typing import Union, Optional
 import numpy as np
 from numpy.typing import NDArray
 
 from qiskit.quantum_info import SparsePauliOp, Operator
 from qiskit.circuit import Parameter, QuantumCircuit
 from qiskit.circuit.library import PauliEvolutionGate
-from qiskit.synthesis import LieTrotter
+from qiskit.synthesis import LieTrotter, EvolutionSynthesis
 
 
 class QiskitTrotter:
@@ -14,19 +14,22 @@ class QiskitTrotter:
         ham: SparsePauliOp,
         observable: Union[SparsePauliOp, NDArray],
         reps: int = 1,
+        synthesis: Optional[EvolutionSynthesis] = None,
     ):
         self.num_qubits = ham.num_qubits
         assert isinstance(self.num_qubits, int)
 
         if isinstance(observable, SparsePauliOp):
             self.observable = observable.to_matrix()
+            assert observable is not None
         else:
             self.observable = observable
 
+        if synthesis is None:
+            synthesis = LieTrotter(reps=reps)
+
         self.para_t = Parameter("t")
-        evo_gate1 = PauliEvolutionGate(
-            ham, self.para_t, synthesis=LieTrotter(reps=reps)
-        )
+        evo_gate1 = PauliEvolutionGate(ham, self.para_t, synthesis=synthesis)
         self.circ = QuantumCircuit(self.num_qubits)
         self.circ.append(evo_gate1, range(self.num_qubits))
 
