@@ -1,7 +1,7 @@
 {
   "observable": "magnetization",
   "methods": [
-    "qiskit_trotter",
+    "lie",
     "exact"
   ],
   "input_file": "data/input/ising-one-qubit.json",

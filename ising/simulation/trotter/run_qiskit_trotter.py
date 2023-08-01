@@ -71,7 +71,7 @@ def main():
 
     results = run_qiskit_trotter(parameters, rep_counter, synthesis)
 
-    file_name = f"data/output/magnetization_qiskit_trotter_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
+    file_name = f"data/output/magnetization_{parameters['method']}_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
 
     print(f"Saving results at: {file_name}")
     with open(file_name, "w") as file:
