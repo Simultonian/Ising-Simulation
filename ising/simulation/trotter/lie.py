@@ -1,7 +1,15 @@
+from typing import Optional
 import numpy as np
+from numpy.typing import NDArray
+
 from qiskit.quantum_info import Pauli
-from qiskit.circuit import QuantumCircuit
+from qiskit.circuit import QuantumCircuit, Parameter
+from qiskit.quantum_info import Operator
 from qiskit.synthesis import LieTrotter
+from qiskit.circuit.library import PauliEvolutionGate
+
+from ising.hamiltonian import Hamiltonian, trotter_reps
+from ising.hamiltonian.hamiltonian import substitute_parameter
 
 
 class Lie(LieTrotter):
@@ -39,3 +47,67 @@ class Lie(LieTrotter):
                 )
 
         return evolution_circuit
+
+
+class LieCircuit:
+    def __init__(self, ham: Hamiltonian, h: Parameter, error: float):
+        self.ham = ham
+        self.num_qubits = ham.sparse_repr.num_qubits
+        self.error = error
+        self.ham_subbed: Optional[Hamiltonian] = None
+
+        self.h = h
+        self.time = Parameter("t")
+        self.reps = Parameter("r")
+
+    @property
+    def ground_state(self) -> NDArray:
+        if self.ham_subbed is None:
+            raise ValueError(
+                "h value has not been substituted, qiskit does not support parametrized Hamiltonians."
+            )
+        return self.ham_subbed.ground_state
+
+    def subsitute_h(self, h_val: float) -> None:
+        self.ham_subbed = substitute_parameter(self.ham, self.h, h_val)
+
+    def construct_parametrized_circuit(self) -> None:
+        if self.ham_subbed is None:
+            raise ValueError(
+                "h value has not been substituted, qiskit does not support parametrized Hamiltonians."
+            )
+
+        evo_gate1 = PauliEvolutionGate(
+            self.ham_subbed.sparse_repr,
+            time=self.time / self.reps,
+            synthesis=Lie(reps=1),
+        )
+        circ_h_sub = QuantumCircuit(self.num_qubits)
+        circ_h_sub.append(evo_gate1, range(self.num_qubits))
+        self.para_circuit = circ_h_sub
+
+    def matrix(self, time: float) -> NDArray:
+        if self.ham_subbed is None:
+            raise ValueError("h value has not been substituted.")
+        if self.para_circuit is None:
+            raise ValueError("Para circuit has not been constructed.")
+        reps = trotter_reps(self.ham_subbed.sparse_repr, time, self.error)
+
+        circuit = self.para_circuit.assign_parameters(
+            {self.reps: reps, self.time: time}
+        )
+        assert circuit is not None
+
+        return Operator.from_circuit(circuit).power(reps).data
+
+    def get_observations(
+        self, rho_init: NDArray, observable: NDArray, times: list[float]
+    ):
+        results = []
+        for time in times:
+            unitary = self.matrix(time)
+            rho_final = unitary @ rho_init @ unitary.conj().T
+            result = np.trace(np.abs(observable @ rho_final))
+            results.append(result)
+
+        return results

@@ -1,5 +1,7 @@
+from typing import Union
 from qiskit.circuit import Parameter
 from qiskit.quantum_info import SparsePauliOp
+from .hamiltonian import Hamiltonian
 import numpy as np
 
 
@@ -13,11 +15,10 @@ def trotter_reps(ham: SparsePauliOp, time: float, eps: float) -> int:
     numr = np.abs(l * (coeff_sum * time) ** 2)
     dr = np.abs(2 * eps)
     final = int(np.ceil(numr / dr))
-    return 15
     return final
 
 
-def parametrized_ising(qubits: int, h: Parameter) -> SparsePauliOp:
+def parametrized_ising(qubits: int, h: Union[Parameter, float]) -> Hamiltonian:
     """
     One dimensional Transverse-field Ising model parameterized by external
     field h. The Hamiltonian is represented by:
@@ -60,4 +61,9 @@ def parametrized_ising(qubits: int, h: Parameter) -> SparsePauliOp:
         # Reset to avoid copying
         p_i[i] = "I"
 
-    return SparsePauliOp(zz_terms + x_terms, np.concatenate([zz_coeffs, x_coeffs]))
+    return Hamiltonian(
+        sparse_repr=SparsePauliOp(
+            zz_terms + x_terms, np.concatenate([zz_coeffs, x_coeffs])
+        ),
+        normalized=True,
+    )

@@ -4,6 +4,7 @@ from qiskit.circuit import QuantumCircuit
 from qiskit.synthesis import LieTrotter
 from qiskit.circuit.library.pauli_evolution import PauliEvolutionGate
 
+
 class QDrift(LieTrotter):
     """The Lie-Trotter product formula."""
 
@@ -42,8 +43,6 @@ class QDrift(LieTrotter):
             p=weights / lambd,
         )
         sampled_ops = pauli_list[sampled_indices]
-        
-
 
         # Build the evolution circuit using the LieTrotter synthesis with the sampled operators
         evolution_circuit = PauliEvolutionGate(

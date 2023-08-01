@@ -1,12 +1,6 @@
 from .qiskit_trotter import QiskitTrotter
-from .lie import Lie
+from .lie import Lie, LieCircuit
 from .qdrift import QDrift
 
 
-TROTTER_MAP = {
-    "lie": Lie,
-    "qdrift": QDrift,
-}
-
-
-__all__ = ["QiskitTrotter", "Lie", "TROTTER_MAP"]
+__all__ = ["QiskitTrotter", "Lie", "QDrift", "LieCircuit"]
