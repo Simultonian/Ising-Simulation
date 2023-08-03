@@ -1,38 +1,13 @@
 import argparse
 import json
-from numpy.typing import NDArray
 import numpy as np
 
 from qiskit.circuit import Parameter
 
-from ising.hamiltonian import parametrized_ising, Hamiltonian
+from ising.hamiltonian import parametrized_ising
 from ising.observables import overall_magnetization
 from ising.utils import read_input_file, close_state
 from ising.simulation.trotter import LieCircuit
-
-
-def get_exact_unitary(ham: Hamiltonian, time: float) -> NDArray:
-    return (
-        ham.eig_vec
-        @ np.diag(np.exp(complex(0, -1) * time * ham.eig_val))
-        @ ham.eig_vec_inv
-    )
-
-
-def get_exact_observations(
-    hamiltonian: Hamiltonian,
-    observable: Hamiltonian,
-    rho_init: NDArray,
-    times: list[int],
-) -> list[float]:
-    results = []
-    for time in times:
-        unitary = get_exact_unitary(hamiltonian, time)
-        rho_final = unitary @ rho_init @ unitary.conj().T
-        result = np.trace(np.abs(observable.matrix @ rho_final))
-        results.append(result)
-
-    return results
 
 
 def run_trotter(paras):
@@ -60,6 +35,7 @@ def run_trotter(paras):
 
         h_wise_answers = {}
         for h in h_values:
+            print(f"Running for {num_qubit} qubits and h:{h}")
             circuit_manager.subsitute_h(h)
             circuit_manager.construct_parametrized_circuit()
             ground_state = circuit_manager.ham_subbed.ground_state

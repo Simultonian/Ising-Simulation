@@ -20,6 +20,7 @@ def run_exact(paras):
 
         h_wise_answers = {}
         for h in h_values:
+            print(f"Running for {num_qubit} qubits and h:{h}")
             ham = parametrized_ising(num_qubit, h)
             circuit_manager = ExactSimulation(ham)
             ground_state = circuit_manager.ground_state

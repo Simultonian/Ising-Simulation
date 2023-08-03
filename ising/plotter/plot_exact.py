@@ -33,7 +33,7 @@ def main():
     args = parser.parse_args()
     parameters = read_input_file(args.input)
 
-    output_file = f"data/output/ising_exact_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
+    output_file = f"data/output/magnetization_exact_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
     results = read_exact_output(output_file)
 
     diagram_name = f"plots/exact/magnetization_{parameters['start_qubit']}_to_{parameters['end_qubit']}.png"

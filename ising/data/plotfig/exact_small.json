@@ -5,6 +5,6 @@
   "methods": [
     "exact"
   ],
-  "input_file": "data/input/ising-one-qubit.json",
+  "input_file": "data/input/ising-one-qubit-larger.json",
   "fig_folder": "plots/qiskit_trotter"
 }
