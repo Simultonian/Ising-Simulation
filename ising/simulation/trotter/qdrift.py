@@ -77,11 +77,10 @@ class LieCircuit:
             raise ValueError(
                 "h value has not been substituted, qiskit does not support parametrized Hamiltonians."
             )
-        
+
         self.n = Parameter("n")
 
         self.evo_time = self.lambd * self.time / self.n
-
 
         evo_gate1 = PauliEvolutionGate(
             self.ham_subbed.sparse_repr,
@@ -111,7 +110,7 @@ class LieCircuit:
     ):
         results = []
         for time in times:
-            n_val = 2 * (self.lambd ** 2) * (time ** 2) / self.error
+            n_val = 2 * (self.lambd**2) * (time**2) / self.error
             unitary = self.matrix(time)
             rho_final = unitary @ rho_init @ unitary.conj().T
             result = np.trace(np.abs(observable @ rho_final))

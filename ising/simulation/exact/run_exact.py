@@ -10,7 +10,9 @@ from ising.simulation.exact import ExactSimulation
 
 def run_exact(paras):
     qubit_wise_answers = {}
-    times = np.linspace(0, paras["time"], paras["count_time"])
+    times = np.linspace(
+        paras["time"] / paras["count_time"], paras["time"], paras["count_time"]
+    )
     h_values = np.linspace(
         10 ** paras["start_h"], 10 ** paras["end_h"], paras["count_h"]
     )

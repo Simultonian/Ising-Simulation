@@ -1,12 +1,12 @@
 from typing import Optional
+from functools import lru_cache
 import numpy as np
 from numpy.typing import NDArray
 
-from qiskit.quantum_info import Pauli
+from qiskit.quantum_info import Pauli, SparsePauliOp
 from qiskit.circuit import QuantumCircuit, Parameter
 from qiskit.quantum_info import Operator
 from qiskit.synthesis import LieTrotter
-from qiskit.circuit.library import PauliEvolutionGate
 
 from ising.hamiltonian import Hamiltonian, trotter_reps
 from ising.hamiltonian.hamiltonian import substitute_parameter
@@ -25,20 +25,18 @@ class Lie(LieTrotter):
         """
         super().__init__(reps, False, "chain", None)
 
-    def synthesize(self, operators, time) -> list[QuantumCircuit]:
-        if not isinstance(operators, list):
-            pauli_list = [
-                (Pauli(op), np.real(coeff)) for op, coeff in operators.to_list()
-            ]
-        else:
-            pauli_list = [(op, 1) for op in operators]
+    def parameterized_map(
+        self, operator: SparsePauliOp, time
+    ) -> dict[Pauli, QuantumCircuit]:
+        pauli_list = [(Pauli(op), np.real(coeff)) for op, coeff in operator.to_list()]
 
-        operations_list = []
-        for _ in range(self.reps):
-            for op, coeff in pauli_list:
-                operations_list.append(self.atomic_evolution(op, coeff * time / self.reps))
+        pauli_circuits = {}
 
-        return operations_list
+        for op, coeff in pauli_list:
+            circuit = self.atomic_evolution(op, coeff * time)
+            pauli_circuits[op] = circuit
+
+        return pauli_circuits
 
 
 class LieCircuit:
@@ -51,9 +49,8 @@ class LieCircuit:
         self.h = h
         self.time = Parameter("t")
         self.reps = Parameter("r")
-        
+
         self.synthesizer = Lie(reps=1)
-        self.para_circuits = []
 
     @property
     def ground_state(self) -> NDArray:
@@ -66,31 +63,36 @@ class LieCircuit:
     def subsitute_h(self, h_val: float) -> None:
         self.ham_subbed = substitute_parameter(self.ham, self.h, h_val)
 
-
-    def fast_pauli(self, index: int, reps:int, time: float) -> NDArray:
-        circ = self.para_circuits[index].assign_parameters({self.reps: reps, self.time: time})
-        return Operator.from_circuit(circ).data
-
     def construct_parametrized_circuit(self) -> None:
         if self.ham_subbed is None:
             raise ValueError(
                 "h value has not been substituted, qiskit does not support parametrized Hamiltonians."
             )
 
-        self.para_circuits = self.synthesizer.synthesize(self.ham_subbed.sparse_repr, self.time/self.reps)
+        self.pauli_mapping = self.synthesizer.parameterized_map(
+            self.ham_subbed.sparse_repr, self.time / self.reps
+        )
+
+    @lru_cache
+    def pauli_matrix(self, pauli: Pauli, time: float, reps: int) -> NDArray:
+        circuit = self.pauli_mapping[pauli].assign_parameters(
+            {self.time: time, self.reps: reps}
+        )
+        return Operator.from_circuit(circuit).reverse_qargs().data
 
     def matrix(self, time: float) -> NDArray:
         if self.ham_subbed is None:
             raise ValueError("h value has not been substituted.")
-        if len(self.para_circuits) == 0: 
+        if self.pauli_mapping is None:
             raise ValueError("Para circuit has not been constructed.")
         reps = trotter_reps(self.ham_subbed.sparse_repr, time, self.error)
 
-        final_answer = self.fast_pauli(0, reps, time)
-        for ind in range(1, len(self.para_circuits)):
-            final_answer = self.fast_pauli(ind, reps, time) @ final_answer 
+        final_op = np.identity(2**self.num_qubits)
+        for op in self.ham_subbed.sparse_repr:
+            p = self.pauli_matrix(Pauli(op.paulis), time, reps)
+            final_op = np.dot(p, final_op)
 
-        return np.power(final_answer, reps)
+        return np.linalg.matrix_power(final_op, reps)
 
     def get_observations(
         self, rho_init: NDArray, observable: NDArray, times: list[float]

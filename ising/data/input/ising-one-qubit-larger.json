@@ -1,12 +1,12 @@
 {
   "start_qubit": "7",
   "end_qubit": "7",
-  "start_h": "-0.5",
+  "start_h": "0.1",
   "end_h": "0.7",
   "count_h": "3",
   "time": "1.0",
-  "count_time": "10",
-  "overlap": "0.8",
+  "count_time": "20",
+  "overlap": "0.5",
   "method": "lie",
   "error": "0.1"
 }
