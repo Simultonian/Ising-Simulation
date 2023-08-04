@@ -18,6 +18,13 @@ def trotter_reps(ham: SparsePauliOp, time: float, eps: float) -> int:
     return final
 
 
+def qdrift_count(lambd: float, time: float, eps: float) -> int:
+    numr = np.abs(2 * (lambd * time) ** 2)
+    dr = eps
+    final = int(np.ceil(numr / dr))
+    return final
+
+
 def parametrized_ising(qubits: int, h: Union[Parameter, float]) -> Hamiltonian:
     """
     One dimensional Transverse-field Ising model parameterized by external

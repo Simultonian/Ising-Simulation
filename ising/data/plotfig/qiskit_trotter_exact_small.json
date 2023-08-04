@@ -1,7 +1,7 @@
 {
   "observable": "magnetization",
   "methods": [
-    "lie",
+    "qdrift",
     "exact"
   ],
   "input_file": "data/input/ising-one-qubit-larger.json",

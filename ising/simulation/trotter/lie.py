@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 from functools import lru_cache
 import numpy as np
 from numpy.typing import NDArray
@@ -26,9 +26,14 @@ class Lie(LieTrotter):
         super().__init__(reps, False, "chain", None)
 
     def parameterized_map(
-        self, operator: SparsePauliOp, time
+        self, operator: Union[list[Pauli], SparsePauliOp], time
     ) -> dict[Pauli, QuantumCircuit]:
-        pauli_list = [(Pauli(op), np.real(coeff)) for op, coeff in operator.to_list()]
+        if isinstance(operator, list):
+            pauli_list = [(op, 1) for op in operator]
+        else:
+            pauli_list = [
+                (Pauli(op), np.real(coeff)) for op, coeff in operator.to_list()
+            ]
 
         pauli_circuits = {}
 

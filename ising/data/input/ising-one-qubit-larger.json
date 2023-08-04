@@ -7,6 +7,6 @@
   "time": "1.0",
   "count_time": "20",
   "overlap": "0.5",
-  "method": "lie",
-  "error": "0.1"
+  "method": "qdrift",
+  "error": "0.01"
 }

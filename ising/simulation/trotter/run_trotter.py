@@ -7,7 +7,7 @@ from qiskit.circuit import Parameter
 from ising.hamiltonian import parametrized_ising
 from ising.observables import overall_magnetization
 from ising.utils import read_input_file, close_state
-from ising.simulation.trotter import LieCircuit
+from ising.simulation.trotter import LieCircuit, QDriftCircuit
 
 
 def run_trotter(paras):
@@ -24,8 +24,7 @@ def run_trotter(paras):
     if method == "lie":
         circuit_synthesis = LieCircuit
     if method == "qdrift":
-        # TODO
-        circuit_synthesis = LieCircuit
+        circuit_synthesis = QDriftCircuit
     else:
         circuit_synthesis = LieCircuit
 
@@ -83,4 +82,5 @@ def test_main():
 
 
 if __name__ == "__main__":
+    np.random.seed(42)
     main()
