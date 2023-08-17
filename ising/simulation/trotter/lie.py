@@ -93,20 +93,38 @@ class LieCircuit:
         reps = trotter_reps(self.ham_subbed.sparse_repr, time, self.error)
 
         final_op = np.identity(2**self.num_qubits)
+        print(f"{time}:{reps}")
         for op in self.ham_subbed.sparse_repr:
             p = self.pauli_matrix(Pauli(op.paulis), time, reps)
             final_op = np.dot(p, final_op)
 
         return np.linalg.matrix_power(final_op, reps)
 
+    # def get_observations(
+    #     self, rho_init: NDArray, observable: NDArray, times: list[float]
+    # ):
+    #     results = []
+    #     for time in times:
+    #         unitary = self.matrix(time)
+    #         rho_final = unitary @ rho_init @ unitary.conj().T
+    #         result = np.trace(np.abs(observable @ rho_final))
+    #         results.append(result)
+
+    #     return results
+
     def get_observations(
         self, rho_init: NDArray, observable: NDArray, times: list[float]
     ):
         results = []
+        cur_time = 0
+        cur_rho = rho_init
         for time in times:
-            unitary = self.matrix(time)
-            rho_final = unitary @ rho_init @ unitary.conj().T
+            print(f"Running for {time}")
+            unitary = self.matrix(time - cur_time)
+            rho_final = unitary @ cur_rho @ unitary.conj().T
             result = np.trace(np.abs(observable @ rho_final))
+            cur_time = time
+            cur_rho = rho_final
             results.append(result)
 
         return results

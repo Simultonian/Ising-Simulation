@@ -1,12 +1,12 @@
 {
-  "start_qubit": "7",
-  "end_qubit": "7",
+  "start_qubit": "5",
+  "end_qubit": "5",
   "start_h": "0.1",
   "end_h": "0.7",
   "count_h": "3",
-  "time": "1.0",
-  "count_time": "20",
+  "time": "300.0",
+  "count_time": "200",
   "overlap": "0.5",
   "method": "qdrift",
-  "error": "0.01"
+  "error": "0.005"
 }
