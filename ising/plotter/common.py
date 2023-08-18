@@ -36,6 +36,9 @@ def plot_exact(paras, results: Result, color: int, **kwargs):
         for h, result in h_wise_results.items():
             h_label = str(h)[:4]
             if style != "L":
+                if len(times) != len(result):
+                    print(h, result)
+                    print(len(times), len(result))
                 sns.scatterplot(
                     x=times,
                     y=result,
