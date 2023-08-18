@@ -1,7 +1,7 @@
 {
   "observable": "magnetization",
   "methods": [
-    "lie",
+    "sparse_lie",
     "exact"
   ],
   "input_file": "data/input/ising-one-qubit-larger.json",

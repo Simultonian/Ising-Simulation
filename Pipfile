@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 qiskit = "*"
 seaborn = "*"
+scipy = "*"
 
 [dev-packages]
 pytest = "*"

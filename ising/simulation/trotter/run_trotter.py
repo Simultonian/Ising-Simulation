@@ -7,7 +7,7 @@ from qiskit.circuit import Parameter
 from ising.hamiltonian import parametrized_ising
 from ising.observables import overall_magnetization
 from ising.utils import read_input_file, close_state
-from ising.simulation.trotter import LieCircuit, QDriftCircuit
+from ising.simulation.trotter import LieCircuit, QDriftCircuit, SparseLie
 
 
 def run_trotter(paras):
@@ -25,6 +25,8 @@ def run_trotter(paras):
         circuit_synthesis = LieCircuit
     if method == "qdrift":
         circuit_synthesis = QDriftCircuit
+    if method == "sparse_lie":
+        circuit_synthesis = SparseLie
     else:
         circuit_synthesis = LieCircuit
 
