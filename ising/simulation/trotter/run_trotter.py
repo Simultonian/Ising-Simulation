@@ -23,12 +23,12 @@ def run_trotter(paras):
 
     if method == "lie":
         circuit_synthesis = LieCircuit
-    if method == "qdrift":
+    elif method == "qdrift":
         circuit_synthesis = QDriftCircuit
-    if method == "sparse_lie":
+    elif method == "sparse_lie":
         circuit_synthesis = SparseLie
     else:
-        circuit_synthesis = LieCircuit
+        raise ValueError("Incorrect method:", method)
 
     for num_qubit in range(paras["start_qubit"], paras["end_qubit"] + 1):
         observable = overall_magnetization(num_qubit)

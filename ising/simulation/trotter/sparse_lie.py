@@ -1,5 +1,6 @@
 from typing import Optional, Union
 from functools import lru_cache
+from scipy import sparse
 import numpy as np
 from numpy.typing import NDArray
 
@@ -7,8 +8,7 @@ from qiskit.quantum_info import Pauli
 from qiskit.circuit import Parameter
 
 from ising.hamiltonian import Hamiltonian, trotter_reps
-
-from scipy import sparse
+from ising.utils import MAXSIZE
 from lie import LieCircuit
 
 
@@ -16,7 +16,7 @@ class SparseLie(LieCircuit):
     def __init__(self, ham: Hamiltonian, h: Parameter, error: float):
         super().__init__(ham, h, error)
 
-    @lru_cache
+    @lru_cache(maxsize=MAXSIZE)
     def pauli_matrix(self, pauli: Pauli, time: float, reps: int) -> sparse.bsr_array:
         return sparse.bsr_array(super().pauli_matrix(pauli, time, reps))
 

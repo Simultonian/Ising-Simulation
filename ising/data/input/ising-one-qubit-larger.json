@@ -1,12 +1,12 @@
 {
-  "start_qubit": "8",
-  "end_qubit": "8",
+  "start_qubit": "3",
+  "end_qubit": "3",
   "start_h": "0.1",
   "end_h": "0.7",
   "count_h": "3",
   "time": "300.0",
   "count_time": "10",
   "overlap": "0.5",
-  "method": "sparse_lie",
-  "error": "0.005"
+  "method": "qdrift",
+  "error": "0.1"
 }

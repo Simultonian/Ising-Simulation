@@ -6,9 +6,11 @@ from numpy.typing import NDArray
 from qiskit.quantum_info import Pauli
 from qiskit.circuit import Parameter
 from qiskit.quantum_info import Operator
+
 from ising.hamiltonian import Hamiltonian, qdrift_count
 from ising.hamiltonian.hamiltonian import substitute_parameter
 from ising.simulation.trotter import Lie
+from ising.utils import MAXSIZE
 
 
 class QDriftCircuit:
@@ -63,12 +65,12 @@ class QDriftCircuit:
         self.sign_map = sign_map
         self.pauli_mapping = self.synthesizer.parameterized_map(self.paulis, self.time)
 
-    @lru_cache
+    @lru_cache(maxsize=MAXSIZE)
     def pauli_matrix(self, pauli: Pauli, time: float) -> NDArray:
         circuit = self.pauli_mapping[pauli].assign_parameters(
             {self.time: self.sign_map[pauli] * time}
         )
-        return Operator.from_circuit(circuit).reverse_qargs().data
+        return np.array(Operator.from_circuit(circuit).reverse_qargs().data)
 
     def matrix(self, time: float) -> NDArray:
         if self.ham_subbed is None:
@@ -91,21 +93,14 @@ class QDriftCircuit:
         return final_op
 
     def get_observations(
-        self, rho_init: NDArray, observable: NDArray, times: list[float], rep: int = 1
+        self, rho_init: NDArray, observable: NDArray, times: list[float]
     ):
         results = []
-        cur_time = 0
-        cur_rho = rho_init
         for time in times:
             print(f"Running for {time}")
-            temp_results = []
-            for _ in range(rep):
-                unitary = self.matrix(time - cur_time)
-                rho_final = unitary @ cur_rho @ unitary.conj().T
-                result = np.trace(np.abs(observable @ rho_final))
-                cur_time = time
-                cur_rho = rho_final
-                temp_results.append(result)
-            results.append(np.mean(temp_results))
+            unitary = self.matrix(time)
+            rho_final = unitary @ rho_init @ unitary.conj().T
+            result = np.trace(np.abs(observable @ rho_final))
+            results.append(result)
 
         return results
