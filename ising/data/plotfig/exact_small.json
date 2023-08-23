@@ -2,7 +2,7 @@
   "observable": "magnetization",
   "methods": [
     "exact",
-    "lie"
+    "grouped_lie"
   ],
   "input_file": "data/input/ising-one-qubit-larger.json",
   "fig_folder": "plots/qiskit_trotter"
