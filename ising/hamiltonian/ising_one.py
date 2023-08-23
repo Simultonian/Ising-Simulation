@@ -1,6 +1,6 @@
 from typing import Union
 from qiskit.circuit import Parameter
-from qiskit.quantum_info import SparsePauliOp
+from qiskit.quantum_info import SparsePauliOp, Pauli, PauliList
 from .hamiltonian import Hamiltonian
 import numpy as np
 
@@ -23,6 +23,17 @@ def qdrift_count(lambd: float, time: float, eps: float) -> int:
     dr = eps
     final = int(np.ceil(numr / dr))
     return final
+
+
+def general_grouping(ops: Union[list[Pauli], PauliList]) -> list[list[Pauli]]:
+    g_x, g_z = [], []
+    for op in ops:
+        if "Z" in str(op):
+            g_z.append(op)
+        else:
+            g_x.append(op)
+
+    return [g_z, g_x]
 
 
 def parametrized_ising(qubits: int, h: Union[Parameter, float]) -> Hamiltonian:

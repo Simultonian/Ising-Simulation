@@ -1,4 +1,4 @@
-from ising.hamiltonian import parametrized_ising
+from ising.hamiltonian import parametrized_ising, substitute_parameter
 from qiskit.circuit import Parameter
 
 
@@ -9,7 +9,7 @@ class TestIsing:
         h_value = 1.0
         ham = parametrized_ising(1, h)
 
-        ham_1 = ham.assign_parameters({h: h_value})
+        ham_1 = substitute_parameter(ham, h, h_value)
 
         assert ham_1 is not None
-        assert ham_1.paulis == ['X']
+        assert ham_1.sparse_repr.paulis == ['X']

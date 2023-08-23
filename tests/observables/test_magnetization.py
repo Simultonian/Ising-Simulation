@@ -7,4 +7,4 @@ class TestMagnetization:
         obs = overall_magnetization(2)
 
         coeffs = np.array([1/2] * 2)
-        assert all(obs.coeffs == coeffs)
+        assert all(obs.sparse_repr.coeffs == coeffs)

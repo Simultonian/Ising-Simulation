@@ -2,12 +2,18 @@ import argparse
 import json
 import numpy as np
 
+from qiskit.quantum_info import Operator
 from qiskit.circuit import Parameter
 
 from ising.hamiltonian import parametrized_ising
 from ising.observables import overall_magnetization
 from ising.utils import read_input_file, close_state
-from ising.simulation.trotter import LieCircuit, QDriftCircuit, SparseLie
+from ising.simulation.trotter import (
+    LieCircuit,
+    QDriftCircuit,
+    SparseLie,
+    GroupedLieCircuit,
+)
 
 
 def run_trotter(paras):
@@ -27,6 +33,8 @@ def run_trotter(paras):
         circuit_synthesis = QDriftCircuit
     elif method == "sparse_lie":
         circuit_synthesis = SparseLie
+    elif method == "grouped_lie":
+        circuit_synthesis = GroupedLieCircuit
     else:
         raise ValueError("Incorrect method:", method)
 
@@ -44,6 +52,8 @@ def run_trotter(paras):
             ground_state = circuit_manager.ham_subbed.ground_state
             init_state = close_state(ground_state, paras["overlap"])
             rho_init = np.outer(init_state, init_state.conj().T)
+
+            rho_init = np.array(Operator(rho_init).reverse_qargs().data)
 
             ans = circuit_manager.get_observations(rho_init, observable.matrix, times)
             h_wise_answers[h] = ans
@@ -72,7 +82,7 @@ def main():
 
 
 def test_main():
-    parameters = read_input_file("data/input/test-ising-trotter.json")
+    parameters = read_input_file("data/input/ising-one-qubit-larger.json")
 
     results = run_trotter(parameters)
 

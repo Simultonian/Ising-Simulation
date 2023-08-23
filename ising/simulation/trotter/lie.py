@@ -3,9 +3,8 @@ from functools import lru_cache
 import numpy as np
 from numpy.typing import NDArray
 
-from qiskit.quantum_info import Pauli, SparsePauliOp
+from qiskit.quantum_info import Pauli, SparsePauliOp, Operator
 from qiskit.circuit import QuantumCircuit, Parameter
-from qiskit.quantum_info import Operator
 from qiskit.synthesis import LieTrotter
 
 from ising.hamiltonian import Hamiltonian, trotter_reps
@@ -84,9 +83,7 @@ class LieCircuit:
         circuit = self.pauli_mapping[pauli].assign_parameters(
             {self.time: time, self.reps: reps}
         )
-        return np.array(Operator.from_circuit(circuit).reverse_qargs().data).astype(
-            np.complex128
-        )
+        return np.array(Operator.from_circuit(circuit).data).astype(np.complex128)
 
     def matrix(self, time: float) -> NDArray:
         if self.ham_subbed is None:

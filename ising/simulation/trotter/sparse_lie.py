@@ -9,7 +9,7 @@ from qiskit.circuit import Parameter
 
 from ising.hamiltonian import Hamiltonian, trotter_reps
 from ising.utils import MAXSIZE
-from lie import LieCircuit
+from ising.simulation.trotter import LieCircuit
 
 
 class SparseLie(LieCircuit):
