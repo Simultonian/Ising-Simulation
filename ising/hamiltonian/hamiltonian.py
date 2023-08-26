@@ -4,7 +4,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from qiskit.circuit import Parameter
-from qiskit.quantum_info import SparsePauliOp
+from qiskit.quantum_info import SparsePauliOp, Pauli
 
 
 def normalized_eigen(matrix: NDArray, normalize: bool) -> tuple[NDArray, NDArray]:
@@ -25,6 +25,12 @@ class Hamiltonian:
     _eig_vec_inv: Optional[NDArray] = None
     _matrix: Optional[NDArray] = None
     _ground_state: Optional[NDArray] = None
+    _map: Optional[dict[Pauli, complex]] = None
+
+    def __getitem__(self, pauli: Pauli) -> complex:
+        if self._map is None:
+            self._map = {Pauli(p): v for (p, v) in self.sparse_repr.to_list()}
+        return self._map[pauli]
 
     @property
     def eig_vec(self) -> NDArray:

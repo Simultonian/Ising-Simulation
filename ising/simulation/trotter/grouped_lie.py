@@ -1,8 +1,8 @@
-from typing import Optional, Union
+from typing import Optional
 import numpy as np
 from numpy.typing import NDArray
 
-from qiskit.quantum_info import Pauli, SparsePauliOp
+from qiskit.quantum_info import Pauli
 from qiskit.circuit import Parameter
 from qiskit.synthesis import LieTrotter
 
@@ -24,9 +24,7 @@ class GroupedLie(LieTrotter):
         """
         super().__init__(reps, False, "chain", None)
 
-    def svd_map(
-        self, operator: Union[list[Pauli], SparsePauliOp], groups: list[list[Pauli]]
-    ) -> list[tuple[NDArray, NDArray, NDArray]]:
+    def svd_map(self, groups: list[list[Pauli]]) -> list[list[NDArray]]:
         """Simultaneously diagonalizes the Pauli operators
 
         Inputs:
@@ -36,24 +34,65 @@ class GroupedLie(LieTrotter):
         Returns: List of (eigenvalues, eigenvectors) corresponding to groups
             after adjusting for the coefficients.
         """
-        if isinstance(operator, list):
-            pauli_map = {Pauli(op): 1 for op in operator}
-        else:
-            pauli_map = {Pauli(op): np.real(coeff) for op, coeff in operator.to_list()}
-
         eig_pairs = []
         for group in groups:
             eig_val, eig_vec = simdiag([pauli.to_matrix() for pauli in group])
-            for ind, pauli in enumerate(group):
-                coeff = pauli_map[pauli]
-                eig_val[ind] *= coeff
-
             eig_inv = np.linalg.inv(eig_vec)
 
-            eig_pairs.append((eig_val, eig_vec, eig_inv))
+            eig_pairs.append([eig_val, eig_vec, eig_inv])
 
         return eig_pairs
 
+
+def get_grouped_coeffs(
+    ham: Hamiltonian, groups: list[list[Pauli]]
+) -> list[list[complex]]:
+    return [[ham[pauli] for pauli in group] for group in groups]
+
+
+def club_into_groups(pauli_indices: list[int], group_map: dict[int, tuple[int, int]]) -> list[tuple[int, list[int]]]:
+    """
+    Clubs the list of pauli indices into adjacent groups. The return value is
+    of the form: [(group, [paulis])*]
+    """
+    grouped = []
+    cur_group = group_map[0][1]
+    inds = []
+    for ind in pauli_indices:
+        p, g = group_map[ind]
+
+        if cur_group == g:
+            inds.append(p)
+            continue
+        # New group
+        assert len(inds) > 0
+        inds.sort()
+        grouped.append((cur_group, inds))
+        cur_group = g
+        inds = [p]
+
+    return grouped
+
+def clubbed_evolve(club: list[tuple[int, list[int]]], group_mapping: list[list[NDArray[np.complex128]]], time: float) -> NDArray:
+    """
+    Takes in the clubbed operators and constructs the matrices using the
+    provided decomposition.
+    """
+
+    # Final shape is identitcal to the eigenvector matrix
+    final_op = np.identity(len(group_mapping[0][1]))
+
+    for group, paulis in club:
+        eig_val, eig_vec, eig_inv = group_mapping[group]
+        eig_sum = eig_val[paulis].sum(axis=0)
+        op = (
+            eig_vec
+            @ np.diag(np.exp(complex(0, -1) * time * eig_sum))
+            @ eig_inv
+        )
+        final_op = np.dot(op, final_op)
+
+    return final_op
 
 class GroupedLieCircuit:
     def __init__(self, ham: Hamiltonian, h: Parameter, error: float):
@@ -66,13 +105,17 @@ class GroupedLieCircuit:
 
         self.synthesizer = GroupedLie(reps=1)
         self.groups = general_grouping(self.ham.sparse_repr.paulis)
-
+        
+        self.order = [(g_ind, list(range(len(group)))) for g_ind, group in enumerate(self.groups)]
         group_map = {}
         for g_ind, group in enumerate(self.groups):
             for p_ind, pauli in enumerate(group):
                 group_map[pauli] = (p_ind, g_ind)
 
         self.group_map = group_map
+
+        self.group_mapping = self.synthesizer.svd_map(self.groups)
+        self._eigvals = [x[0] for x in self.group_mapping]
 
     @property
     def ground_state(self) -> NDArray:
@@ -84,16 +127,19 @@ class GroupedLieCircuit:
 
     def subsitute_h(self, h_val: float) -> None:
         self.ham_subbed = substitute_parameter(self.ham, self.h, h_val)
+        self.group_coeffs = [
+            np.array(x) for x in get_grouped_coeffs(self.ham_subbed, self.groups)
+        ]
+
+        for ind, coeffs in enumerate(self.group_coeffs):
+            for e_ind, (coeff, eig_val) in enumerate(zip(coeffs, self._eigvals[ind])):
+                self.group_mapping[ind][0][e_ind] = coeff.real * eig_val.real
 
     def construct_parametrized_circuit(self) -> None:
         if self.ham_subbed is None:
             raise ValueError(
                 "h value has not been substituted, qiskit does not support parametrized Hamiltonians."
             )
-
-        self.group_mapping = self.synthesizer.svd_map(
-            self.ham_subbed.sparse_repr, self.groups
-        )
 
     def pauli_matrix(self, pauli: Pauli, time: float, reps: int) -> NDArray:
         p_ind, g_ind = self.group_map[pauli]
@@ -122,16 +168,7 @@ class GroupedLieCircuit:
 
         print(f"{time}:{reps}")
 
-        final_op = np.identity(2**self.num_qubits).astype(np.complex128)
-
-        for eig_val, eig_vec, eig_inv in self.group_mapping:
-            eig_sum = np.sum(eig_val, axis=0)
-            op = (
-                eig_vec
-                @ np.diag(np.exp(complex(0, -1) * (time / reps) * eig_sum))
-                @ eig_inv
-            )
-            final_op = np.dot(op, final_op)
+        final_op = clubbed_evolve(self.order, self.group_mapping, time / reps)
 
         return np.linalg.matrix_power(final_op, reps)
 
