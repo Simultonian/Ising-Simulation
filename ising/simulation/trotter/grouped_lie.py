@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Sequence
 import numpy as np
 from numpy.typing import NDArray
 
@@ -51,7 +51,7 @@ def get_grouped_coeffs(
 
 
 def club_into_groups(
-    paulis: list[Pauli], group_map: dict[Pauli, tuple[int, int]]
+    paulis: Sequence[int], group_map: dict[int, tuple[int, int]]
 ) -> list[tuple[int, list[int]]]:
     """
     Clubs the list of pauli indices into adjacent groups. The return value is
@@ -117,15 +117,17 @@ class GroupedLieCircuit:
         self.synthesizer = GroupedLie(reps=1)
         self.groups = general_grouping(self.ham.sparse_repr.paulis)
 
-        paulis = []
+        inds = []
+        ind_count = 0
         group_map = {}
         for g_ind, group in enumerate(self.groups):
-            for p_ind, pauli in enumerate(group):
-                group_map[pauli] = (p_ind, g_ind)
-                paulis.append(pauli)
+            for p_ind, _ in enumerate(group):
+                group_map[ind_count] = (p_ind, g_ind)
+                inds.append(ind_count)
+                ind_count += 1
 
         self.group_map = group_map
-        self.order = club_into_groups(paulis, group_map)
+        self.order = club_into_groups(inds, group_map)
 
         self.group_mapping = self.synthesizer.svd_map(self.groups)
         self._eigvals = [x[0] for x in self.group_mapping]

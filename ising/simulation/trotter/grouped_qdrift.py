@@ -30,12 +30,17 @@ class GroupedQDriftCircuit:
         self.synthesizer = GroupedLie(reps=1)
         self.groups = general_grouping(self.ham.sparse_repr.paulis)
 
+        inds = []
+        ind_count = 0
         group_map = {}
         for g_ind, group in enumerate(self.groups):
-            for p_ind, pauli in enumerate(group):
-                group_map[pauli] = (p_ind, g_ind)
+            for p_ind, _ in enumerate(group):
+                group_map[ind_count] = (p_ind, g_ind)
+                inds.append(ind_count)
+                ind_count += 1
 
         self.group_map = group_map
+        self.inds = inds
 
         self.group_mapping = self.synthesizer.svd_map(self.groups)
         self._eigvals = [x[0] for x in self.group_mapping]
@@ -64,7 +69,6 @@ class GroupedQDriftCircuit:
         self.probs = np.abs(self.ham_subbed.sparse_repr.coeffs).astype(np.float64)
         self.lambd = np.sum(self.probs)
         self.probs /= self.lambd
-        self.indices = np.array(list(range(len(self.probs))))
         # Use self.ham_subbed.sparse_repr.paulis for accessing paulis
 
     def construct_parametrized_circuit(self) -> None:
@@ -102,13 +106,12 @@ class GroupedQDriftCircuit:
 
         # Sampling Paulis
         count = qdrift_count(self.lambd, time, self.error)
-        samples = np.random.choice(self.indices, p=self.probs, size=count)
-        paulis = list(self.ham_subbed.sparse_repr.paulis[samples])
+        pauli_inds = np.random.choice(self.inds, p=self.probs, size=count).astype(int)
 
         evolution_time = float(self.lambd * time / count)
 
         # Paulis will be sampled
-        club = club_into_groups(paulis, self.group_map)
+        club = club_into_groups(pauli_inds, self.group_map)
         final_op = clubbed_evolve(club, self.group_mapping, evolution_time)
 
         return final_op
