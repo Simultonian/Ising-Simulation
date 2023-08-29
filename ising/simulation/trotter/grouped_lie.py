@@ -50,16 +50,21 @@ def get_grouped_coeffs(
     return [[ham[pauli] for pauli in group] for group in groups]
 
 
-def club_into_groups(pauli_indices: list[int], group_map: dict[int, tuple[int, int]]) -> list[tuple[int, list[int]]]:
+def club_into_groups(
+    paulis: list[Pauli], group_map: dict[Pauli, tuple[int, int]]
+) -> list[tuple[int, list[int]]]:
     """
     Clubs the list of pauli indices into adjacent groups. The return value is
     of the form: [(group, [paulis])*]
     """
     grouped = []
-    cur_group = group_map[0][1]
+    cur_group = -1
     inds = []
-    for ind in pauli_indices:
-        p, g = group_map[ind]
+    for pauli in paulis:
+        p, g = group_map[pauli]
+
+        if cur_group == -1:
+            cur_group = g
 
         if cur_group == g:
             inds.append(p)
@@ -71,9 +76,18 @@ def club_into_groups(pauli_indices: list[int], group_map: dict[int, tuple[int, i
         cur_group = g
         inds = [p]
 
+    if len(inds) > 0 and cur_group != -1:
+        inds.sort()
+        grouped.append((cur_group, inds))
+
     return grouped
 
-def clubbed_evolve(club: list[tuple[int, list[int]]], group_mapping: list[list[NDArray[np.complex128]]], time: float) -> NDArray:
+
+def clubbed_evolve(
+    club: list[tuple[int, list[int]]],
+    group_mapping: list[list[NDArray[np.complex128]]],
+    time: float,
+) -> NDArray:
     """
     Takes in the clubbed operators and constructs the matrices using the
     provided decomposition.
@@ -85,14 +99,11 @@ def clubbed_evolve(club: list[tuple[int, list[int]]], group_mapping: list[list[N
     for group, paulis in club:
         eig_val, eig_vec, eig_inv = group_mapping[group]
         eig_sum = eig_val[paulis].sum(axis=0)
-        op = (
-            eig_vec
-            @ np.diag(np.exp(complex(0, -1) * time * eig_sum))
-            @ eig_inv
-        )
+        op = eig_vec @ np.diag(np.exp(complex(0, -1) * time * eig_sum)) @ eig_inv
         final_op = np.dot(op, final_op)
 
     return final_op
+
 
 class GroupedLieCircuit:
     def __init__(self, ham: Hamiltonian, h: Parameter, error: float):
@@ -105,14 +116,16 @@ class GroupedLieCircuit:
 
         self.synthesizer = GroupedLie(reps=1)
         self.groups = general_grouping(self.ham.sparse_repr.paulis)
-        
-        self.order = [(g_ind, list(range(len(group)))) for g_ind, group in enumerate(self.groups)]
+
+        paulis = []
         group_map = {}
         for g_ind, group in enumerate(self.groups):
             for p_ind, pauli in enumerate(group):
                 group_map[pauli] = (p_ind, g_ind)
+                paulis.append(pauli)
 
         self.group_map = group_map
+        self.order = club_into_groups(paulis, group_map)
 
         self.group_mapping = self.synthesizer.svd_map(self.groups)
         self._eigvals = [x[0] for x in self.group_mapping]

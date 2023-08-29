@@ -18,7 +18,7 @@ def trotter_reps(ham: SparsePauliOp, time: float, eps: float) -> int:
     return final
 
 
-def qdrift_count(lambd: float, time: float, eps: float) -> int:
+def qdrift_count(lambd: np.float64, time: float, eps: float) -> int:
     numr = np.abs(2 * (lambd * time) ** 2)
     dr = eps
     final = int(np.ceil(numr / dr))

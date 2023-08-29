@@ -13,6 +13,7 @@ from ising.simulation.trotter import (
     QDriftCircuit,
     SparseLie,
     GroupedLieCircuit,
+    GroupedQDriftCircuit,
 )
 
 
@@ -35,6 +36,8 @@ def run_trotter(paras):
         circuit_synthesis = SparseLie
     elif method == "grouped_lie":
         circuit_synthesis = GroupedLieCircuit
+    elif method == "grouped_qdrift":
+        circuit_synthesis = GroupedQDriftCircuit
     else:
         raise ValueError("Incorrect method:", method)
 
@@ -82,7 +85,7 @@ def main():
 
 
 def test_main():
-    parameters = read_input_file("data/input/ising-one-qubit-larger.json")
+    parameters = read_input_file("data/input/default.json")
 
     results = run_trotter(parameters)
 
