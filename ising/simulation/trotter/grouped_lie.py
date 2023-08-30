@@ -98,7 +98,7 @@ def clubbed_evolve(
 
     for group, paulis in club:
         eig_val, eig_vec, eig_inv = group_mapping[group]
-        eig_sum = eig_val[paulis].sum(axis=0)
+        eig_sum = eig_val.take(paulis, axis=0).sum(axis=0)
         op = eig_vec @ np.diag(np.exp(complex(0, -1) * time * eig_sum)) @ eig_inv
         final_op = np.dot(op, final_op)
 

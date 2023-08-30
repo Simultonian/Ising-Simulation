@@ -106,7 +106,13 @@ class GroupedQDriftCircuit:
 
         # Sampling Paulis
         count = qdrift_count(self.lambd, time, self.error)
-        pauli_inds = np.random.choice(self.inds, p=self.probs, size=count).astype(int)
+    
+
+        # TODO
+        exp_factor = 1
+        sample_count = (count // exp_factor) + 1
+
+        pauli_inds = np.random.choice(self.inds, p=self.probs, size=sample_count).astype(int)
 
         evolution_time = float(self.lambd * time / count)
 
@@ -114,7 +120,7 @@ class GroupedQDriftCircuit:
         club = club_into_groups(pauli_inds, self.group_map)
         final_op = clubbed_evolve(club, self.group_mapping, evolution_time)
 
-        return final_op
+        return np.linalg.matrix_power(final_op, exp_factor)
 
     def get_observations(
         self, rho_init: NDArray, observable: NDArray, times: list[float]

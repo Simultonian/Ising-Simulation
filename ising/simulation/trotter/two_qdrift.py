@@ -15,7 +15,6 @@ from ising.simulation.trotter.grouped_lie import (
     GroupedLie,
 )
 
-
 def pre_processed_clubbed_evolve(
     club: list[tuple[int, tuple[int, ...]]],
     group_mapping: list[list[NDArray[np.complex128]]],
@@ -24,6 +23,39 @@ def pre_processed_clubbed_evolve(
     """
     Takes in the clubbed operators and constructs the matrices using the
     provided decomposition.
+    """
+
+    unique_clubs = set(club)
+    club_op_mapping = {}
+    for group, paulis in unique_clubs:
+        eig_val, eig_vec, eig_inv = group_mapping[group]
+        eig_sum = np.sum(eig_val.take(paulis, axis=0), axis=0)
+        op = eig_vec @ np.diag(np.exp(complex(0, -1) * time * eig_sum)) @ eig_inv
+        club_op_mapping[(group, paulis)] = op
+
+    # Final shape is identitcal to the eigenvector matrix
+    final_op = np.identity(len(group_mapping[0][1]))
+
+    for group in club:
+        final_op = np.dot(club_op_mapping[group], final_op)
+
+    return final_op
+
+def pre_processed_AB(
+    club: list[tuple[int, tuple[int, ...]]],
+    group_mapping: list[list[NDArray[np.complex128]]],
+    time: float,
+) -> NDArray:
+    """
+    We precompute 
+
+    (V1 S1 T1) (V2 S2 T2) (V1 S3 T1) (V1 S1 T1) (V2 S2 T2) (V1 S3 T1)
+    - 3 SVD exp
+    - 5 matrix multiplications
+
+    (V1 S1 T1 V2) S2 (T2 V1 S3 T1 V1) S1 (T1 V2 S2 T2 V1) S3 T1
+    - 3 SVD exp
+    - 
     """
 
     unique_clubs = set(club)
