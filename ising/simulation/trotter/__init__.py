@@ -3,6 +3,7 @@ from .sparse_lie import SparseLie
 from .qdrift import QDriftCircuit
 from .grouped_lie import GroupedLieCircuit, GroupedLie
 from .grouped_qdrift import GroupedQDriftCircuit
+from .two_qdrift import TwoQDriftCircuit
 
 
 __all__ = [
@@ -13,4 +14,5 @@ __all__ = [
     "GroupedLieCircuit",
     "GroupedLie",
     "GroupedQDriftCircuit",
+    "TwoQDriftCircuit",
 ]

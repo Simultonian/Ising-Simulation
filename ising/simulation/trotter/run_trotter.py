@@ -14,6 +14,7 @@ from ising.simulation.trotter import (
     SparseLie,
     GroupedLieCircuit,
     GroupedQDriftCircuit,
+    TwoQDriftCircuit,
 )
 
 
@@ -38,6 +39,8 @@ def run_trotter(paras):
         circuit_synthesis = GroupedLieCircuit
     elif method == "grouped_qdrift":
         circuit_synthesis = GroupedQDriftCircuit
+    elif method == "two_qdrift_circuit":
+        circuit_synthesis = TwoQDriftCircuit
     else:
         raise ValueError("Incorrect method:", method)
 

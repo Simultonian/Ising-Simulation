@@ -1,89 +1,22 @@
-from typing import Optional, Sequence
+from typing import Optional
 import numpy as np
 from numpy.typing import NDArray
 
 from qiskit.quantum_info import Pauli
 from qiskit.circuit import Parameter
-from qiskit.synthesis import LieTrotter
 
+from ising.hamiltonian import Hamiltonian, qdrift_count
 from ising.hamiltonian import Hamiltonian, trotter_reps, general_grouping
 from ising.hamiltonian.hamiltonian import substitute_parameter
-from ising.utils import simdiag
+
+from ising.simulation.trotter.grouped_lie import (
+    get_grouped_coeffs,
+    club_into_groups,
+    GroupedLie,
+)
 
 
-class GroupedLie(LieTrotter):
-    """The Lie-Trotter product formula."""
-
-    def __init__(self, reps: int = 1) -> None:
-        """
-        Inputs:
-            - reps: The number of time steps.
-            - atomic_evolution: A function to construct the circuit for the evolution of single
-                Pauli string. Per default, a single Pauli evolution is decomopsed in a CX chain
-                and a single qubit Z rotation.
-        """
-        super().__init__(reps, False, "chain", None)
-
-    def svd_map(self, groups: list[list[Pauli]]) -> list[list[NDArray]]:
-        """Simultaneously diagonalizes the Pauli operators
-
-        Inputs:
-        - operator: The operator to be simulated.
-        - groups: List of Grouped Pauli operators.
-
-        Returns: List of (eigenvalues, eigenvectors) corresponding to groups
-            after adjusting for the coefficients.
-        """
-        eig_pairs = []
-        for group in groups:
-            eig_val, eig_vec = simdiag([pauli.to_matrix() for pauli in group])
-            eig_inv = np.linalg.inv(eig_vec)
-
-            eig_pairs.append([eig_val, eig_vec, eig_inv])
-
-        return eig_pairs
-
-
-def get_grouped_coeffs(
-    ham: Hamiltonian, groups: list[list[Pauli]]
-) -> list[list[complex]]:
-    return [[ham[pauli] for pauli in group] for group in groups]
-
-
-def club_into_groups(
-    paulis: Sequence[int], group_map: dict[int, tuple[int, int]]
-) -> list[tuple[int, tuple[int, ...]]]:
-    """
-    Clubs the list of pauli indices into adjacent groups. The return value is
-    of the form: [(group, [paulis])*]
-    """
-    grouped = []
-    cur_group = -1
-    inds = []
-    for pauli in paulis:
-        p, g = group_map[pauli]
-
-        if cur_group == -1:
-            cur_group = g
-
-        if cur_group == g:
-            inds.append(p)
-            continue
-        # New group
-        assert len(inds) > 0
-        inds.sort()
-        grouped.append((cur_group, tuple(inds)))
-        cur_group = g
-        inds = [p]
-
-    if len(inds) > 0 and cur_group != -1:
-        inds.sort()
-        grouped.append((cur_group, tuple(inds)))
-
-    return grouped
-
-
-def clubbed_evolve(
+def pre_processed_clubbed_evolve(
     club: list[tuple[int, tuple[int, ...]]],
     group_mapping: list[list[NDArray[np.complex128]]],
     time: float,
@@ -93,19 +26,24 @@ def clubbed_evolve(
     provided decomposition.
     """
 
+    unique_clubs = set(club)
+    club_op_mapping = {}
+    for group, paulis in unique_clubs:
+        eig_val, eig_vec, eig_inv = group_mapping[group]
+        eig_sum = np.sum(eig_val.take(paulis, axis=0), axis=0)
+        op = eig_vec @ np.diag(np.exp(complex(0, -1) * time * eig_sum)) @ eig_inv
+        club_op_mapping[(group, paulis)] = op
+
     # Final shape is identitcal to the eigenvector matrix
     final_op = np.identity(len(group_mapping[0][1]))
 
-    for group, paulis in club:
-        eig_val, eig_vec, eig_inv = group_mapping[group]
-        eig_sum = eig_val[paulis].sum(axis=0)
-        op = eig_vec @ np.diag(np.exp(complex(0, -1) * time * eig_sum)) @ eig_inv
-        final_op = np.dot(op, final_op)
+    for group in club:
+        final_op = np.dot(club_op_mapping[group], final_op)
 
     return final_op
 
 
-class GroupedLieCircuit:
+class TwoQDriftCircuit:
     def __init__(self, ham: Hamiltonian, h: Parameter, error: float):
         self.ham = ham
         self.num_qubits = ham.sparse_repr.num_qubits
@@ -113,6 +51,7 @@ class GroupedLieCircuit:
         self.ham_subbed: Optional[Hamiltonian] = None
 
         self.h = h
+        self.paulis = self.ham.sparse_repr.paulis
 
         self.synthesizer = GroupedLie(reps=1)
         self.groups = general_grouping(self.ham.sparse_repr.paulis)
@@ -127,7 +66,7 @@ class GroupedLieCircuit:
                 ind_count += 1
 
         self.group_map = group_map
-        self.order = club_into_groups(inds, group_map)
+        self.inds = inds
 
         self.group_mapping = self.synthesizer.svd_map(self.groups)
         self._eigvals = [x[0] for x in self.group_mapping]
@@ -142,13 +81,21 @@ class GroupedLieCircuit:
 
     def subsitute_h(self, h_val: float) -> None:
         self.ham_subbed = substitute_parameter(self.ham, self.h, h_val)
-        self.group_coeffs = [
+        group_coeffs = [
             np.array(x) for x in get_grouped_coeffs(self.ham_subbed, self.groups)
         ]
 
-        for ind, coeffs in enumerate(self.group_coeffs):
+        for ind, coeffs in enumerate(group_coeffs):
             for e_ind, (coeff, eig_val) in enumerate(zip(coeffs, self._eigvals[ind])):
-                self.group_mapping[ind][0][e_ind] = coeff.real * eig_val.real
+                if coeff.real < 0:
+                    self.group_mapping[ind][0][e_ind] = -1 * eig_val.real
+                else:
+                    self.group_mapping[ind][0][e_ind] = eig_val.real
+
+        self.probs = np.abs(self.ham_subbed.sparse_repr.coeffs).astype(np.float64)
+        self.lambd = np.sum(self.probs)
+        self.probs /= self.lambd
+        # Use self.ham_subbed.sparse_repr.paulis for accessing paulis
 
     def construct_parametrized_circuit(self) -> None:
         if self.ham_subbed is None:
@@ -183,9 +130,19 @@ class GroupedLieCircuit:
 
         print(f"{time}:{reps}")
 
-        final_op = clubbed_evolve(self.order, self.group_mapping, time / reps)
+        # Sampling Paulis
+        count = qdrift_count(self.lambd, time, self.error)
+        pauli_inds = np.random.choice(self.inds, p=self.probs, size=count).astype(int)
 
-        return np.linalg.matrix_power(final_op, reps)
+        evolution_time = float(self.lambd * time / count)
+
+        # Paulis will be sampled
+        club = club_into_groups(pauli_inds, self.group_map)
+        final_op = pre_processed_clubbed_evolve(
+            club, self.group_mapping, evolution_time
+        )
+
+        return final_op
 
     def get_observations(
         self, rho_init: NDArray, observable: NDArray, times: list[float]
