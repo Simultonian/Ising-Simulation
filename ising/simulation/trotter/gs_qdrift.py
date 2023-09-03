@@ -6,7 +6,7 @@ from numpy.typing import NDArray
 from qiskit.quantum_info import Pauli
 from qiskit.circuit import Parameter
 
-from ising.hamiltonian import Hamiltonian, trotter_reps, general_grouping
+from ising.hamiltonian import Hamiltonian, general_grouping
 from ising.hamiltonian import Hamiltonian, general_grouping, qdrift_count
 from ising.hamiltonian.hamiltonian import substitute_parameter
 from ising.utils import MAXSIZE
@@ -14,8 +14,6 @@ from ising.utils import MAXSIZE
 from ising.simulation.trotter import GroupedLie
 from ising.simulation.trotter.grouped_lie import (
     get_grouped_coeffs,
-    club_into_groups,
-    clubbed_evolve,
 )
 from ising.simulation.trotter.grouped_lie import get_grouped_coeffs
 
@@ -43,6 +41,7 @@ def club_same_terms(terms: NDArray[np.int64]) -> list[tuple[int, int]]:
 class GSQDriftCircuit:
     def __init__(self, ham: Hamiltonian, h: Parameter, error: float):
         self.ham = ham
+        self.num_qubits = ham.sparse_repr.num_qubits
         self.error = error
         self.ham_subbed: Optional[Hamiltonian] = None
 
@@ -53,19 +52,12 @@ class GSQDriftCircuit:
         self.synthesizer = GroupedLie(reps=1)
         self.groups = general_grouping(self.ham.sparse_repr.paulis)
 
-        inds = []
-        ind_count = 0
         group_map = {}
         for g_ind, group in enumerate(self.groups):
-            for p_ind, _ in enumerate(group):
-                group_map[ind_count] = (p_ind, g_ind)
-                inds.append(ind_count)
-                ind_count += 1
             for p_ind, pauli in enumerate(group):
                 group_map[pauli] = (p_ind, g_ind)
 
         self.group_map = group_map
-        self.order = club_into_groups(inds, group_map)
 
         self.group_mapping = self.synthesizer.svd_map(self.groups)
         self._eigvals = [x[0] for x in self.group_mapping]
@@ -74,7 +66,11 @@ class GSQDriftCircuit:
 
     @property
     def ground_state(self) -> NDArray:
-@ -52,13 +68,30 @@ class GSQDriftCircuit:
+        if self.ham_subbed is None:
+            raise ValueError(
+                "h value has not been substituted, qiskit does not support parametrized Hamiltonians."
+            )
+        return self.ham_subbed.ground_state
 
     def subsitute_h(self, h_val: float) -> None:
         self.ham_subbed = substitute_parameter(self.ham, self.h, h_val)
@@ -108,7 +104,7 @@ class GSQDriftCircuit:
 
     def construct_parametrized_circuit(self) -> None:
         if self.ham_subbed is None:
-@ -66,36 +99,61 @@ class GSQDriftCircuit:
+            raise ValueError(
                 "h value has not been substituted, qiskit does not support parametrized Hamiltonians."
             )
 
@@ -129,9 +125,6 @@ class GSQDriftCircuit:
             @ eig_inv
         )
 
-        eig_val = self.group_mapping[g_ind][0][p_ind]
-        eig_vec = self.group_mapping[g_ind][1]
-        eig_inv = self.group_mapping[g_ind][2]
     @lru_cache(maxsize=MAXSIZE)
     def group_matrix(self, g_ind: int, time: float, reps: int) -> NDArray:
         eig_sum = self.eig_sums[g_ind]
@@ -139,34 +132,23 @@ class GSQDriftCircuit:
         eig_inv = self.svd_map[g_ind][2]
 
         return (
-            eig_vec @ np.diag(np.exp(complex(0, -1) * time / reps * eig_val)) @ eig_inv
             eig_vec
             @ np.diag(np.exp(complex(0, -1) * (time / reps) * eig_sum))
             @ eig_inv
         )
 
-    def matrix(self, time: float) -> NDArray:
-        """
-        Lie Trotter is a deterministic method of generation, using grouping we
-        can do the following:
-        e^P11 e^P12 ... e^Pmn = V_1 (l_1 + l_2 ...) V_1^t V_2 ... V_2^t ...
     @lru_cache(maxsize=MAXSIZE)
     def club_matrix(self, club: tuple[int, int], time: float, reps: int) -> NDArray:
         g_ind, count = club
         single = self.group_matrix(g_ind, time, reps)
         return np.linalg.matrix_power(single, count)
 
-        This is faster if the number of groups are less.
-        """
     def matrix(self, time: float) -> NDArray:
         if self.ham_subbed is None:
             raise ValueError("h value has not been substituted.")
-        if self.group_mapping is None:
         if self.pauli_mapping is None:
             raise ValueError("Para circuit has not been constructed.")
-        reps = trotter_reps(self.ham_subbed.sparse_repr, time, self.error)
 
-        print(f"{time}:{reps}")
         # Sampling
         count = qdrift_count(self.lambd, time, self.error)
         samples = np.random.choice(self.indices, p=self.probs, size=count).astype(int)
@@ -176,13 +158,20 @@ class GSQDriftCircuit:
         final_op = np.identity(2**self.num_qubits).astype(np.complex128)
         print(f"{time}:{count}")
 
-        final_op = clubbed_evolve(self.order, self.group_mapping, time / reps)
         for club in clubs:
             group_op = self.club_matrix(club, self.lambd * time, count)
             final_op = np.dot(group_op, final_op)
 
-        return np.linalg.matrix_power(final_op, reps)
         return final_op
 
     def get_observations(
         self, rho_init: NDArray, observable: NDArray, times: list[float]
+    ):
+        results = []
+        for time in times:
+            unitary = self.matrix(time)
+            rho_final = unitary @ rho_init @ unitary.conj().T
+            result = np.trace(np.abs(observable @ rho_final))
+            results.append(result)
+
+        return results
