@@ -93,7 +93,9 @@ class LieCircuit:
         reps = trotter_reps(self.ham_subbed.sparse_repr, time, self.error)
 
         final_op = np.identity(2**self.num_qubits).astype(np.complex128)
+
         print(f"{time}:{reps}")
+
         for op in self.ham_subbed.sparse_repr:
             p = self.pauli_matrix(Pauli(op.paulis), time, reps)
             final_op = np.dot(p, final_op)

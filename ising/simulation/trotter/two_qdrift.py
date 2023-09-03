@@ -15,6 +15,7 @@ from ising.simulation.trotter.grouped_lie import (
     GroupedLie,
 )
 
+
 def pre_processed_clubbed_evolve(
     club: list[tuple[int, tuple[int, ...]]],
     group_mapping: list[list[NDArray[np.complex128]]],
@@ -41,13 +42,14 @@ def pre_processed_clubbed_evolve(
 
     return final_op
 
+
 def pre_processed_AB(
     club: list[tuple[int, tuple[int, ...]]],
     group_mapping: list[list[NDArray[np.complex128]]],
     time: float,
 ) -> NDArray:
     """
-    We precompute 
+    We precompute
 
     (V1 S1 T1) (V2 S2 T2) (V1 S3 T1) (V1 S1 T1) (V2 S2 T2) (V1 S3 T1)
     - 3 SVD exp
@@ -55,7 +57,7 @@ def pre_processed_AB(
 
     (V1 S1 T1 V2) S2 (T2 V1 S3 T1 V1) S1 (T1 V2 S2 T2 V1) S3 T1
     - 3 SVD exp
-    - 
+    -
     """
 
     unique_clubs = set(club)

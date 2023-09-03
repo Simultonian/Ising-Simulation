@@ -15,10 +15,20 @@ def trotter_reps(ham: SparsePauliOp, time: float, eps: float) -> int:
     numr = np.abs(l * (coeff_sum * time) ** 2)
     dr = np.abs(2 * eps)
     final = int(np.ceil(numr / dr))
+    if final <= 0:
+        raise ValueError("Incorrect calculation")
+
     return final
 
 
 def qdrift_count(lambd: np.float64, time: float, eps: float) -> int:
+    numr = np.abs(2 * (lambd * time) ** 2)
+    dr = eps
+    final = np.ceil(numr / dr).astype(int)
+    return final
+
+
+def group_qdrift_count(lambd: np.float64, time: float, eps: float) -> int:
     numr = np.abs(2 * (lambd * time) ** 2)
     dr = eps
     final = int(np.ceil(numr / dr))

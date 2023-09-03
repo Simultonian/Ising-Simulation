@@ -4,9 +4,8 @@ from numpy.typing import NDArray
 from qiskit.quantum_info import Pauli, Operator, SparsePauliOp
 from qiskit.circuit import Parameter
 
-from ising.utils import simdiag, close_state
+from ising.utils import simdiag
 from ising.simulation.trotter import Lie, LieCircuit, GroupedLieCircuit, GroupedLie
-from ising.observables import overall_magnetization
 from ising.hamiltonian import general_grouping, parametrized_ising
 
 
@@ -57,7 +56,7 @@ def test_exp():
     np.testing.assert_almost_equal(g_final, norm_final)
 
 def test_circuit_match():
-    time = 1.0
+    time = 2.0
     p, coeff = (Pauli("ZZ"), -1)
     m = p.to_matrix()
     ea, ee = np.linalg.eig(m)
@@ -78,15 +77,18 @@ def test_circuit_match():
 
 def test_lie_grouped():
     time = 1.0
-    op = SparsePauliOp([Pauli("XI"), Pauli("IX"), Pauli("ZZ")], [1, 1, -1])
+    op = SparsePauliOp([Pauli("XI"), Pauli("IX"), Pauli("ZZ")], [2, 2, -1])
 
     group_map = {Pauli("XI"): (0, 0), Pauli("IX"): (1, 0), Pauli("ZZ"): (0, 1)}
 
     g_lie = GroupedLie()
     lie = Lie()
     p_map = lie.parameterized_map(op, time)
-    eig_list = g_lie.svd_map(op, groups=[[Pauli("XI"), Pauli("IX")], [Pauli("ZZ")]])
+    eig_list = g_lie.svd_map([[Pauli("XI"), Pauli("IX")], [Pauli("ZZ")]])
 
+    for p, coeff in zip(op.paulis.label_iter(), op.coeffs):
+        p_ind, g_ind = group_map[Pauli(p)]
+        eig_list[g_ind][0][p_ind] = eig_list[g_ind][0][p_ind] * coeff
 
     def check_circuit_match(p):
         p_ind, g_ind = group_map[p]
@@ -101,8 +103,8 @@ def test_lie_grouped():
         eas, ee, ei = eig_list[g_ind]
         ea = eas[p_ind]
 
-        op = ee @ np.diag(np.exp(complex(0, -1) * time * ea)) @ ei
-        np.testing.assert_almost_equal(r_op, op)
+        e_op = ee @ np.diag(np.exp(complex(0, -1) * time * ea)) @ ei
+        np.testing.assert_allclose(r_op, e_op, rtol=1e-7, atol=1e-7)
     
     for p in op.paulis:
         check_circuit_match(p)
@@ -129,47 +131,49 @@ def test_pauli_lie():
         grouped_matrix = get_pauli(GroupedLieCircuit, pauli, time)
         np.testing.assert_almost_equal(lie_matrix, grouped_matrix)
 
-def test_grouped_lie():
+def test_grouped_pauli():
     h_para = Parameter("h")
-    h_value = 1.0
     error = 0.1
-    time = 1.0
 
     parametrized_ham = parametrized_ising(2, h_para)
 
-    def get_matrix(circuit_synthesis, time):
-        circuit_manager = circuit_synthesis(parametrized_ham, h_para, error)
-        circuit_manager.subsitute_h(h_value)
-        circuit_manager.construct_parametrized_circuit()
+    lie_circuit = LieCircuit(parametrized_ham, h_para, error)
+    grouped_circuit = GroupedLieCircuit(parametrized_ham, h_para, error)
 
-        return circuit_manager.matrix(time)
+    for h_value in [1.0, 0.5, 2.0]:
+        lie_circuit.subsitute_h(h_value)
+        grouped_circuit.subsitute_h(h_value)
+        lie_circuit.construct_parametrized_circuit()
+        grouped_circuit.construct_parametrized_circuit()
 
-    lie_matrix = get_matrix(LieCircuit, time)
-    grouped_matrix = get_matrix(GroupedLieCircuit, time)
-    np.testing.assert_almost_equal(lie_matrix, grouped_matrix)
+        for time in [1.0, 10.0, 5.0]:
+            for pauli in parametrized_ham.sparse_repr.paulis:
+                def get_pauli(circuit_manager, time):
+                    return circuit_manager.pauli_matrix(pauli, time, 1)
 
-def test_grouped_simulation():
+                lie_matrix = get_pauli(lie_circuit, time)
+                grouped_matrix = get_pauli(grouped_circuit, time)
+                np.testing.assert_almost_equal(lie_matrix, grouped_matrix)
+
+def test_grouped_matrix():
     h_para = Parameter("h")
-    h_value = 1.0
     error = 0.1
-    overlap = 0.7
-    time = 1.0
-    num_qubit = 2
 
-    parametrized_ham = parametrized_ising(num_qubit, h_para)
-    observable = overall_magnetization(num_qubit)
+    parametrized_ham = parametrized_ising(2, h_para)
 
-    def get_result(circuit_synthesis, time):
-        circuit_manager = circuit_synthesis(parametrized_ham, h_para, error)
-        circuit_manager.subsitute_h(h_value)
-        circuit_manager.construct_parametrized_circuit()
+    lie_circuit = LieCircuit(parametrized_ham, h_para, error)
+    grouped_circuit = GroupedLieCircuit(parametrized_ham, h_para, error)
 
-        ground_state = circuit_manager.ham_subbed.ground_state
-        init_state = close_state(ground_state, overlap)
-        rho_init = np.outer(init_state, init_state.conj().T)
-        rho_init = Operator(rho_init).reverse_qargs().data
-        return circuit_manager.get_observations(rho_init, observable.matrix, [time])[0]
+    for h_value in [1.0, 0.9, 2.0]:
+        lie_circuit.subsitute_h(h_value)
+        grouped_circuit.subsitute_h(h_value)
+        lie_circuit.construct_parametrized_circuit()
+        grouped_circuit.construct_parametrized_circuit()
 
-    lie_matrix = get_result(LieCircuit, time)
-    grouped_matrix = get_result(GroupedLieCircuit, time)
-    np.testing.assert_almost_equal(lie_matrix, grouped_matrix)
+        for time in [1.0, 10.0, 5.0]:
+            def get_pauli(circuit_manager, time):
+                return circuit_manager.matrix(time)
+
+            lie_matrix = get_pauli(lie_circuit, time)
+            grouped_matrix = get_pauli(grouped_circuit, time)
+            np.testing.assert_almost_equal(lie_matrix, grouped_matrix)

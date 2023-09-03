@@ -1,13 +1,15 @@
-from typing import Optional, Sequence
+from typing import Optional, Union, Sequence
+from functools import lru_cache
 import numpy as np
 from numpy.typing import NDArray
 
-from qiskit.quantum_info import Pauli
-from qiskit.circuit import Parameter
+from qiskit.quantum_info import Pauli, SparsePauliOp
+from qiskit.circuit import QuantumCircuit, Parameter
 from qiskit.synthesis import LieTrotter
 
 from ising.hamiltonian import Hamiltonian, trotter_reps, general_grouping
 from ising.hamiltonian.hamiltonian import substitute_parameter
+from ising.utils import MAXSIZE
 from ising.utils import simdiag
 
 
@@ -24,6 +26,24 @@ class GroupedLie(LieTrotter):
         """
         super().__init__(reps, False, "chain", None)
 
+    def parameterized_map(
+        self, operator: Union[list[Pauli], SparsePauliOp], time
+    ) -> dict[Pauli, QuantumCircuit]:
+        if isinstance(operator, list):
+            pauli_list = [(op, 1) for op in operator]
+        else:
+            pauli_list = [
+                (Pauli(op), np.real(coeff)) for op, coeff in operator.to_list()
+            ]
+
+        pauli_circuits = {}
+
+        for op, coeff in pauli_list:
+            circuit = self.atomic_evolution(op, coeff * time)
+            pauli_circuits[op] = circuit
+
+        return pauli_circuits
+
     def svd_map(self, groups: list[list[Pauli]]) -> list[list[NDArray]]:
         """Simultaneously diagonalizes the Pauli operators
 
@@ -36,8 +56,15 @@ class GroupedLie(LieTrotter):
         """
         eig_pairs = []
         for group in groups:
+            mats = [pauli.to_matrix() for pauli in group]
+
             eig_val, eig_vec = simdiag([pauli.to_matrix() for pauli in group])
             eig_inv = np.linalg.inv(eig_vec)
+
+            for ind, mat in enumerate(mats):
+                ev = eig_val[ind]
+                res = eig_vec @ np.diag(ev) @ eig_inv
+                np.testing.assert_allclose(mat, res, rtol=1e-7, atol=1e-9)
 
             eig_pairs.append([eig_val, eig_vec, eig_inv])
 
@@ -113,24 +140,21 @@ class GroupedLieCircuit:
         self.ham_subbed: Optional[Hamiltonian] = None
 
         self.h = h
+        self.time = Parameter("t")
+        self.reps = Parameter("r")
 
         self.synthesizer = GroupedLie(reps=1)
         self.groups = general_grouping(self.ham.sparse_repr.paulis)
 
-        inds = []
-        ind_count = 0
         group_map = {}
         for g_ind, group in enumerate(self.groups):
-            for p_ind, _ in enumerate(group):
-                group_map[ind_count] = (p_ind, g_ind)
-                inds.append(ind_count)
-                ind_count += 1
+            for p_ind, pauli in enumerate(group):
+                group_map[pauli] = (p_ind, g_ind)
 
         self.group_map = group_map
-        self.order = club_into_groups(inds, group_map)
 
-        self.group_mapping = self.synthesizer.svd_map(self.groups)
-        self._eigvals = [x[0] for x in self.group_mapping]
+        self.svd_map = self.synthesizer.svd_map(self.groups)
+        self._eigvals = [np.copy(x[0]) for x in self.svd_map]
 
     @property
     def ground_state(self) -> NDArray:
@@ -142,13 +166,19 @@ class GroupedLieCircuit:
 
     def subsitute_h(self, h_val: float) -> None:
         self.ham_subbed = substitute_parameter(self.ham, self.h, h_val)
+
         self.group_coeffs = [
             np.array(x) for x in get_grouped_coeffs(self.ham_subbed, self.groups)
         ]
 
-        for ind, coeffs in enumerate(self.group_coeffs):
-            for e_ind, (coeff, eig_val) in enumerate(zip(coeffs, self._eigvals[ind])):
-                self.group_mapping[ind][0][e_ind] = coeff.real * eig_val.real
+        for g_ind, coeffs in enumerate(self.group_coeffs):
+            for e_ind, (coeff, eig_val) in enumerate(zip(coeffs, self._eigvals[g_ind])):
+                self.svd_map[g_ind][0][e_ind] = coeff.real * eig_val
+
+        self.eig_sums = [
+            np.sum(self.svd_map[g_ind][0], axis=0)
+            for g_ind, _ in enumerate(self.groups)
+        ]
 
     def construct_parametrized_circuit(self) -> None:
         if self.ham_subbed is None:
@@ -156,34 +186,42 @@ class GroupedLieCircuit:
                 "h value has not been substituted, qiskit does not support parametrized Hamiltonians."
             )
 
+    @lru_cache(maxsize=MAXSIZE)
     def pauli_matrix(self, pauli: Pauli, time: float, reps: int) -> NDArray:
         p_ind, g_ind = self.group_map[pauli]
-
-        eig_val = self.group_mapping[g_ind][0][p_ind]
-        eig_vec = self.group_mapping[g_ind][1]
-        eig_inv = self.group_mapping[g_ind][2]
+        eig_val = self.svd_map[g_ind][0][p_ind]
+        eig_vec = self.svd_map[g_ind][1]
+        eig_inv = self.svd_map[g_ind][2]
 
         return (
-            eig_vec @ np.diag(np.exp(complex(0, -1) * time / reps * eig_val)) @ eig_inv
+            eig_vec
+            @ np.diag(np.exp(complex(0, -1) * (time / reps) * eig_val))
+            @ eig_inv
+        )
+
+    def group_matrix(self, g_ind: int, time: float, reps: int) -> NDArray:
+        eig_sum = self.eig_sums[g_ind]
+        eig_vec = self.svd_map[g_ind][1]
+        eig_inv = self.svd_map[g_ind][2]
+
+        return (
+            eig_vec
+            @ np.diag(np.exp(complex(0, -1) * (time / reps) * eig_sum))
+            @ eig_inv
         )
 
     def matrix(self, time: float) -> NDArray:
-        """
-        Lie Trotter is a deterministic method of generation, using grouping we
-        can do the following:
-        e^P11 e^P12 ... e^Pmn = V_1 (l_1 + l_2 ...) V_1^t V_2 ... V_2^t ...
-
-        This is faster if the number of groups are less.
-        """
         if self.ham_subbed is None:
             raise ValueError("h value has not been substituted.")
-        if self.group_mapping is None:
-            raise ValueError("Para circuit has not been constructed.")
+
         reps = trotter_reps(self.ham_subbed.sparse_repr, time, self.error)
 
+        final_op = np.identity(2**self.num_qubits).astype(np.complex128)
         print(f"{time}:{reps}")
 
-        final_op = clubbed_evolve(self.order, self.group_mapping, time / reps)
+        for g_ind, _ in enumerate(self.groups):
+            group_op = self.group_matrix(g_ind, time, reps)
+            final_op = np.dot(group_op, final_op)
 
         return np.linalg.matrix_power(final_op, reps)
 
