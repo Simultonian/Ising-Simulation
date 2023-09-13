@@ -2,6 +2,7 @@ from typing import TypeAlias
 
 import argparse
 import math
+import numpy as np
 
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -28,8 +29,8 @@ def get_length(all_results: dict[str, Result]) -> int:
     raise ValueError("Empty Result provided")
 
 
-def log_label_maker(values: list[str]) -> list[str]:
-    return ["{:.2f}".format(math.trunc(float(x) * 100) / 100) for x in values]
+def log_label_maker(values: list[float]) -> list[str]:
+    return ["{:.2f}".format(math.trunc(np.log(float(x)) * 100) / 100) for x in values]
 
 
 def plot_one(results: Result, color: int, **kwargs):
@@ -38,6 +39,7 @@ def plot_one(results: Result, color: int, **kwargs):
     for num_qubit, h_wise_results in results.items():
         # h_wise_results: h -> magn
         y_values = list(h_wise_results.values())
+        x_values = log_label_maker(list(h_wise_results.keys()))
         if style != "L":
             ax = sns.scatterplot(
                 x=x_values,
