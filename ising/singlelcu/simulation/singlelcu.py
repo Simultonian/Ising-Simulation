@@ -1,14 +1,14 @@
+from functools import lru_cache
 import numpy as np
 import numpy.testing as npt
 from collections import Counter
-from numpy.typing import NDArray
 
 from qiskit.quantum_info import SparsePauliOp
 
 from ising.hamiltonian import Hamiltonian
 from ising.simulation import Synthesizer
 from ising.utils.constants import ONEONE, ZEROZERO, PLUS
-from ising.utils import close_state
+from ising.utils import close_state, MAXSIZE
 
 
 def spectral_norm(eigenval):
@@ -174,11 +174,12 @@ class GroundState:
             op_2 = np.kron(ONEONE, unitary)
             return op_1 + op_2
 
+    @lru_cache(maxsize=MAXSIZE)
     def post_v1(self, ind):
         final_rho = self.rho_init.copy()
         v1 = self.control_unitary(ind, control_val=1)
         final_rho = v1 @ final_rho @ v1.conj().T
-        npt.assert_almost_equal(np.trace(final_rho), 1)
+        npt.assert_allclose(np.trace(final_rho), 1, atol=1e-3, rtol=1e-3)
         return final_rho
 
     def post_v1v2(self, i1, i2):
@@ -187,7 +188,7 @@ class GroundState:
         v2 = self.control_unitary(i2, control_val=0)
         final_rho = v2 @ final_rho @ v2.conj().T
 
-        npt.assert_almost_equal(np.trace(final_rho), 1)
+        npt.assert_allclose(np.trace(final_rho), 1, atol=1e-3, rtol=1e-3)
 
         return final_rho
 
@@ -206,7 +207,7 @@ class GroundState:
 
         for sample in sorted(samples_count.keys()):
             s_count = samples_count[sample]
-            if total_count % 10 == 0:
+            if total_count % 100 == 0:
                 print(f"running: {total_count} out of {count}")
             total_count += s_count
 

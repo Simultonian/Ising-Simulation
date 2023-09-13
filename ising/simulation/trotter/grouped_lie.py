@@ -217,7 +217,6 @@ class GroupedLieCircuit:
         reps = trotter_reps(self.ham_subbed.sparse_repr, time, self.error)
 
         final_op = np.identity(2**self.num_qubits).astype(np.complex128)
-        print(f"{time}:{reps}")
 
         for g_ind, _ in enumerate(self.groups):
             group_op = self.group_matrix(g_ind, time, reps)

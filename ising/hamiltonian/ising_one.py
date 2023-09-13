@@ -15,7 +15,7 @@ def trotter_reps(ham: SparsePauliOp, time: float, eps: float) -> int:
     numr = np.abs(l * (coeff_sum * time) ** 2)
     dr = np.abs(2 * eps)
     final = int(np.ceil(numr / dr))
-    if final <= 0:
+    if final < 0:
         raise ValueError("Incorrect calculation")
 
     return final

@@ -1,10 +1,11 @@
 {
   "observable": "magnetization",
   "methods": [
+    "num_exact",
     "exact"
   ],
   "input_file": "data/input/singlelcu/default.json",
   "fig_folder": "plots/singlelcu",
   "scale": [1.5, 1.5],
-  "labels": ["L", "L"]
+  "labels": ["x", "L"]
 }

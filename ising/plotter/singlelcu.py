@@ -47,7 +47,6 @@ def plot_one(results: Result, color: int, **kwargs):
                 label=f"{num_qubit}",
                 marker=style,
                 linewidth=3,
-                color=color,
             )
         else:
             ax = sns.lineplot(x=x_values, y=y_values, label=f"{num_qubit}")

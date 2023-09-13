@@ -8,6 +8,7 @@ from qiskit.circuit import Parameter
 
 from ising.hamiltonian.hamiltonian import substitute_parameter
 
+
 class ExactSimulation:
     def __init__(self, ham: Hamiltonian, h: Parameter, error: float):
         self.ham = ham

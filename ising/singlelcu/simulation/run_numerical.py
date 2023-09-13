@@ -66,13 +66,12 @@ def run_numerical(paras):
             circuit_manager.construct_parametrized_circuit()
 
             lcu_run = GroundState(
-                    circuit_manager, 
-                    observable,
-                    eeta=paras["eeta"],
-                    eps=paras["eps"],
-                    prob=paras["prob"],
-                    )
-
+                circuit_manager,
+                observable,
+                eeta=paras["eeta"],
+                eps=paras["eps"],
+                prob=paras["prob"],
+            )
 
             ground_state = circuit_manager.ham_subbed.ground_state
             init_state = close_state(ground_state, paras["overlap"])
@@ -81,7 +80,7 @@ def run_numerical(paras):
             rho_init = np.array(Operator(rho_init).reverse_qargs().data)
 
             ans = lcu_run.calculate_mu()
-            h_wise_answers[h] = ans 
+            h_wise_answers[h] = ans
 
         qubit_wise_answers[num_qubit] = h_wise_answers
 
@@ -99,7 +98,7 @@ def main():
 
     results = run_numerical(parameters)
 
-    file_name = f"data/singlelcu/output/magnetization_{parameters['method']}_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
+    file_name = f"data/singlelcu/output/magnetization_num_{parameters['method']}_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
 
     print(f"Saving results at: {file_name}")
     with open(file_name, "w") as file:
@@ -107,7 +106,7 @@ def main():
 
 
 def test_main():
-    parameters = read_input_file("data/input/singlelcu/default.json")
+    parameters = read_input_file("data/singlelcu/input/default.json")
 
     results = run_numerical(parameters)
 
