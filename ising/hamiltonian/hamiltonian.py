@@ -26,6 +26,7 @@ class Hamiltonian:
     _matrix: Optional[NDArray] = None
     _ground_state: Optional[NDArray] = None
     _map: Optional[dict[Pauli, complex]] = None
+    _spectral_gap: Optional[float] = None
 
     def __getitem__(self, pauli: Pauli) -> complex:
         if self._map is None:
@@ -72,6 +73,13 @@ class Hamiltonian:
         if self._eig_vec_inv is None:
             self._eig_vec_inv = np.linalg.inv(self.eig_vec)
         return self._eig_vec_inv
+
+    @property
+    def spectral_gap(self) -> float:
+        if self._spectral_gap is None:
+            sorted_eigval = sorted(self.eig_val)
+            self._spectral_gap = np.abs(sorted_eigval[0] - sorted_eigval[1])
+        return self._spectral_gap
 
 
 def substitute_parameter(ham: Hamiltonian, para: Parameter, val: float) -> Hamiltonian:
