@@ -13,8 +13,3 @@ from ising.hamiltonian import Hamiltonian, qdrift_count
 from ising.hamiltonian.hamiltonian import substitute_parameter
 from ising.simulation.trotter import Lie
 from ising.simulation.singlelcu.singlelcu import calculate_mu
-
-
-
-
-

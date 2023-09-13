@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def calculate_mu(mu_samples, count, coeffs):
     """
     Formula is in the algorithm 1 of the paper
@@ -9,6 +10,7 @@ def calculate_mu(mu_samples, count, coeffs):
 
     mu = (norm_1_sq * mu_sum) / count
     return mu
+
 
 def calculate_lcu_constants(m, delta_t, t):
     """
