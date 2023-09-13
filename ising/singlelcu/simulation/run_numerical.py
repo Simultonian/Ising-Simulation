@@ -21,20 +21,22 @@ from ising.simulation.trotter import (
     TwoQDriftCircuit,
     GSQDriftCircuit,
 )
+from ising.simulation.exact import ExactSimulation
+
+from ising.singlelcu.simulation import GroundState
 
 
 def run_numerical(paras):
     qubit_wise_answers = {}
-    times = np.linspace(
-        paras["time"] / paras["count_time"], paras["time"], paras["count_time"]
-    )
     h_values = np.linspace(
         10 ** paras["start_h"], 10 ** paras["end_h"], paras["count_h"]
     )
 
     method = paras["method"]
 
-    if method == "lie":
+    if method == "exact":
+        circuit_synthesis = ExactSimulation
+    elif method == "lie":
         circuit_synthesis = LieCircuit
     elif method == "qdrift":
         circuit_synthesis = QDriftCircuit
@@ -62,15 +64,24 @@ def run_numerical(paras):
             print(f"Running for {num_qubit} qubits and h:{h}")
             circuit_manager.subsitute_h(h)
             circuit_manager.construct_parametrized_circuit()
+
+            lcu_run = GroundState(
+                    circuit_manager, 
+                    observable,
+                    eeta=paras["eeta"],
+                    eps=paras["eps"],
+                    prob=paras["prob"],
+                    )
+
+
             ground_state = circuit_manager.ham_subbed.ground_state
             init_state = close_state(ground_state, paras["overlap"])
             rho_init = np.outer(init_state, init_state.conj().T)
 
             rho_init = np.array(Operator(rho_init).reverse_qargs().data)
 
-            # TODO: Replace this with magnetization
-            ans = circuit_manager.get_observations(rho_init, observable.matrix, times)
-            h_wise_answers[h] = np.mean(ans)
+            ans = lcu_run.calculate_mu()
+            h_wise_answers[h] = ans 
 
         qubit_wise_answers[num_qubit] = h_wise_answers
 
@@ -96,11 +107,11 @@ def main():
 
 
 def test_main():
-    parameters = read_input_file("data/singlelcu/input/default.json")
+    parameters = read_input_file("data/input/singlelcu/default.json")
 
     results = run_numerical(parameters)
 
-    file_name = f"data/singlelcu/output/magnetization_{parameters['method']}_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
+    file_name = f"data/singlelcu/output/magnetization_num_{parameters['method']}_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
 
     print(f"Saving results at: {file_name}")
     with open(file_name, "w") as file:

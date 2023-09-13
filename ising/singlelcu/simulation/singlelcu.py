@@ -83,7 +83,6 @@ def calculate_lcu_constants(m, delta_t, t):
 
 
 class GroundState:
-    # def calculate_magnetization(ham, observable, eeta, eps, prob, **kwargs):
     def __init__(self, synthesizer: Synthesizer, observable: Hamiltonian, **kwargs):
         """
         Code for running single ancilla LCU simulation using given synthesizer.
@@ -107,7 +106,7 @@ class GroundState:
 
         self.params = {x: kwargs[x] for x in ["eeta", "eps", "prob"]}
         self.ground_params = ground_state_constants(
-            self.synth.ham.spectral_gap,
+            self.synth.ham_subbed.spectral_gap,
             self.params["eeta"],
             self.params["eps"],
             self.params["prob"],
@@ -121,7 +120,7 @@ class GroundState:
         )
         self.lcu_indices = list(range(len(self.lcu_times)))
 
-        self.eye = np.identity(self.synth.ham.eig_vec.shape[0])
+        self.eye = np.identity(self.synth.ham_subbed.eig_vec.shape[0])
 
         # Normalized plus state of size N: [1...1] / sqrt{N}
         plus_state = np.ones_like(self.synth.ground_state) / np.sqrt(
@@ -153,7 +152,7 @@ class GroundState:
         Inputs:
             - ind: Sampled index
         """
-        return self.synth.get_unitary(self.lcu_times[ind])
+        return self.synth.matrix(self.lcu_times[ind])
 
     def control_unitary(self, ind: int, control_val: int):
         """

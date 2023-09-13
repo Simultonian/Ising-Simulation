@@ -6,5 +6,8 @@
   "count_h": "10",
   "overlap": "0.5",
   "method": "exact",
-  "error": "0.1"
+  "error": "0.1",
+  "eeta": "0.6",
+  "eps": "0.1",
+  "prob": "0.1"
 }
