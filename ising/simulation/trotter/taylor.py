@@ -148,9 +148,6 @@ class Taylor:
         r = int(np.ceil(t_bar ** 2))
         cap_k = get_cap_k(t_bar, self.obs_norm, self.error)
 
-        #TODO: remove this
-        cap_k = 3
-
         alphas = get_small_k_probs(t_bar=t_bar, r=r, cap_k=cap_k)
 
         k_probs = np.abs(alphas)
