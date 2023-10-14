@@ -55,7 +55,6 @@ def parametrized_ising(qubits: int, h: Union[Parameter, float]) -> Hamiltonian:
 
     Inputs:
         - qubits: Number of qubits for the Hamiltonian
-        - j: Energy prefactor
         - h: External field
 
     Returns: Hamiltonian in SparsePauliOp

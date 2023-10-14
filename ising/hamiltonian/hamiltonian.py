@@ -27,11 +27,19 @@ class Hamiltonian:
     _ground_state: Optional[NDArray] = None
     _map: Optional[dict[Pauli, complex]] = None
     _spectral_gap: Optional[float] = None
+    _paulis: tuple[Pauli] = tuple([])
 
     def __getitem__(self, pauli: Pauli) -> complex:
         if self._map is None:
             self._map = {Pauli(p): v for (p, v) in self.sparse_repr.to_list()}
         return self._map[pauli]
+
+    @property
+    def map(self) -> dict[Pauli, complex]:
+        if self._map is None:
+            self._map = {Pauli(p): v for (p, v) in self.sparse_repr.to_list()}
+        return self._map
+
 
     @property
     def eig_vec(self) -> NDArray:
@@ -63,7 +71,7 @@ class Hamiltonian:
     @property
     def matrix(self) -> NDArray:
         if self._matrix is None:
-            _ = self.eig_vec
+            self._matrix = self.eig_vec @ np.diag(self.eig_val) @ self.eig_vec_inv
         assert self._matrix is not None
 
         return self._matrix
@@ -80,6 +88,13 @@ class Hamiltonian:
             sorted_eigval = sorted(self.eig_val)
             self._spectral_gap = np.abs(sorted_eigval[0] - sorted_eigval[1])
         return self._spectral_gap
+
+    @property
+    def paulis(self) -> tuple[Pauli]:
+        if len(self._paulis) == 0:
+            self._paulis = tuple([Pauli(p) for (p, _) in self.sparse_repr.to_list()])
+
+        return self._paulis
 
 
 def substitute_parameter(ham: Hamiltonian, para: Parameter, val: float) -> Hamiltonian:
