@@ -149,8 +149,7 @@ class Taylor:
 
 
         # TODO
-        r = 1
-        cap_k = 3
+        r = 8
 
         alphas = get_small_k_probs(t_bar=t_bar, r=r, cap_k=cap_k)
 
@@ -162,10 +161,13 @@ class Taylor:
 
         final = None
         for _ in range(r):
+            
+            # Sample k
             k_cur = np.random.choice(k_range, p=k_probs)
             alpha_cur = alphas[k_cur]
             sampled_pauli_inds = np.random.choice(self.pauli_inds, p=self.coeffs, size=k_cur)
             rotation_ind = np.random.choice(self.pauli_inds, p=self.coeffs, size=1)[0]
+
             cur_term = get_final_term_from_sample(sampled_pauli_inds, rotation_ind, self.paulis, self.coeffs, alpha_cur, t_bar, r, k_cur)
 
             if final is None:
