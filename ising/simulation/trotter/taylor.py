@@ -16,7 +16,7 @@ from ising.utils import simdiag
 
 def get_small_k_probs(t_bar, r, cap_k):
     ks = np.arange(cap_k+1)
-    k_vec = np.zeros(cap_k+1, dtype=np.complex64)
+    k_vec = np.zeros(cap_k+1, dtype=np.complex128)
 
     def apply_k(k):
         # Function according to the formula
@@ -76,7 +76,6 @@ def get_final_term_from_sample(indices, rotation_ind, paulis, normalized_ham_coe
     # Do not multiply it for the phase because it is pushed in exp
     coeff_prod *= alpha
 
-    
     rotation_pauli_mat = paulis[rotation_ind].to_matrix()
 
     # Taking care of negative sign in sampled rotation
@@ -148,11 +147,18 @@ class Taylor:
         r = int(np.ceil(t_bar ** 2))
         cap_k = get_cap_k(t_bar, self.obs_norm, self.error)
 
+
+        # TODO
+        r = 1
+        cap_k = 3
+
         alphas = get_small_k_probs(t_bar=t_bar, r=r, cap_k=cap_k)
 
         k_probs = np.abs(alphas)
         k_probs /= np.sum(k_probs)
         k_range = np.arange(0,cap_k+1)
+
+        assert k_range.shape == k_probs.shape
 
         final = None
         for _ in range(r):

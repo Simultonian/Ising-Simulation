@@ -95,52 +95,78 @@ def global_phase(a: np.ndarray) -> complex:
     return 1 + 0j
 
 
+
+def exp_ham(time, pauli):
+    mat = pauli.to_matrix()
+    eig_val, eig_vec = np.linalg.eig(mat)
+    eig_inv = eig_vec.conj().T
+
+    return eig_vec @ np.diag(np.exp(-1j * time * eig_val)) @ eig_inv
+
+
+
+def check_allclose(mat, mat_list):
+    return any([np.allclose(mat, matx) for matx in mat_list])
+
+
 def test_taylor_sum_convergence():
     h_para = Parameter("h")
     error = 0.1
     delta = 0.1
     sample_count = 10000
 
-    parametrized_ham = parametrized_ising(2, h_para)
+    parametrized_ham = parametrized_ising(2, h_para, 0, False)
 
     taylor = Taylor(parametrized_ham, h_para, error, delta)
 
-
-
-    zz = Pauli("ZZ")
-    zz_mat = zz.to_matrix()
-    e_val, e_vec = np.linalg.eig(zz_mat)
-    # e_inv = np.linalg.inv(e_vec)
-    e_inv = e_vec.conj().T
-
-
-    def zz_exp(time):
-        return e_vec @ np.diag(np.exp(complex(0, 1) * time * e_val)) @ e_inv 
-
-    def rzz(p):
-        power = 1j * np.arccos(1/p)
-        return zz_exp(power)
-
+    xi = Pauli("XI")
+    ix = Pauli("IX")
+    xx = Pauli("XX")
+    xx_mat = xx.to_matrix()
     
-    p1, p2 = np.sqrt(2), np.sqrt(10) / 6
-    term1, term2 = rzz(p1), -rzz(p2*2)
+    time1 = np.arccos(1 / np.sqrt(2))
+    
+    k01 = exp_ham(time1, ix)
+    k02 = exp_ham(time1, xi)
+    k0 = [k01, k02]
 
-    sum_term = p1 * term1 + p2 * term2
-    expected = zz_exp(1.0)
+    time2 = np.arccos(3 / np.sqrt(10))
 
-    # assert np.allclose(sum_term, expected)
+    k2 = []
+    k2.append(exp_ham(time2, ix))
+    k2.append(exp_ham(time2, xi))
+    k2.append(xx_mat @ exp_ham(time2, ix))
+    k2.append(xx_mat @ exp_ham(time2, xi))
+
+    k2 = [-x for x in k2]
 
 
-    for h_value in [0.0, 1.0, 0.9, 2.0]:
+    all_ks = k0 + k2
+
+
+    for h_value in [1.0/2, 0.9, 2.0]:
         taylor.subsitute_h(h_value)
         taylor.construct_parametrized_circuit()
 
         for time in [1.0, 10.0, 5.0]:
             alphas = taylor.get_alphas(time)
 
+            alyt_0 = (alphas[0] / len(k0)) * np.sum(k0, axis=0)
+            alyt_2 = (-alphas[2] / len(k2)) * np.sum(k2, axis=0)
+            finalyt = alyt_0 + alyt_2
+ 
+            expected = taylor.get_exact_unitary(time)
+            exact = exp_ham(1/2, ix) @ exp_ham(1/2, xi)
+            np.testing.assert_almost_equal(expected, exact)
+
+            # MATCHING
+            # np.testing.assert_almost_equal(expected, finalyt)
+
             final = None
             for _ in range(sample_count):
                 res = taylor.sample_v(time)
+                assert check_allclose(res, all_ks)
+                
                 if final is None:
                     final = res
                 else:
@@ -148,8 +174,7 @@ def test_taylor_sum_convergence():
 
             # final /= global_phase(final)
             final *= (np.sum(np.abs(alphas)).real/sample_count)
-
- 
-            expected = zz_exp(time)
+            np.testing.assert_almost_equal(finalyt, final)
             np.testing.assert_almost_equal(expected, final)
+
 

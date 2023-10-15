@@ -46,15 +46,16 @@ def general_grouping(ops: Union[list[Pauli], PauliList]) -> list[list[Pauli]]:
     return [g_z, g_x]
 
 
-def parametrized_ising(qubits: int, h: Union[Parameter, float]) -> Hamiltonian:
+def parametrized_ising(qubits: int, h: Union[Parameter, float], j: float = -1, normalize:bool=True) -> Hamiltonian:
     """
     One dimensional Transverse-field Ising model parameterized by external
     field h. The Hamiltonian is represented by:
 
-    :math:`-1 sum_{<i, j>} Z_i Z_j + h sum_i X`
+    :math:`j sum_{<i, j>} Z_i Z_j + h sum_i X`
 
     Inputs:
         - qubits: Number of qubits for the Hamiltonian
+        - j
         - h: External field
 
     Returns: Hamiltonian in SparsePauliOp
@@ -65,7 +66,7 @@ def parametrized_ising(qubits: int, h: Union[Parameter, float]) -> Hamiltonian:
     i_n = ["I"] * qubits
 
     zz_terms = []
-    zz_coeffs = np.array([-1] * (qubits - 1))
+    zz_coeffs = np.array([j] * (qubits - 1))
     for i in range(qubits - 1):
         j = i + 1
         p_i = i_n
@@ -92,5 +93,5 @@ def parametrized_ising(qubits: int, h: Union[Parameter, float]) -> Hamiltonian:
         sparse_repr=SparsePauliOp(
             zz_terms + x_terms, np.concatenate([zz_coeffs, x_coeffs])
         ),
-        normalized=True,
+        normalized=normalize,
     )
