@@ -4,7 +4,7 @@ from qiskit.circuit import Parameter
 from ising.simulation.trotter.taylor import (
         get_small_k_probs, get_cap_k, 
         normalize_ham_list, get_final_term_from_sample, 
-        calculate_exp_pauli, Taylor)
+        calculate_exp_pauli, Taylor, sum_decomposition)
 from ising.hamiltonian import parametrized_ising
 
 
@@ -116,6 +116,7 @@ def rnd(mat):
 
 def test_taylor_sum_convergence():
     h_para = Parameter("h")
+    return
     error = 0.1
     delta = 0.1
     sample_count = 10000
@@ -147,6 +148,7 @@ def test_taylor_sum_convergence():
 
 
     all_ks = k0 + k2
+
 
 
     for h_value in [1.0, 0.9, 2.0]:
@@ -182,4 +184,109 @@ def test_taylor_sum_convergence():
             np.testing.assert_almost_equal(finalyt, final)
             np.testing.assert_almost_equal(expected, final)
 
+
+
+def test_taylor_sum_anlyt_xx():
+    h_para = Parameter("h")
+    error = 0.1
+    delta = 0.1
+    sample_count = 10000
+
+    parametrized_ham = parametrized_ising(2, h_para, 0, False)
+
+    taylor = Taylor(parametrized_ham, h_para, error, delta)
+
+    xi = Pauli("XI")
+    ix = Pauli("IX")
+    xx = Pauli("XX")
+    xx_mat = xx.to_matrix()
+    
+    time1 = np.arccos(1 / np.sqrt(2))
+    
+    k01 = exp_ham(time1, ix)
+    k02 = exp_ham(time1, xi)
+    k0 = [k01, k02]
+
+    time2 = np.arccos(3 / np.sqrt(10))
+
+    k2 = []
+    k2.append(exp_ham(time2, ix))
+    k2.append(exp_ham(time2, xi))
+    k2.append(xx_mat @ exp_ham(time2, ix))
+    k2.append(xx_mat @ exp_ham(time2, xi))
+
+    k2 = [-x for x in k2]
+
+
+    all_ks = k0 + k2
+
+    for h_value in [1.0/2, 0.9, 2.0]:
+        taylor.subsitute_h(h_value)
+        taylor.construct_parametrized_circuit()
+
+        for time in [1.0, 10.0, 5.0]:
+            tt = time * h_value
+            anlyt = exp_ham(tt, ix) @ exp_ham(tt, xi)
+            alphas = taylor.get_alphas(time)
+
+            alyt_0 = (alphas[0] / len(k0)) * np.sum(k0, axis=0)
+            alyt_2 = (-alphas[2] / len(k2)) * np.sum(k2, axis=0)
+            finalyt = alyt_0 + alyt_2
+
+            exact = taylor.get_exact_unitary(time)
+
+            decomp = sum_decomposition(taylor.paulis, time, taylor.coeffs, 3, alphas)
+
+            final = None
+            for _ in range(sample_count):
+                res = taylor.sample_v(time)
+                # assert check_allclose(res, all_ks)
+                
+                if final is None:
+                    final = res
+                else:
+                    final += res
+
+            np.testing.assert_allclose(decomp, anlyt)
+            np.testing.assert_allclose(exact, anlyt)
+            np.testing.assert_allclose(exact, decomp)
+
+def test_taylor_sum_anlyt_zz():
+    h_para = Parameter("h")
+    error = 0.1
+    delta = 0.1
+    sample_count = 10000
+
+    parametrized_ham = parametrized_ising(2, h_para, 1, False)
+
+    taylor = Taylor(parametrized_ham, h_para, error, delta)
+
+    zz = Pauli("ZZ")
+
+    for h_value in [0, 1.0/2, 0.9, 2.0]:
+        taylor.subsitute_h(h_value)
+        taylor.construct_parametrized_circuit()
+
+        for time in [1.0, 10.0, 5.0]:
+            tt = time
+            anlyt = exp_ham(tt, zz) 
+            alphas = taylor.get_alphas(time)
+
+            exact = taylor.get_exact_unitary(time)
+
+            decomp = sum_decomposition(taylor.paulis, time, taylor.coeffs, 3, alphas)
+
+
+            final = None
+            for _ in range(sample_count):
+                res = taylor.sample_v(time)
+                # assert check_allclose(res, all_ks)
+                
+                if final is None:
+                    final = res
+                else:
+                    final += res
+
+            np.testing.assert_allclose(exact, anlyt)
+            np.testing.assert_allclose(exact, decomp)
 

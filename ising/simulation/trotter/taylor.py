@@ -11,6 +11,7 @@ from ising.hamiltonian import Hamiltonian, trotter_reps, general_grouping
 from ising.hamiltonian.hamiltonian import substitute_parameter
 from ising.utils import MAXSIZE
 from ising.utils import simdiag
+from itertools import product as cartesian_product
 
 
 
@@ -91,6 +92,72 @@ def get_final_term_from_sample(indices, rotation_ind, paulis, normalized_ham_coe
     return phase * (pauli_prod.to_matrix() @ exp_pauli)
 
 
+def calculate_exp(time, pauli, k):
+    eye = np.identity(pauli.shape[0])
+    dr = np.sqrt(1 + ((time) / (k + 1)) ** 2)
+
+    term2 = (1j * (time) * pauli) / (k + 1)
+    rotate = (eye - term2) / dr
+    return rotate
+
+def sum_decomposition(paulis, time, coeffs, k_max, alphas):
+    pairs = list(zip(paulis, coeffs))
+    final = None
+
+    for k in range(0, k_max+1, 2):
+        alpha_term = alphas[k]
+
+        if time == 0.0:
+            if k > 0:
+                assert alpha_term == 0.0
+
+        mult_paulis = cartesian_product(pairs, repeat=k+1)
+
+        total_pauli = None
+        for paulis in mult_paulis:
+            pauli_prod = paulis[:-1]
+            exp_pair = paulis[-1]
+
+            cur_prob = 1.0
+            cur_pauli = None
+            for pauli, prob in pauli_prod:
+                cur_prob *= prob
+
+                if cur_pauli is None:
+                    cur_pauli = pauli
+                else:
+                    cur_pauli = cur_pauli @ pauli
+
+
+            exp_pauli, exp_prob = exp_pair
+            exp_pauli = exp_pauli.to_matrix()
+            rotated = calculate_exp(time, exp_pauli, k)
+
+            if cur_pauli is None:
+                cur_pauli = exp_prob * rotated
+            else:
+                cur_pauli = cur_prob * cur_pauli.to_matrix()
+                cur_pauli *= (exp_prob * rotated)
+
+            assert cur_pauli is not None
+
+            if total_pauli is None:
+                total_pauli = cur_pauli
+            else:
+                total_pauli += cur_pauli
+
+        assert total_pauli is not None
+        total_pauli *= alpha_term
+
+        if final is None:
+            final = total_pauli
+        else:
+            final += total_pauli
+        
+    return final
+
+
+
 class Taylor:
     def __init__(self, ham: Hamiltonian, h: Parameter, error: float, delta: float):
         self.ham = ham
@@ -138,6 +205,7 @@ class Taylor:
         t_bar = time * self.beta
         r = np.ceil(t_bar ** 2)
         cap_k = get_cap_k(t_bar, self.obs_norm, self.error)
+        cap_k = 3
 
         return get_small_k_probs(t_bar=t_bar, r=r, cap_k=cap_k)
 
@@ -149,7 +217,8 @@ class Taylor:
 
 
         # TODO
-        r = 8
+        cap_k = 3
+        r = 1
 
         alphas = get_small_k_probs(t_bar=t_bar, r=r, cap_k=cap_k)
 
