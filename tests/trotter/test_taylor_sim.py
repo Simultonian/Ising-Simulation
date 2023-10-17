@@ -192,7 +192,7 @@ def test_taylor_sum_anlyt_xx():
     delta = 0.1
     sample_count = 10000
 
-    parametrized_ham = parametrized_ising(2, h_para, 0, False)
+    parametrized_ham = parametrized_ising(2, h_para, 0.001, False)
 
     taylor = Taylor(parametrized_ham, h_para, error, delta)
 
@@ -224,7 +224,7 @@ def test_taylor_sum_anlyt_xx():
         taylor.subsitute_h(h_value)
         taylor.construct_parametrized_circuit()
 
-        for time in [1.0, 10.0, 5.0]:
+        for time in [0.5, 1.0, 10.0, 5.0]:
             tt = time * h_value
             anlyt = exp_ham(tt, ix) @ exp_ham(tt, xi)
             alphas = taylor.get_alphas(time)
@@ -247,9 +247,19 @@ def test_taylor_sum_anlyt_xx():
                 else:
                     final += res
 
+            final *= (np.sum(np.abs(alphas)).real/sample_count)
+            def prnt():
+                print(rnd(exact))
+                print(rnd(final))
+                print(rnd(decomp))
+                print(rnd(anlyt))
+
             np.testing.assert_allclose(decomp, anlyt)
             np.testing.assert_allclose(exact, anlyt)
             np.testing.assert_allclose(exact, decomp)
+
+
+
 
 def test_taylor_sum_anlyt_zz():
     h_para = Parameter("h")
@@ -286,6 +296,14 @@ def test_taylor_sum_anlyt_zz():
                     final = res
                 else:
                     final += res
+
+            final *= (np.sum(np.abs(alphas)).real/sample_count)
+
+            def prnt():
+                print(rnd(exact))
+                print(rnd(final))
+                print(rnd(decomp))
+                print(rnd(anlyt))
 
             np.testing.assert_allclose(exact, anlyt)
             np.testing.assert_allclose(exact, decomp)

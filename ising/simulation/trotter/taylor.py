@@ -119,25 +119,17 @@ def sum_decomposition(paulis, time, coeffs, k_max, alphas):
             exp_pair = paulis[-1]
 
             cur_prob = 1.0
-            cur_pauli = None
+            cur_pauli = Pauli("I" * len(exp_pair[0]))
             for pauli, prob in pauli_prod:
                 cur_prob *= prob
-
-                if cur_pauli is None:
-                    cur_pauli = pauli
-                else:
-                    cur_pauli = cur_pauli @ pauli
-
+                cur_pauli = cur_pauli @ pauli
 
             exp_pauli, exp_prob = exp_pair
             exp_pauli = exp_pauli.to_matrix()
             rotated = calculate_exp(time, exp_pauli, k)
 
-            if cur_pauli is None:
-                cur_pauli = exp_prob * rotated
-            else:
-                cur_pauli = cur_prob * cur_pauli.to_matrix()
-                cur_pauli *= (exp_prob * rotated)
+            cur_pauli = cur_prob * cur_pauli.to_matrix()
+            cur_pauli = cur_pauli @ (exp_prob * rotated)
 
             assert cur_pauli is not None
 
@@ -204,7 +196,7 @@ class Taylor:
     def get_alphas(self, time:float):
         t_bar = time * self.beta
         r = np.ceil(t_bar ** 2)
-        cap_k = get_cap_k(t_bar, self.obs_norm, self.error)
+        # cap_k = get_cap_k(t_bar, self.obs_norm, self.error)
         cap_k = 3
 
         return get_small_k_probs(t_bar=t_bar, r=r, cap_k=cap_k)
@@ -213,7 +205,7 @@ class Taylor:
 
         t_bar = time * self.beta
         r = int(np.ceil(t_bar ** 2))
-        cap_k = get_cap_k(t_bar, self.obs_norm, self.error)
+        # cap_k = get_cap_k(t_bar, self.obs_norm, self.error)
 
 
         # TODO
