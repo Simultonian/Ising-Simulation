@@ -22,7 +22,7 @@ def get_small_k_probs(t_bar, r, cap_k):
     def apply_k(k):
         # Function according to the formula
         t1 = ((1j*t_bar/r) ** k) / np.math.factorial(k)
-        t2 = np.sqrt(1 + ((t_bar / (r * k + 1)) ** 2))
+        t2 = np.sqrt(1 + ((t_bar / (r * (k + 1))) ** 2))
         return t1 * t2
 
     vectorized_apply_k = np.vectorize(apply_k)
@@ -77,6 +77,10 @@ def get_final_term_from_sample(indices, rotation_ind, paulis, normalized_ham_coe
     # Do not multiply it for the phase because it is pushed in exp
     coeff_prod *= alpha
 
+    phase = 1
+    if coeff_prod < 0:
+        phase = -1
+
     rotation_pauli_mat = paulis[rotation_ind].to_matrix()
 
     # Taking care of negative sign in sampled rotation
@@ -84,10 +88,6 @@ def get_final_term_from_sample(indices, rotation_ind, paulis, normalized_ham_coe
         rotation_pauli_mat *= -1
 
     exp_pauli = calculate_exp_pauli(t_bar, r, k, rotation_pauli_mat)
-
-    phase = 1
-    if coeff_prod < 0:
-        phase = -1
 
     return phase * (pauli_prod.to_matrix() @ exp_pauli)
 
@@ -100,9 +100,20 @@ def calculate_exp(time, pauli, k):
     rotate = (eye - term2) / dr
     return rotate
 
-def sum_decomposition(paulis, time, coeffs, k_max, alphas):
+def get_alphas(time, beta, cap_k, r=None):
+    t_bar = time * beta
+    if r is None:
+        r = np.ceil(t_bar ** 2)
+
+    return get_small_k_probs(t_bar=t_bar, r=r, cap_k=cap_k)
+
+def sum_decomposition(paulis, time, r, beta, coeffs, k_max):
     pairs = list(zip(paulis, coeffs))
     final = None
+
+
+    time = time / r
+    alphas = get_alphas(time, beta, k_max, r)
 
     for k in range(0, k_max+1, 2):
         alpha_term = alphas[k]
@@ -146,7 +157,7 @@ def sum_decomposition(paulis, time, coeffs, k_max, alphas):
         else:
             final += total_pauli
         
-    return final
+    return np.linalg.matrix_power(final, r)
 
 
 
@@ -193,24 +204,25 @@ class Taylor:
         return self.ham_subbed.eig_vec @ np.diag(np.exp(complex(0, -1) * time * self.ham_subbed.eig_val)) @ self.ham_subbed.eig_vec_inv 
 
 
-    def get_alphas(self, time:float):
+    def get_alphas(self, time:float, r=None):
         t_bar = time * self.beta
-        r = np.ceil(t_bar ** 2)
+        if r is None:
+            r = np.ceil(t_bar ** 2)
         # cap_k = get_cap_k(t_bar, self.obs_norm, self.error)
-        cap_k = 3
+        cap_k = 6
 
         return get_small_k_probs(t_bar=t_bar, r=r, cap_k=cap_k)
 
-    def sample_v(self, time:float):
+    def sample_v(self, time:float, r=None):
 
         t_bar = time * self.beta
-        r = int(np.ceil(t_bar ** 2))
+        if r is None:
+            r = int(np.ceil(t_bar ** 2))
         # cap_k = get_cap_k(t_bar, self.obs_norm, self.error)
 
 
         # TODO
-        cap_k = 3
-        r = 1
+        cap_k = 6
 
         alphas = get_small_k_probs(t_bar=t_bar, r=r, cap_k=cap_k)
 
