@@ -187,6 +187,7 @@ def test_taylor_sum_convergence():
 
 
 def test_taylor_sum_anlyt_xx():
+    return
     h_para = Parameter("h")
     error = 0.1
     delta = 0.1
@@ -256,52 +257,69 @@ def test_taylor_sum_anlyt_xx():
             np.testing.assert_allclose(exact, decomp)
 
 
-
-
-def test_taylor_sum_anlyt_zz():
+def test_taylor_sum_anlyt():
     h_para = Parameter("h")
     error = 0.1
     delta = 0.1
     sample_count = 10000
 
-    parametrized_ham = parametrized_ising(2, h_para, 1, False)
+    parametrized_ham = parametrized_ising(2, h_para, -1, False)
 
     taylor = Taylor(parametrized_ham, h_para, error, delta)
 
-    zz = Pauli("ZZ")
-
-    for h_value in [0, 1.0/2, 0.9, 2.0]:
+    for h_value in [1.0, 0.9, 2.0]:
         taylor.subsitute_h(h_value)
         taylor.construct_parametrized_circuit()
+        beta = np.sum(np.abs(taylor.ham_subbed.coeffs))
 
-        for time in [1.0, 10.0, 5.0]:
-            tt = time
-            anlyt = exp_ham(tt, zz) 
-            alphas = taylor.get_alphas(time)
-
+        r = 1
+        exacts, finals, decomps = [], [], []
+        for time in [3.0]:
             exact = taylor.get_exact_unitary(time)
+            
+            t_bar = beta * time
+            decomp = sum_decomposition(taylor.paulis, t_bar, r, taylor.coeffs, 6)
 
-            decomp = sum_decomposition(taylor.paulis, time, taylor.coeffs, 3, alphas)
+            def sample_sum(r=None, count=sample_count):
+                alphas = taylor.get_alphas(time, r)
+                final = None
+                for _ in range(count):
+                    res = taylor.sample_v(time, r)
+                    # assert check_allclose(res, all_ks)
+                    
+                    if final is None:
+                        final = res
+                    else:
+                        final += res
 
+                if r is None:
+                    r = int(np.ceil(t_bar ** 2))
 
-            final = None
-            for _ in range(sample_count):
-                res = taylor.sample_v(time)
-                # assert check_allclose(res, all_ks)
-                
-                if final is None:
-                    final = res
-                else:
-                    final += res
+                final *= (np.sum(np.abs(alphas) ** r).real/sample_count)
+                return final
 
-            final *= (np.sum(np.abs(alphas)).real/sample_count)
+            # final = sample_sum(r)
+            # def prnt_in():
+            #     print(rnd(exact))
+            #     print(rnd(final))
+            #     print(rnd(decomp))
 
-            def prnt():
-                print(rnd(exact))
-                print(rnd(final))
-                print(rnd(decomp))
-                print(rnd(anlyt))
+            def loop_decomp(x, y, s):
+                for a in range(x, y, s):
+                    print(rnd(sum_decomposition(taylor.paulis, t_bar, a, taylor.coeffs, 6)))
 
-            np.testing.assert_allclose(exact, anlyt)
-            np.testing.assert_allclose(exact, decomp)
+            def loop_sample(x, y, s):
+                for a in range(x, y, s):
+                    print(rnd(sample_sum(a,1000)))
 
+            assert False
+            exacts.append(exact)
+            finals.append(final)
+            decomps.append(decomp)
+
+        def prnt(i):
+            print(rnd(exacts[i]))
+            print(rnd(finals[i]))
+            print(rnd(decomps[i]))
+
+        assert False

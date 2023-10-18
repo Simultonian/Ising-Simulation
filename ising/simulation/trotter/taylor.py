@@ -12,6 +12,7 @@ from ising.hamiltonian.hamiltonian import substitute_parameter
 from ising.utils import MAXSIZE
 from ising.utils import simdiag
 from itertools import product as cartesian_product
+import math
 
 
 
@@ -21,7 +22,7 @@ def get_small_k_probs(t_bar, r, cap_k):
 
     def apply_k(k):
         # Function according to the formula
-        t1 = ((1j*t_bar/r) ** k) / np.math.factorial(k)
+        t1 = ((1j*t_bar/r) ** k) / math.factorial(k)
         t2 = np.sqrt(1 + ((t_bar / (r * (k + 1))) ** 2))
         return t1 * t2
 
@@ -100,25 +101,26 @@ def calculate_exp(time, pauli, k):
     rotate = (eye - term2) / dr
     return rotate
 
-def get_alphas(time, beta, cap_k, r=None):
-    t_bar = time * beta
+def get_alphas(t_bar, cap_k, r=None):
     if r is None:
         r = np.ceil(t_bar ** 2)
 
     return get_small_k_probs(t_bar=t_bar, r=r, cap_k=cap_k)
 
-def sum_decomposition(paulis, time, r, beta, coeffs, k_max):
+def sum_decomposition(paulis, t_bar, r, coeffs, k_max):
     pairs = list(zip(paulis, coeffs))
     final = None
 
+    if r is None:
+        r = int(np.ceil(t_bar ** 2))
 
-    time = time / r
-    alphas = get_alphas(time, beta, k_max, r)
+    alphas = get_alphas(t_bar, k_max, r)
+    t_bar = t_bar / r
 
     for k in range(0, k_max+1, 2):
         alpha_term = alphas[k]
 
-        if time == 0.0:
+        if t_bar == 0.0:
             if k > 0:
                 assert alpha_term == 0.0
 
@@ -137,7 +139,7 @@ def sum_decomposition(paulis, time, r, beta, coeffs, k_max):
 
             exp_pauli, exp_prob = exp_pair
             exp_pauli = exp_pauli.to_matrix()
-            rotated = calculate_exp(time, exp_pauli, k)
+            rotated = calculate_exp(t_bar, exp_pauli, k)
 
             cur_pauli = cur_prob * cur_pauli.to_matrix()
             cur_pauli = cur_pauli @ (exp_prob * rotated)

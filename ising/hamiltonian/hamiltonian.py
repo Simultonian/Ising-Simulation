@@ -28,6 +28,7 @@ class Hamiltonian:
     _map: Optional[dict[Pauli, complex]] = None
     _spectral_gap: Optional[float] = None
     _paulis: tuple[Pauli] = tuple([])
+    _coeffs: tuple[float] = tuple([])
 
     def __getitem__(self, pauli: Pauli) -> complex:
         if self._map is None:
@@ -93,8 +94,18 @@ class Hamiltonian:
     def paulis(self) -> tuple[Pauli]:
         if len(self._paulis) == 0:
             self._paulis = tuple([Pauli(p) for (p, _) in self.sparse_repr.to_list()])
+            self._coeffs = tuple([v for (_, v) in self.sparse_repr.to_list()])
 
         return self._paulis
+
+    @property
+    def coeffs(self) -> tuple[float]:
+        if len(self._paulis) == 0:
+            self._paulis = tuple([Pauli(p) for (p, _) in self.sparse_repr.to_list()])
+            self._coeffs = tuple([v for (_, v) in self.sparse_repr.to_list()])
+
+        return self._coeffs
+
 
 
 def substitute_parameter(ham: Hamiltonian, para: Parameter, val: float) -> Hamiltonian:
