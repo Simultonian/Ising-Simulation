@@ -66,17 +66,13 @@ def calculate_exp_pauli(t_bar:float, r: int, k: int, pauli: NDArray) -> NDArray:
 
 def get_final_term_from_sample(indices, rotation_ind, paulis, normalized_ham_coeffs, alpha, t_bar, r, k):
     assert len(indices) == k
+
+    coeff_prod = alpha
+    pauli_prod = Pauli("I" * len(paulis[rotation_ind]))
     if k > 0:
-        coeff_prod = np.prod([normalized_ham_coeffs[ind] for ind in indices])
-        pauli_prod = Pauli("I" * len(paulis[rotation_ind]))
+        coeff_prod *= np.prod([normalized_ham_coeffs[ind] for ind in indices])
         for ind in indices:
             pauli_prod = pauli_prod @ paulis[ind]
-    else:
-        coeff_prod = 1
-        pauli_prod = Pauli("I" * len(paulis[rotation_ind]))
-
-    # Do not multiply it for the phase because it is pushed in exp
-    coeff_prod *= alpha
 
     phase = 1
     if coeff_prod < 0:
@@ -206,31 +202,33 @@ class Taylor:
         return self.ham_subbed.eig_vec @ np.diag(np.exp(complex(0, -1) * time * self.ham_subbed.eig_val)) @ self.ham_subbed.eig_vec_inv 
 
 
-    def get_alphas(self, time:float, r=None):
+    def get_alphas(self, time:float, r=None, cap_k=None):
         t_bar = time * self.beta
         if r is None:
             r = np.ceil(t_bar ** 2)
-        # cap_k = get_cap_k(t_bar, self.obs_norm, self.error)
-        cap_k = 6
+
+        if cap_k is None:
+            cap_k = get_cap_k(t_bar, self.obs_norm, self.error)
 
         return get_small_k_probs(t_bar=t_bar, r=r, cap_k=cap_k)
 
-    def sample_v(self, time:float, r=None):
+    def sample_v(self, time:float, r=None, cap_k=None):
 
         t_bar = time * self.beta
         if r is None:
             r = int(np.ceil(t_bar ** 2))
-        # cap_k = get_cap_k(t_bar, self.obs_norm, self.error)
 
-
-        # TODO
-        cap_k = 6
-
-        alphas = get_small_k_probs(t_bar=t_bar, r=r, cap_k=cap_k)
+        if cap_k is None:
+            cap_k = get_cap_k(t_bar, self.obs_norm, self.error)
+        
+        alphas = self.get_alphas(time, cap_k=cap_k)
 
         k_probs = np.abs(alphas)
         k_probs /= np.sum(k_probs)
         k_range = np.arange(0,cap_k+1)
+
+        for x in k_probs[1::2]:
+            assert x == 0
 
         assert k_range.shape == k_probs.shape
 
@@ -239,6 +237,8 @@ class Taylor:
             
             # Sample k
             k_cur = np.random.choice(k_range, p=k_probs)
+            assert k_cur % 2 == 0
+
             alpha_cur = alphas[k_cur]
             sampled_pauli_inds = np.random.choice(self.pauli_inds, p=self.coeffs, size=k_cur)
             rotation_ind = np.random.choice(self.pauli_inds, p=self.coeffs, size=1)[0]
@@ -250,7 +250,7 @@ class Taylor:
             else:
                 final = final @ cur_term
 
-        
+        assert final is not None 
         return final
 
     def get_observation(self, rho_init: NDArray, observable: NDArray, time:float):
