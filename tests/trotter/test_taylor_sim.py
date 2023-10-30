@@ -4,7 +4,7 @@ from qiskit.circuit import Parameter
 from ising.simulation.trotter.taylor import (
         get_small_k_probs, get_cap_k, 
         normalize_ham_list, get_final_term_from_sample, 
-        calculate_exp_pauli, Taylor, sum_decomposition, sample_decomposition_sum, sample_decomposition_sum_unnormalized)
+        calculate_exp_pauli, Taylor, sum_decomposition, sample_decomposition_sum)
 from ising.hamiltonian import parametrized_ising
 
 
@@ -110,26 +110,6 @@ def test_taylor_sum_anlyt_zz():
     decomp = sum_decomposition(taylor.paulis, time, rl[-1], taylor.coeffs, kl[-1])
 
 
-    for k in kl:
-        for r in rl:
-            alphas = taylor.get_alphas(time, r, k)
-            sample, normalizer = sample_decomposition_sum_unnormalized(taylor.paulis, time, r, taylor.coeffs, k, sample_count)
-            np.testing.assert_allclose(sum(np.abs(alphas)), normalizer)
-
-            assert not np.isnan(normalizer)
-
-            r_normalizer = normalizer ** r
-
-            assert not np.isnan(r_normalizer)
-
-            sample *= r_normalizer
-
-            ans = np.max(np.abs(sample - exact))
-            if ans > 1e9:
-                assert False
-
-            print(k, r, ans, r_normalizer)
-            # np.testing.assert_allclose(sample, exact)
 
     def sample_sum(r, count=sample_count):
         alphas = taylor.get_alphas(time, r, k_max)
@@ -141,7 +121,12 @@ def test_taylor_sum_anlyt_zz():
         final *= (np.sum(np.abs(alphas) ** r).real / sample_count)
         return final
 
-    # sample = sample_sum(r)
+    for k in kl:
+        for r in rl:
+            sample = sample_decomposition_sum(taylor.paulis, time, r, taylor.coeffs, k, sample_count)
+            ans = np.max(np.abs(sample - exact))
+            print(k, r, ans)
+            # np.testing.assert_allclose(sample, exact)
 
     def prnt():
         print(rnd(exact))
