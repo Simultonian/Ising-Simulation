@@ -103,6 +103,112 @@ def get_alphas(t_bar, cap_k, r=None):
 
     return get_small_k_probs(t_bar=t_bar, r=r, cap_k=cap_k)
 
+def sum_decomposition_terms(paulis, t_bar, r, coeffs, k_max):
+    pairs = list(zip(paulis, coeffs))
+    terms = []
+    probs = []
+
+    if r is None:
+        r = int(np.ceil(t_bar ** 2))
+
+    alphas = get_alphas(t_bar, k_max, r)
+    t_bar = t_bar / r
+
+    for k in range(0, k_max+1, 2):
+        alpha_term = alphas[k]
+
+        if t_bar == 0.0:
+            if k > 0:
+                assert alpha_term == 0.0
+
+        mult_paulis = cartesian_product(pairs, repeat=k+1)
+
+        for paulis in mult_paulis:
+            pauli_prod = paulis[:-1]
+            exp_pair = paulis[-1]
+
+            cur_prob = 1.0
+            cur_pauli = Pauli("I" * len(exp_pair[0]))
+            for pauli, prob in pauli_prod:
+                cur_prob *= prob
+                cur_pauli = cur_pauli @ pauli
+
+            exp_pauli, exp_prob = exp_pair
+
+            exp_pauli = exp_pauli.to_matrix()
+            rotated = calculate_exp(t_bar, exp_pauli, k)
+
+            cur_prob *= exp_prob
+            cur_pauli = cur_pauli.to_matrix()
+            cur_pauli = cur_pauli @ rotated
+
+            assert cur_pauli is not None
+            cur_prob *= alpha_term
+            if cur_prob < 0:
+                cur_prob *= -1
+                cur_pauli *= -1
+
+            terms.append(cur_pauli)
+            probs.append(cur_prob)
+
+    _probs = []
+    for prob in probs:
+        np.testing.assert_allclose(prob.imag, 0.0)
+        _probs.append(prob.real)
+
+    assert np.abs(max([np.max(x) for x in terms])) < 1e9
+    return (terms, np.array(_probs))
+
+
+def sample_decomposition_sum_unnormalized(paulis, t_bar, r, coeffs, k_max, sample_count):
+    terms, probs = sum_decomposition_terms(paulis, t_bar, r, coeffs, k_max)
+    assert np.abs(max([np.max(x) for x in terms])) < 1e9
+    inds = np.arange(len(terms))
+    print(f"Size of decomposition:{len(terms) ** r}")
+
+    normalizer = sum(probs)
+    probs = probs / normalizer
+
+    total = None
+    for _ in range(sample_count):
+        sampled_terms = np.random.choice(inds, p=probs, size=r)
+
+        final = terms[sampled_terms[0]].copy()
+        for ind in sampled_terms[1:]:
+            final = final @ terms[ind]
+
+        if total is None:
+            total = final
+        else:
+            total += final
+
+    assert False
+    return total / sample_count, normalizer
+
+def sample_decomposition_sum(paulis, t_bar, r, coeffs, k_max, sample_count):
+    terms, probs = sum_decomposition_terms(paulis, t_bar, r, coeffs, k_max)
+    inds = np.arange(len(terms))
+    print(f"Size of decomposition:{len(terms) ** r}")
+
+    normalizer = sum(probs)
+    probs = probs / normalizer
+
+    total = None
+    for _ in range(sample_count):
+        sampled_terms = np.random.choice(inds, p=probs, size=r)
+        final = normalizer * terms[sampled_terms[0]]
+
+        for ind in sampled_terms[1:]:
+            term = terms[ind]
+            final = final @ (normalizer * term)
+
+        if total is None:
+            total = final
+        else:
+            total += final
+
+    return total / sample_count
+
 def sum_decomposition(paulis, t_bar, r, coeffs, k_max):
     pairs = list(zip(paulis, coeffs))
     final = None
@@ -246,7 +352,7 @@ class Taylor:
             cur_term = get_final_term_from_sample(sampled_pauli_inds, rotation_ind, self.paulis, self.coeffs, alpha_cur, t_bar, r, k_cur)
 
             if final is None:
-                final = cur_term
+                final = cur_term.copy()
             else:
                 final = final @ cur_term
 
