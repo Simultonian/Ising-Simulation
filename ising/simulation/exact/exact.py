@@ -10,7 +10,7 @@ from ising.hamiltonian.hamiltonian import substitute_parameter
 
 
 class ExactSimulation:
-    def __init__(self, ham: Hamiltonian, h: Parameter, error: float):
+    def __init__(self, ham: Hamiltonian, h: Parameter, error: float=0.0):
         self.ham = ham
         self.num_qubits = ham.sparse_repr.num_qubits
         self.ham_subbed: Optional[Hamiltonian] = None

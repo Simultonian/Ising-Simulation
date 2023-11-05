@@ -24,7 +24,10 @@ def run_exact(paras):
         for h in h_values:
             print(f"Running for {num_qubit} qubits and h:{h}")
             ham = parametrized_ising(num_qubit, h)
-            circuit_manager = ExactSimulation(ham)
+            circuit_manager = ExactSimulation(ham, h)
+            circuit_manager.subsitute_h(h)
+            circuit_manager.construct_parametrized_circuit()
+
             ground_state = circuit_manager.ground_state
             init_state = close_state(ground_state, paras["overlap"])
             rho_init = np.outer(init_state, init_state.conj().T)
@@ -48,7 +51,7 @@ def main():
 
     results = run_exact(parameters)
 
-    file_name = f"data/output/magnetization_exact_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
+    file_name = f"data/simulation/magnetization_exact_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
 
     print(f"Saving results at: {file_name}")
     with open(file_name, "w") as file:
@@ -60,7 +63,7 @@ def test_main():
 
     results = run_exact(parameters)
 
-    file_name = f"data/output/magnetization_exact_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
+    file_name = f"data/simulation/magnetization_exact_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
 
     print(f"Saving results at: {file_name}")
     with open(file_name, "w") as file:

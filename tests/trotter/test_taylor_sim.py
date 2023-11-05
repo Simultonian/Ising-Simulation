@@ -1,10 +1,10 @@
 import numpy as np
 from qiskit.quantum_info import Pauli
 from qiskit.circuit import Parameter
-from ising.simulation.trotter.taylor import (
+from ising.simulation.trotter.taylor_old import (
         get_small_k_probs, get_cap_k, 
-        normalize_ham_list, get_final_term_from_sample, 
-        calculate_exp_pauli, Taylor, sum_decomposition, sample_decomposition_sum)
+        normalize_ham_list, calculate_exp_pauli, Taylor, 
+        sum_decomposition, sample_decomposition_sum)
 from ising.hamiltonian import parametrized_ising
 
 

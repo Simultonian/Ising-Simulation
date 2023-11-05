@@ -1,11 +1,11 @@
 {
   "observable": "magnetization",
   "methods": [
-    "num_grouped_lie",
+    "gs_qdrift",
     "exact"
   ],
-  "input_file": "data/singlelcu/input/default.json",
-  "fig_folder": "plots/singlelcu",
+  "input_file": "data/input/default.json",
+  "fig_folder": "plots/qiskit_trotter",
   "scale": [1.5, 1.5],
   "labels": ["x", "L"]
 }

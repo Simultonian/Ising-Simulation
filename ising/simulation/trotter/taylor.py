@@ -1,16 +1,12 @@
-from typing import Optional, Union, Sequence
-from functools import lru_cache, reduce
+from typing import Optional
 import numpy as np
 from numpy.typing import NDArray
 
-from qiskit.quantum_info import Pauli, SparsePauliOp
-from qiskit.circuit import QuantumCircuit, Parameter
-from qiskit.synthesis import LieTrotter
+from qiskit.quantum_info import Pauli
+from qiskit.circuit import Parameter
 
-from ising.hamiltonian import Hamiltonian, trotter_reps, general_grouping
+from ising.hamiltonian import Hamiltonian
 from ising.hamiltonian.hamiltonian import substitute_parameter
-from ising.utils import MAXSIZE
-from ising.utils import simdiag
 from itertools import product as cartesian_product
 import math
 
@@ -63,32 +59,6 @@ def calculate_exp_pauli(t_bar:float, r: int, k: int, pauli: NDArray) -> NDArray:
     term2 = (1j * (t_bar/r) * pauli) / (k + 1)
     rotate = (eye - term2) / dr
     return rotate
-
-def get_final_term_from_sample(indices, rotation_ind, paulis, normalized_ham_coeffs, alpha, t_bar, r, k):
-    assert len(indices) == k
-
-    coeff_prod = alpha
-    pauli_prod = Pauli("I" * len(paulis[rotation_ind]))
-    if k > 0:
-        coeff_prod *= np.prod([normalized_ham_coeffs[ind] for ind in indices])
-        for ind in indices:
-            pauli_prod = pauli_prod @ paulis[ind]
-
-    coeff_prod *= abs(normalized_ham_coeffs[rotation_ind])
-    phase = 1
-    if coeff_prod < 0:
-        phase = -1
-
-    rotation_pauli_mat = paulis[rotation_ind].to_matrix()
-
-    # Taking care of negative sign in sampled rotation
-    if normalized_ham_coeffs[rotation_ind] < 0:
-        rotation_pauli_mat *= -1
-
-    exp_pauli = calculate_exp_pauli(t_bar, r, k, rotation_pauli_mat)
-
-    return phase * (pauli_prod.to_matrix() @ exp_pauli)
-
 
 def calculate_exp(time, pauli, k):
     eye = np.identity(pauli.shape[0])
@@ -165,102 +135,135 @@ def sum_decomposition_terms(paulis, time, r, coeffs, k_max):
 
     return (terms, np.array(_probs))
 
+from functools import lru_cache
+import numpy as np
+import numpy.testing as npt
+from collections import Counter
 
-def sample_decomposition_sum(paulis, t_bar, r, coeffs, k_max, sample_count):
-    terms, probs = sum_decomposition_terms(paulis, t_bar, r, coeffs, k_max)
-    inds = np.arange(len(terms))
-    print(f"Size of decomposition:{len(terms) ** r}")
+from qiskit.quantum_info import SparsePauliOp
 
-    normalizer = sum(probs)
-    probs = probs / normalizer
+from ising.hamiltonian import Hamiltonian
+from ising.utils.constants import ONEONE, ZEROZERO, PLUS
+from ising.utils import MAXSIZE
+from ising.singlelcu.simulation.singlelcu import calculate_mu
 
-    total = None
-    for _ in range(sample_count):
-        sampled_terms = np.random.choice(inds, p=probs, size=r)
-        final = normalizer * terms[sampled_terms[0]]
 
-        for ind in sampled_terms[1:]:
-            term = terms[ind]
-            final = final @ (normalizer * term)
+class SingleAncilla:
+    def __init__(self, terms, probs, observable: Hamiltonian, **kwargs):
+        """
+        Code for running single ancilla LCU simulation using given synthesizer.
 
-        if total is None:
-            total = final
+        Inputs:
+            - synthesizer: Provides access for construction of unitaries.
+            - observable: Observable to run LCU simulation on.
+
+        Kwargs must contain:
+            - eeta
+            - eps
+            - prob
+        """
+        self.terms = terms
+        self.probs = probs
+        obs_x = SparsePauliOp(["X"], [1.0])
+        run_obs = obs_x.tensor(observable.sparse_repr)
+
+        self.run_obs = run_obs.to_matrix()
+
+        # TODO: Replace with `spectral_norm`
+        self.obs_norm = 1
+
+        self.params = {x: kwargs[x] for x in ["eeta", "eps", "prob"]}
+
+        self.inds = list(range(len(terms)))
+        self.eye = np.identity(terms[0].shape[0])
+
+        self.rho_init = None
+
+    def get_unitary(self, ind: int):
+        """
+        Uses the synthesizer for constructing Hamiltonian simulation for given
+        lcu time index.
+
+        Inputs:
+            - ind: Sampled index
+        """
+        return self.terms[ind]
+
+    def control_unitary(self, ind: int, control_val: int):
+        """
+        Calculates |0><0| U + |1><1| I if control_val = 0
+        Calculates |0><0| I + |1><1| U if control_val = 1
+
+        Where U is unitary for Hamiltonian evolution with time `times[ind]`.
+        """
+
+        unitary = self.get_unitary(ind)
+
+        if control_val == 0:
+            op_1 = np.kron(ZEROZERO, unitary)
+            op_2 = np.kron(ONEONE, self.eye)
+            return op_1 + op_2
+        # Control value is 1
         else:
-            total += final
+            op_1 = np.kron(ZEROZERO, self.eye)
+            op_2 = np.kron(ONEONE, unitary)
+            return op_1 + op_2
 
-    return total / sample_count
+    @lru_cache(maxsize=MAXSIZE)
+    def post_v1(self, ind):
+        if self.rho_init is None:
+            raise ValueError("Initial state not set.")
+        final_rho = self.rho_init.copy()
+        v1 = self.control_unitary(ind, control_val=1)
+        final_rho = v1 @ final_rho @ v1.conj().T
+        npt.assert_allclose(np.trace(final_rho), 1, atol=1e-3, rtol=1e-3)
+        return final_rho
 
-def sum_decomposition(paulis, t_bar, r, coeffs, k_max):
-    pairs = list(zip(paulis, coeffs))
-    final = None
+    def post_v1v2(self, i1, i2):
+        final_rho = self.post_v1(i1)
 
-    if r is None:
-        r = int(np.ceil(t_bar ** 2))
+        v2 = self.control_unitary(i2, control_val=0)
+        final_rho = v2 @ final_rho @ v2.conj().T
 
-    alphas = get_alphas(t_bar, k_max, r)
-    t_bar = t_bar / r
+        npt.assert_allclose(np.trace(final_rho), 1, atol=1e-3, rtol=1e-3)
 
-    for k in range(0, k_max+1, 2):
-        alpha_term = alphas[k]
+        return final_rho
 
-        if t_bar == 0.0:
-            if k > 0:
-                assert alpha_term == 0.0
+    def calculate_mu(self, count):
+        print("Entering loop")
+        results = []
 
-        mult_paulis = cartesian_product(pairs, repeat=k+1)
+        samples_count = Counter(
+            [tuple(x) for x in np.random.choice(self.inds, p=self.probs, size=(count, 2))]
+        )
 
-        total_pauli = None
-        for paulis in mult_paulis:
-            pauli_prod = paulis[:-1]
-            exp_pair = paulis[-1]
+        total_count = 0
 
-            cur_prob = 1.0
-            cur_pauli = Pauli("I" * len(exp_pair[0]))
-            for pauli, prob in pauli_prod:
-                cur_prob *= prob
-                cur_pauli = cur_pauli @ pauli
+        for sample in sorted(samples_count.keys()):
+            s_count = samples_count[sample]
+            if total_count % 100 == 0:
+                print(f"running: {total_count} out of {count}")
+            total_count += s_count
 
-            exp_pauli, exp_prob = exp_pair
-            exp_pauli = exp_pauli.to_matrix()
-            rotated = calculate_exp(t_bar, exp_pauli, k)
+            final_rho = self.post_v1v2(sample[0], sample[1])
 
-            cur_pauli = cur_prob * cur_pauli.to_matrix()
-            cur_pauli = cur_pauli @ (exp_prob * rotated)
+            result = np.trace(np.abs(self.run_obs @ final_rho))
+            results.append(result * s_count)
 
-            assert cur_pauli is not None
+        assert total_count == count
 
-            if total_pauli is None:
-                total_pauli = cur_pauli
-            else:
-                total_pauli += cur_pauli
-
-        assert total_pauli is not None
-        total_pauli *= alpha_term
-
-        if final is None:
-            final = total_pauli
-        else:
-            final += total_pauli
-        
-    return np.linalg.matrix_power(final, r)
+        magn_h = calculate_mu(results, count, self.probs)
+        return magn_h
 
 
-
-class Taylor:
-    def __init__(self, ham: Hamiltonian, h: Parameter, error: float, delta: float):
+class TaylorBad:
+    def __init__(self, ham: Hamiltonian, h: Parameter, error: float):
         self.ham = ham
         self.num_qubits = ham.sparse_repr.num_qubits
         self.error = error
-        self.delta = delta
         self.ham_subbed: Optional[Hamiltonian] = None
 
         self.h = h
-        self.time = Parameter("t")
-
-        self.paulis = ham.paulis
-
-        # TODO: Remove this
-        self.obs_norm = 1
 
     @property
     def ground_state(self) -> NDArray:
@@ -272,10 +275,10 @@ class Taylor:
 
     def subsitute_h(self, h_val: float) -> None:
         self.ham_subbed = substitute_parameter(self.ham, self.h, h_val)
-
-        self.paulis, self.coeffs, self.beta = normalize_ham_list(self.ham_subbed.map)
-        self.pauli_inds = np.arange(len(self.paulis))
-
+        self.paulis = self.ham_subbed.paulis
+        self.coeffs = self.ham_subbed.coeffs
+        self.beta = np.sum(np.abs(np.array(self.coeffs)))
+        self.coeffs /= self.beta
 
     def construct_parametrized_circuit(self) -> None:
         if self.ham_subbed is None:
@@ -283,84 +286,31 @@ class Taylor:
                 "h value has not been substituted, qiskit does not support parametrized Hamiltonians."
             )
 
+    def get_observation(self, rho_init: NDArray, observable: Hamiltonian, time: float):
+        self.r = np.ceil(time ** 2)
+        self.t_bar = time / self.beta
 
-    def get_exact_unitary(self, time):
-        assert self.ham_subbed is not None
-        return self.ham_subbed.eig_vec @ np.diag(np.exp(complex(0, -1) * time * self.ham_subbed.eig_val)) @ self.ham_subbed.eig_vec_inv 
+        # TODO obs_norm
+        self.cap_k = get_cap_k(self.t_bar, obs_norm=1, eps=self.error)
+        self.terms, self.probs = sum_decomposition_terms(self.paulis, time, self.r, self.coeffs, self.cap_k)
+
+        c_1 = np.sum(np.abs(self.probs))
+        self.probs /= c_1
+
+        init_complete = np.kron(PLUS, rho_init)
+
+        T = 1000
 
 
-    def get_alphas(self, time:float, r=None, cap_k=None):
-        t_bar = time * self.beta
-        if r is None:
-            r = np.ceil(t_bar ** 2)
-
-        if cap_k is None:
-            cap_k = get_cap_k(t_bar, self.obs_norm, self.error)
-
-        return get_small_k_probs(t_bar=t_bar, r=r, cap_k=cap_k)
-
-    def sample_v(self, time:float, r=None, cap_k=None):
-
-        t_bar = time * self.beta
-        if r is None:
-            r = int(np.ceil(t_bar ** 2))
-
-        if cap_k is None:
-            cap_k = get_cap_k(t_bar, self.obs_norm, self.error)
-        
-        alphas = self.get_alphas(time, cap_k=cap_k)
-
-        k_probs = np.abs(alphas)
-        k_probs /= np.sum(k_probs)
-        k_range = np.arange(0,cap_k+1)
-
-        for x in k_probs[1::2]:
-            assert x == 0
-
-        assert k_range.shape == k_probs.shape
-
-        final = None
-        for _ in range(r):
-            
-            # Sample k
-            k_cur = np.random.choice(k_range, p=k_probs)
-            assert k_cur % 2 == 0
-
-            alpha_cur = alphas[k_cur]
-            sampled_pauli_inds = np.random.choice(self.pauli_inds, p=self.coeffs, size=k_cur)
-            rotation_ind = np.random.choice(self.pauli_inds, p=self.coeffs, size=1)[0]
-
-            cur_term = get_final_term_from_sample(sampled_pauli_inds, rotation_ind, self.paulis, self.coeffs, alpha_cur, t_bar, r, k_cur)
-
-            if final is None:
-                final = cur_term.copy()
-            else:
-                final = final @ cur_term
-
-        assert final is not None 
-        return final
-
-    def get_observation(self, rho_init: NDArray, observable: NDArray, time:float):
-        """
-        Run the singleLCU algorithm and get the observation value for the simulation.
-
-        e^{-iHt} R e^{iHt}
-        """
-
-        ## Previous
-        unitary = self.matrix(time)
-        rho_final = unitary @ rho_init @ unitary.conj().T
-        result = np.trace(np.abs(observable @ rho_final))
-        return result
 
     def get_observations(
-        self, rho_init: NDArray, observable: NDArray, times: list[float]
+        self, rho_init: NDArray, observable: Hamiltonian, times: list[float]
     ):
-        # TODO
-        self.obs_norm = 1
         results = []
         for time in times:
-            result = self.get_observation(rho_init, observable, time)
+            unitary = self.matrix(time)
+            rho_final = unitary @ rho_init @ unitary.conj().T
+            result = np.trace(np.abs(observable @ rho_final))
             results.append(result)
 
         return results

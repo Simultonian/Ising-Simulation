@@ -86,7 +86,7 @@ def main():
 
     for method in plotfig["methods"]:
         method_output_file = (
-            f"data/output/{observable}_{method}_{start_qubit}_to_{end_qubit}.json"
+            f"data/simulation/{observable}_{method}_{start_qubit}_to_{end_qubit}.json"
         )
         results = read_json(method_output_file)
         method_wise_results[method] = results

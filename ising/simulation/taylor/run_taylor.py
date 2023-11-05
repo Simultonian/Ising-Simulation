@@ -8,15 +8,8 @@ from qiskit.circuit import Parameter
 from ising.hamiltonian import parametrized_ising
 from ising.observables import overall_magnetization
 from ising.utils import read_input_file, close_state
-from ising.simulation.trotter import (
-    LieCircuit,
-    QDriftCircuit,
-    SparseLie,
-    GroupedLieCircuit,
-    GroupedQDriftCircuit,
-    TwoQDriftCircuit,
-    GSQDriftCircuit,
-)
+
+from ising.simulation.taylor.taylor import TaylorCircuit
 
 
 def run_trotter(paras):
@@ -30,22 +23,9 @@ def run_trotter(paras):
 
     method = paras["method"]
 
-    if method == "lie":
-        circuit_synthesis = LieCircuit
-    elif method == "qdrift":
-        circuit_synthesis = QDriftCircuit
-    elif method == "sparse_lie":
-        circuit_synthesis = SparseLie
-    elif method == "grouped_lie":
-        circuit_synthesis = GroupedLieCircuit
-    elif method == "grouped_qdrift":
-        circuit_synthesis = GroupedQDriftCircuit
-    elif method == "two_qdrift_circuit":
-        circuit_synthesis = TwoQDriftCircuit
-    elif method == "gs_qdrift":
-        circuit_synthesis = GSQDriftCircuit
-    else:
-        raise ValueError("Incorrect method:", method)
+    assert method == "taylor"
+
+    circuit_synthesis = TaylorCircuit
 
     for num_qubit in range(paras["start_qubit"], paras["end_qubit"] + 1):
         observable = overall_magnetization(num_qubit)
@@ -83,7 +63,7 @@ def main():
 
     results = run_trotter(parameters)
 
-    file_name = f"data/simulation/magnetization_{parameters['method']}_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
+    file_name = f"data/output/magnetization_{parameters['method']}_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
 
     print(f"Saving results at: {file_name}")
     with open(file_name, "w") as file:
@@ -95,7 +75,7 @@ def test_main():
 
     results = run_trotter(parameters)
 
-    file_name = f"data/simulation/magnetization_{parameters['method']}_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
+    file_name = f"data/output/magnetization_{parameters['method']}_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
 
     print(f"Saving results at: {file_name}")
     with open(file_name, "w") as file:
