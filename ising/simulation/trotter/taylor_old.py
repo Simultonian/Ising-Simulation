@@ -15,14 +15,13 @@ from itertools import product as cartesian_product
 import math
 
 
-
 def get_small_k_probs(t_bar, r, cap_k):
-    ks = np.arange(cap_k+1)
-    k_vec = np.zeros(cap_k+1, dtype=np.complex128)
+    ks = np.arange(cap_k + 1)
+    k_vec = np.zeros(cap_k + 1, dtype=np.complex128)
 
     def apply_k(k):
         # Function according to the formula
-        t1 = ((1j*t_bar/r) ** k) / math.factorial(k)
+        t1 = ((1j * t_bar / r) ** k) / math.factorial(k)
         t2 = np.sqrt(1 + ((t_bar / (r * (k + 1))) ** 2))
         return t1 * t2
 
@@ -34,15 +33,18 @@ def get_small_k_probs(t_bar, r, cap_k):
     k_vec[1::2] = 0
     return k_vec
 
+
 def get_cap_k(t_bar, obs_norm, eps) -> int:
     numr = np.log(t_bar * obs_norm / eps)
     return int(np.ceil(numr / np.log(numr)))
 
 
-def normalize_ham_list(pauli_map: dict[Pauli, complex]) -> tuple[list[Pauli], list[float], complex]:
+def normalize_ham_list(
+    pauli_map: dict[Pauli, complex]
+) -> tuple[list[Pauli], list[float], complex]:
     paulis = []
     coeffs = []
-    for (p, v) in pauli_map.items():
+    for p, v in pauli_map.items():
         if v.real < 0:
             paulis.append(-p)
             coeffs.append(-v)
@@ -56,15 +58,19 @@ def normalize_ham_list(pauli_map: dict[Pauli, complex]) -> tuple[list[Pauli], li
 
     return (paulis, coeffs, coeff_sum)
 
-def calculate_exp_pauli(t_bar:float, r: int, k: int, pauli: NDArray) -> NDArray:
-    eye = np.identity(pauli.shape[0])
-    dr = np.sqrt(1 + (((t_bar/r) / (k + 1)) ** 2))
 
-    term2 = (1j * (t_bar/r) * pauli) / (k + 1)
+def calculate_exp_pauli(t_bar: float, r: int, k: int, pauli: NDArray) -> NDArray:
+    eye = np.identity(pauli.shape[0])
+    dr = np.sqrt(1 + (((t_bar / r) / (k + 1)) ** 2))
+
+    term2 = (1j * (t_bar / r) * pauli) / (k + 1)
     rotate = (eye - term2) / dr
     return rotate
 
-def get_final_term_from_sample(indices, rotation_ind, paulis, normalized_ham_coeffs, alpha, t_bar, r, k):
+
+def get_final_term_from_sample(
+    indices, rotation_ind, paulis, normalized_ham_coeffs, alpha, t_bar, r, k
+):
     assert len(indices) == k
 
     coeff_prod = alpha
@@ -98,9 +104,10 @@ def calculate_exp(time, pauli, k):
     rotate = (eye - term2) / dr
     return rotate
 
+
 def get_alphas(t_bar, cap_k, r=None):
     if r is None:
-        r = np.ceil(t_bar ** 2)
+        r = np.ceil(t_bar**2)
 
     return get_small_k_probs(t_bar=t_bar, r=r, cap_k=cap_k)
 
@@ -131,6 +138,7 @@ def calculate_decomposition_term(prod_inds, rotation_ind, paulis, t_bar, k, alph
 
     return (cur_pauli, cur_prob)
 
+
 def sum_decomposition_terms(paulis, time, r, coeffs, k_max):
     pairs = list(zip(paulis, coeffs))
     inds = np.arange(len(pairs))
@@ -138,23 +146,25 @@ def sum_decomposition_terms(paulis, time, r, coeffs, k_max):
     probs = []
 
     if r is None:
-        r = int(np.ceil(time ** 2))
+        r = int(np.ceil(time**2))
 
     alphas = get_alphas(time, k_max, r)
     t_bar = time / r
 
-    for k in range(0, k_max+1, 2):
+    for k in range(0, k_max + 1, 2):
         alpha_term = alphas[k]
 
         if t_bar == 0.0:
             if k > 0:
                 assert alpha_term == 0.0
 
-        mult_inds = cartesian_product(inds, repeat=k+1)
+        mult_inds = cartesian_product(inds, repeat=k + 1)
 
         for inds in mult_inds:
             prod_inds, rotation_ind = inds[:-1], inds[-1]
-            cur_pauli, cur_prob = calculate_decomposition_term(prod_inds, rotation_ind, paulis, t_bar, k, alpha_term)
+            cur_pauli, cur_prob = calculate_decomposition_term(
+                prod_inds, rotation_ind, paulis, t_bar, k, alpha_term
+            )
             terms.append(cur_pauli)
             probs.append(cur_prob)
 
@@ -190,24 +200,25 @@ def sample_decomposition_sum(paulis, t_bar, r, coeffs, k_max, sample_count):
 
     return total / sample_count
 
+
 def sum_decomposition(paulis, t_bar, r, coeffs, k_max):
     pairs = list(zip(paulis, coeffs))
     final = None
 
     if r is None:
-        r = int(np.ceil(t_bar ** 2))
+        r = int(np.ceil(t_bar**2))
 
     alphas = get_alphas(t_bar, k_max, r)
     t_bar = t_bar / r
 
-    for k in range(0, k_max+1, 2):
+    for k in range(0, k_max + 1, 2):
         alpha_term = alphas[k]
 
         if t_bar == 0.0:
             if k > 0:
                 assert alpha_term == 0.0
 
-        mult_paulis = cartesian_product(pairs, repeat=k+1)
+        mult_paulis = cartesian_product(pairs, repeat=k + 1)
 
         total_pauli = None
         for paulis in mult_paulis:
@@ -241,9 +252,8 @@ def sum_decomposition(paulis, t_bar, r, coeffs, k_max):
             final = total_pauli
         else:
             final += total_pauli
-        
-    return np.linalg.matrix_power(final, r)
 
+    return np.linalg.matrix_power(final, r)
 
 
 class Taylor:
@@ -276,43 +286,43 @@ class Taylor:
         self.paulis, self.coeffs, self.beta = normalize_ham_list(self.ham_subbed.map)
         self.pauli_inds = np.arange(len(self.paulis))
 
-
     def construct_parametrized_circuit(self) -> None:
         if self.ham_subbed is None:
             raise ValueError(
                 "h value has not been substituted, qiskit does not support parametrized Hamiltonians."
             )
 
-
     def get_exact_unitary(self, time):
         assert self.ham_subbed is not None
-        return self.ham_subbed.eig_vec @ np.diag(np.exp(complex(0, -1) * time * self.ham_subbed.eig_val)) @ self.ham_subbed.eig_vec_inv 
+        return (
+            self.ham_subbed.eig_vec
+            @ np.diag(np.exp(complex(0, -1) * time * self.ham_subbed.eig_val))
+            @ self.ham_subbed.eig_vec_inv
+        )
 
-
-    def get_alphas(self, time:float, r=None, cap_k=None):
+    def get_alphas(self, time: float, r=None, cap_k=None):
         t_bar = time * self.beta
         if r is None:
-            r = np.ceil(t_bar ** 2)
+            r = np.ceil(t_bar**2)
 
         if cap_k is None:
             cap_k = get_cap_k(t_bar, self.obs_norm, self.error)
 
         return get_small_k_probs(t_bar=t_bar, r=r, cap_k=cap_k)
 
-    def sample_v(self, time:float, r=None, cap_k=None):
-
+    def sample_v(self, time: float, r=None, cap_k=None):
         t_bar = time * self.beta
         if r is None:
-            r = int(np.ceil(t_bar ** 2))
+            r = int(np.ceil(t_bar**2))
 
         if cap_k is None:
             cap_k = get_cap_k(t_bar, self.obs_norm, self.error)
-        
+
         alphas = self.get_alphas(time, cap_k=cap_k)
 
         k_probs = np.abs(alphas)
         k_probs /= np.sum(k_probs)
-        k_range = np.arange(0,cap_k+1)
+        k_range = np.arange(0, cap_k + 1)
 
         for x in k_probs[1::2]:
             assert x == 0
@@ -321,26 +331,36 @@ class Taylor:
 
         final = None
         for _ in range(r):
-            
             # Sample k
             k_cur = np.random.choice(k_range, p=k_probs)
             assert k_cur % 2 == 0
 
             alpha_cur = alphas[k_cur]
-            sampled_pauli_inds = np.random.choice(self.pauli_inds, p=self.coeffs, size=k_cur)
+            sampled_pauli_inds = np.random.choice(
+                self.pauli_inds, p=self.coeffs, size=k_cur
+            )
             rotation_ind = np.random.choice(self.pauli_inds, p=self.coeffs, size=1)[0]
 
-            cur_term = get_final_term_from_sample(sampled_pauli_inds, rotation_ind, self.paulis, self.coeffs, alpha_cur, t_bar, r, k_cur)
+            cur_term = get_final_term_from_sample(
+                sampled_pauli_inds,
+                rotation_ind,
+                self.paulis,
+                self.coeffs,
+                alpha_cur,
+                t_bar,
+                r,
+                k_cur,
+            )
 
             if final is None:
                 final = cur_term.copy()
             else:
                 final = final @ cur_term
 
-        assert final is not None 
+        assert final is not None
         return final
 
-    def get_observation(self, rho_init: NDArray, observable: NDArray, time:float):
+    def get_observation(self, rho_init: NDArray, observable: NDArray, time: float):
         """
         Run the singleLCU algorithm and get the observation value for the simulation.
 

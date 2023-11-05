@@ -11,14 +11,13 @@ from itertools import product as cartesian_product
 import math
 
 
-
 def get_small_k_probs(t_bar, r, cap_k):
-    ks = np.arange(cap_k+1)
-    k_vec = np.zeros(cap_k+1, dtype=np.complex128)
+    ks = np.arange(cap_k + 1)
+    k_vec = np.zeros(cap_k + 1, dtype=np.complex128)
 
     def apply_k(k):
         # Function according to the formula
-        t1 = ((1j*t_bar/r) ** k) / math.factorial(k)
+        t1 = ((1j * t_bar / r) ** k) / math.factorial(k)
         t2 = np.sqrt(1 + ((t_bar / (r * (k + 1))) ** 2))
         return t1 * t2
 
@@ -30,15 +29,18 @@ def get_small_k_probs(t_bar, r, cap_k):
     k_vec[1::2] = 0
     return k_vec
 
+
 def get_cap_k(t_bar, obs_norm, eps) -> int:
     numr = np.log(t_bar * obs_norm / eps)
     return int(np.ceil(numr / np.log(numr)))
 
 
-def normalize_ham_list(pauli_map: dict[Pauli, complex]) -> tuple[list[Pauli], list[float], complex]:
+def normalize_ham_list(
+    pauli_map: dict[Pauli, complex]
+) -> tuple[list[Pauli], list[float], complex]:
     paulis = []
     coeffs = []
-    for (p, v) in pauli_map.items():
+    for p, v in pauli_map.items():
         if v.real < 0:
             paulis.append(-p)
             coeffs.append(-v)
@@ -52,13 +54,15 @@ def normalize_ham_list(pauli_map: dict[Pauli, complex]) -> tuple[list[Pauli], li
 
     return (paulis, coeffs, coeff_sum)
 
-def calculate_exp_pauli(t_bar:float, r: int, k: int, pauli: NDArray) -> NDArray:
-    eye = np.identity(pauli.shape[0])
-    dr = np.sqrt(1 + (((t_bar/r) / (k + 1)) ** 2))
 
-    term2 = (1j * (t_bar/r) * pauli) / (k + 1)
+def calculate_exp_pauli(t_bar: float, r: int, k: int, pauli: NDArray) -> NDArray:
+    eye = np.identity(pauli.shape[0])
+    dr = np.sqrt(1 + (((t_bar / r) / (k + 1)) ** 2))
+
+    term2 = (1j * (t_bar / r) * pauli) / (k + 1)
     rotate = (eye - term2) / dr
     return rotate
+
 
 def calculate_exp(time, pauli, k):
     eye = np.identity(pauli.shape[0])
@@ -68,9 +72,10 @@ def calculate_exp(time, pauli, k):
     rotate = (eye - term2) / dr
     return rotate
 
+
 def get_alphas(t_bar, cap_k, r=None):
     if r is None:
-        r = np.ceil(t_bar ** 2)
+        r = np.ceil(t_bar**2)
 
     return get_small_k_probs(t_bar=t_bar, r=r, cap_k=cap_k)
 
@@ -101,6 +106,7 @@ def calculate_decomposition_term(prod_inds, rotation_ind, paulis, t_bar, k, alph
 
     return (cur_pauli, cur_prob)
 
+
 def sum_decomposition_terms(paulis, time, r, coeffs, k_max):
     pairs = list(zip(paulis, coeffs))
     inds = np.arange(len(pairs))
@@ -108,23 +114,25 @@ def sum_decomposition_terms(paulis, time, r, coeffs, k_max):
     probs = []
 
     if r is None:
-        r = int(np.ceil(time ** 2))
+        r = int(np.ceil(time**2))
 
     alphas = get_alphas(time, k_max, r)
     t_bar = time / r
 
-    for k in range(0, k_max+1, 2):
+    for k in range(0, k_max + 1, 2):
         alpha_term = alphas[k]
 
         if t_bar == 0.0:
             if k > 0:
                 assert alpha_term == 0.0
 
-        mult_inds = cartesian_product(inds, repeat=k+1)
+        mult_inds = cartesian_product(inds, repeat=k + 1)
 
         for inds in mult_inds:
             prod_inds, rotation_ind = inds[:-1], inds[-1]
-            cur_pauli, cur_prob = calculate_decomposition_term(prod_inds, rotation_ind, paulis, t_bar, k, alpha_term)
+            cur_pauli, cur_prob = calculate_decomposition_term(
+                prod_inds, rotation_ind, paulis, t_bar, k, alpha_term
+            )
             terms.append(cur_pauli)
             probs.append(cur_prob)
 
@@ -134,6 +142,7 @@ def sum_decomposition_terms(paulis, time, r, coeffs, k_max):
         _probs.append(prob.real)
 
     return (terms, np.array(_probs))
+
 
 from functools import lru_cache
 import numpy as np
@@ -234,7 +243,10 @@ class SingleAncilla:
         results = []
 
         samples_count = Counter(
-            [tuple(x) for x in np.random.choice(self.inds, p=self.probs, size=(count, 2))]
+            [
+                tuple(x)
+                for x in np.random.choice(self.inds, p=self.probs, size=(count, 2))
+            ]
         )
 
         total_count = 0
@@ -287,12 +299,14 @@ class TaylorBad:
             )
 
     def get_observation(self, rho_init: NDArray, observable: Hamiltonian, time: float):
-        self.r = np.ceil(time ** 2)
+        self.r = np.ceil(time**2)
         self.t_bar = time / self.beta
 
         # TODO obs_norm
         self.cap_k = get_cap_k(self.t_bar, obs_norm=1, eps=self.error)
-        self.terms, self.probs = sum_decomposition_terms(self.paulis, time, self.r, self.coeffs, self.cap_k)
+        self.terms, self.probs = sum_decomposition_terms(
+            self.paulis, time, self.r, self.coeffs, self.cap_k
+        )
 
         c_1 = np.sum(np.abs(self.probs))
         self.probs /= c_1
@@ -300,8 +314,6 @@ class TaylorBad:
         init_complete = np.kron(PLUS, rho_init)
 
         T = 1000
-
-
 
     def get_observations(
         self, rho_init: NDArray, observable: Hamiltonian, times: list[float]

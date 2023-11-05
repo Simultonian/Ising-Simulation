@@ -46,7 +46,9 @@ def general_grouping(ops: Union[list[Pauli], PauliList]) -> list[list[Pauli]]:
     return [g_z, g_x]
 
 
-def parametrized_ising(qubits: int, h: Union[Parameter, float], j: float = -1, normalize:bool=True) -> Hamiltonian:
+def parametrized_ising(
+    qubits: int, h: Union[Parameter, float], j: float = -1, normalize: bool = True
+) -> Hamiltonian:
     """
     One dimensional Transverse-field Ising model parameterized by external
     field h. The Hamiltonian is represented by:

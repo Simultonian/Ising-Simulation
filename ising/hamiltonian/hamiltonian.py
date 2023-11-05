@@ -41,7 +41,6 @@ class Hamiltonian:
             self._map = {Pauli(p): v for (p, v) in self.sparse_repr.to_list()}
         return self._map
 
-
     @property
     def eig_vec(self) -> NDArray:
         if self._eig_vec is None:
@@ -105,7 +104,6 @@ class Hamiltonian:
             self._coeffs = tuple([v for (_, v) in self.sparse_repr.to_list()])
 
         return self._coeffs
-
 
 
 def substitute_parameter(ham: Hamiltonian, para: Parameter, val: float) -> Hamiltonian:
