@@ -10,6 +10,8 @@ from ising.observables import overall_magnetization
 from ising.utils import read_input_file, close_state
 from ising.simulation.taylor import TaylorCircuit
 
+from ising.utils.constants import PLUS
+
 
 def run_trotter(paras):
     qubit_wise_answers = {}
@@ -37,12 +39,23 @@ def run_trotter(paras):
             circuit_manager.subsitute_h(h)
             circuit_manager.construct_parametrized_circuit()
             ground_state = circuit_manager.ham_subbed.ground_state
+
             init_state = close_state(ground_state, paras["overlap"])
-            rho_init = np.outer(init_state, init_state.conj().T)
 
-            rho_init = np.array(Operator(rho_init).reverse_qargs().data)
+            PLUS = np.array([[1], [1]]) / np.sqrt(2)
+            init_complete = np.kron(PLUS, init_state)
+            init_state = init_state.reshape(-1, 1)
 
-            ans = circuit_manager.get_observations(rho_init, observable.matrix, times)
+
+            # Taking tensor product of the overlap state with `|+>` which is the state after `H`
+
+            # Checking for norm
+            np.testing.assert_almost_equal(np.sum(np.abs(init_complete) ** 2), 1)
+
+            rho_init = np.outer(init_complete, init_complete.conj())
+            # rho_init = np.array(Operator(rho_init).reverse_qargs().data)
+
+            ans = circuit_manager.get_observations(rho_init, observable, times)
             h_wise_answers[h] = ans
 
         qubit_wise_answers[num_qubit] = h_wise_answers
@@ -69,7 +82,7 @@ def main():
 
 
 def test_main():
-    parameters = read_input_file("data/input/default.json")
+    parameters = read_input_file("data/input/taylor.json")
 
     results = run_trotter(parameters)
 
