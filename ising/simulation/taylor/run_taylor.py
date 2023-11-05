@@ -8,8 +8,7 @@ from qiskit.circuit import Parameter
 from ising.hamiltonian import parametrized_ising
 from ising.observables import overall_magnetization
 from ising.utils import read_input_file, close_state
-
-from ising.simulation.taylor.taylor import TaylorCircuit
+from ising.simulation.taylor import TaylorCircuit
 
 
 def run_trotter(paras):
@@ -23,15 +22,15 @@ def run_trotter(paras):
 
     method = paras["method"]
 
-    assert method == "taylor"
+    if method != "taylor":
+        raise ValueError("This is Taylor file, method called:", method)
 
-    circuit_synthesis = TaylorCircuit
-
+    
     for num_qubit in range(paras["start_qubit"], paras["end_qubit"] + 1):
         observable = overall_magnetization(num_qubit)
         h_para = Parameter("h")
         parametrized_ham = parametrized_ising(num_qubit, h_para)
-        circuit_manager = circuit_synthesis(parametrized_ham, h_para, paras["error"])
+        circuit_manager = TaylorCircuit(parametrized_ham, h_para, paras["error"])
 
         h_wise_answers = {}
         for h in h_values:
@@ -63,7 +62,7 @@ def main():
 
     results = run_trotter(parameters)
 
-    file_name = f"data/output/magnetization_{parameters['method']}_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
+    file_name = f"data/simulation/magnetization_{parameters['method']}_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
 
     print(f"Saving results at: {file_name}")
     with open(file_name, "w") as file:
@@ -75,7 +74,7 @@ def test_main():
 
     results = run_trotter(parameters)
 
-    file_name = f"data/output/magnetization_{parameters['method']}_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
+    file_name = f"data/simulation/magnetization_{parameters['method']}_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
 
     print(f"Saving results at: {file_name}")
     with open(file_name, "w") as file:

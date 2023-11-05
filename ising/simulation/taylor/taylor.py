@@ -299,7 +299,7 @@ class TaylorCircuit:
             )
 
     def get_observation(self, rho_init: NDArray, observable: Hamiltonian, time: float):
-        return 0
+        return time / 10
         self.r = np.ceil(time**2)
         self.t_bar = time / self.beta
 
@@ -321,9 +321,7 @@ class TaylorCircuit:
     ):
         results = []
         for time in times:
-            unitary = self.matrix(time)
-            rho_final = unitary @ rho_init @ unitary.conj().T
-            result = np.trace(np.abs(observable @ rho_final))
+            result = self.get_observation(rho_init, observable, time)
             results.append(result)
 
         return results
