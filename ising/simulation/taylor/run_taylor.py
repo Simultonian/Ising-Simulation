@@ -25,7 +25,6 @@ def run_trotter(paras):
     if method != "taylor":
         raise ValueError("This is Taylor file, method called:", method)
 
-    
     for num_qubit in range(paras["start_qubit"], paras["end_qubit"] + 1):
         observable = overall_magnetization(num_qubit)
         h_para = Parameter("h")
