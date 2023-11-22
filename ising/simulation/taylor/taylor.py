@@ -70,10 +70,15 @@ def calculate_decomposition_term(prod_inds, rotation_ind, paulis, t_bar, k, alph
         cur_pauli = cur_pauli @ pauli
 
     exp_pauli, exp_prob = exp_pair
+    if exp_prob < 0:
+        exp_pauli = exp_pauli * -1
+        exp_prob *= -1
+
 
     exp_pauli = exp_pauli.to_matrix()
     rotated = calculate_exp(t_bar, exp_pauli, k)
 
+    assert exp_prob >= 0
     cur_prob *= exp_prob
     cur_pauli = cur_pauli.to_matrix()
     cur_pauli = cur_pauli @ rotated
@@ -92,8 +97,8 @@ def sum_decomposition_terms(paulis, t_bar, r, coeffs, k_max):
     terms = []
     probs = []
 
-    if r is None:
-        r = int(np.ceil(t_bar**2))
+    # if r is None:
+    #     r = int(np.ceil(t_bar**2))
 
     alphas = get_alphas(t_bar, k_max, r)
     t_bar = t_bar / r
@@ -122,6 +127,60 @@ def sum_decomposition_terms(paulis, t_bar, r, coeffs, k_max):
         _probs.append(prob.real)
 
     return (terms, np.array(_probs)) 
+
+def sum_decomposition(paulis, t_bar, r, coeffs, k_max):
+    pairs = list(zip(paulis, coeffs))
+    final = None
+
+    if r is None:
+        r = int(np.ceil(t_bar**2))
+
+    alphas = get_alphas(t_bar, k_max, r)
+    t_bar = t_bar / r
+
+    for k in range(0, k_max + 1, 2):
+        alpha_term = alphas[k]
+
+        if t_bar == 0.0:
+            if k > 0:
+                assert alpha_term == 0.0
+
+        mult_paulis = cartesian_product(pairs, repeat=k + 1)
+
+        total_pauli = None
+        for paulis in mult_paulis:
+            pauli_prod = paulis[:-1]
+            exp_pair = paulis[-1]
+
+            cur_prob = 1.0
+            cur_pauli = Pauli("I" * len(exp_pair[0]))
+            for pauli, prob in pauli_prod:
+                cur_prob *= prob
+                cur_pauli = cur_pauli @ pauli
+
+            exp_pauli, exp_prob = exp_pair
+            exp_pauli = exp_pauli.to_matrix()
+            rotated = calculate_exp(t_bar, exp_pauli, k)
+
+            cur_pauli = cur_prob * cur_pauli.to_matrix()
+            cur_pauli = cur_pauli @ (exp_prob * rotated)
+
+            assert cur_pauli is not None
+
+            if total_pauli is None:
+                total_pauli = cur_pauli
+            else:
+                total_pauli += cur_pauli
+
+        assert total_pauli is not None
+        total_pauli *= alpha_term
+
+        if final is None:
+            final = total_pauli
+        else:
+            final += total_pauli
+
+    return np.linalg.matrix_power(final, r)
 
 
 class TaylorCircuit:
@@ -173,6 +232,7 @@ class TaylorCircuit:
         # hm = self.ham_subbed
         # assert hm is not None
         # return hm.eig_vec @ np.diag(np.exp(complex(0, -1) * self.time * hm.eig_val)) @ hm.eig_vec_inv
+        # decomp = sum_decomposition(self.paulis, self.t_bar, self.r, self.coeffs, self.cap_k)
         return self.terms[ind]
 
     def control_unitary(self, ind: int, control_val: int):
@@ -195,39 +255,41 @@ class TaylorCircuit:
             op_2 = np.kron(ONEONE, unitary)
             return op_1 + op_2
 
-    def post_v1(self, ind):
+    def post_v1(self, inds: list[int]):
         if self.rho_init is None:
             raise ValueError("Initial state not set.")
 
         final_rho = self.rho_init.copy()
 
-        v1 = self.control_unitary(ind, control_val=1)
-        final_rho = v1 @ final_rho @ v1.conj().T
+        for ind in inds:
+            v1 = self.control_unitary(ind, control_val=1)
+            final_rho = v1 @ final_rho @ v1.conj().T
+
         npt.assert_allclose(np.trace(final_rho), 1, atol=1e-3, rtol=1e-3)
         return final_rho
 
-    def post_v1v2(self, i1, i2):
+    def post_v1v2(self, i1s: list[int], i2s: list[int]):
 
-        final_rho = self.post_v1(i1)
+        final_rho = self.post_v1(i1s)
 
-        v2 = self.control_unitary(i2, control_val=0)
-        final_rho = v2 @ final_rho @ v2.conj().T
+        for i2 in i2s:
+            v2 = self.control_unitary(i2, control_val=0)
+            final_rho = v2 @ final_rho @ v2.conj().T
 
         npt.assert_allclose(np.trace(final_rho), 1, atol=1e-3, rtol=1e-3)
 
         return final_rho
 
     def get_observation(self, time: float):
-        # self.r = np.ceil(time ** 2)
         self.time = time
-        self.r = 1
         self.t_bar = time * self.beta
-
+        self.r = 5 * np.ceil(self.t_bar) ** 2
+        # self.r = 10
         # TODO obs_norm
         # self.cap_k = get_cap_k(self.t_bar, obs_norm=1, eps=self.error)
         self.cap_k = 5
         self.terms, self.probs = sum_decomposition_terms(
-            self.paulis, time, self.r, self.coeffs, self.cap_k
+            self.paulis, self.t_bar, self.r, self.coeffs, self.cap_k
         )
 
         self.eye = np.identity(self.terms[0].shape[0])
@@ -241,8 +303,8 @@ class TaylorCircuit:
 
         samples_count = Counter(
             [
-                tuple(x)
-                for x in np.random.choice(self.inds, p=self.probs, size=(count, 2))
+                tuple([tuple(x[0]), tuple(x[1])])
+                for x in np.random.choice(self.inds, p=self.probs, size=(count, 2, int(self.r)))
             ]
         )
 
@@ -256,7 +318,7 @@ class TaylorCircuit:
                 print(f"running: {total_count} out of {count}")
             total_count += s_count
 
-            final_rho = self.post_v1v2(sample[0], sample[1])
+            final_rho = self.post_v1v2(list(sample[0]), list(sample[1]))
 
             result = np.trace(np.abs(self.run_obs @ final_rho))
             results.append(result * s_count)
@@ -264,7 +326,8 @@ class TaylorCircuit:
         assert total_count == count
 
         magn_h = calculate_mu(results, count, [1])
-        # assert False
+        # if time > 0.8:
+        #     assert False
         return magn_h
 
     def get_observations(

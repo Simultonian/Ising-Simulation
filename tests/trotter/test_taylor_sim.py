@@ -110,7 +110,6 @@ def test_taylor_sum_anlyt_zz():
     decomp = sum_decomposition(taylor.paulis, time, rl[-1], taylor.coeffs, kl[-1])
 
 
-
     def sample_sum(r, count=sample_count):
         alphas = taylor.get_alphas(time, r, k_max)
         final = taylor.sample_v(time, r, k_max)
