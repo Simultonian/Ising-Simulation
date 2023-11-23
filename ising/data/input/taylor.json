@@ -5,7 +5,7 @@
   "end_h": "-1",
   "count_h": "1",
   "time": "2.0",
-  "count_time": "10",
+  "count_time": "2",
   "overlap": "0.5",
   "method": "taylor",
   "error": "0.1"

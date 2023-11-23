@@ -23,6 +23,7 @@ from ising.utils.constants import ONEONE, ZEROZERO, PLUS
 from ising.utils import MAXSIZE
 from ising.singlelcu.simulation.singlelcu import calculate_mu
 
+
 def get_small_k_probs(t_bar, r, cap_k):
     ks = np.arange(cap_k + 1)
     k_vec = np.zeros(cap_k + 1, dtype=np.complex128)
@@ -41,9 +42,11 @@ def get_small_k_probs(t_bar, r, cap_k):
     k_vec[1::2] = 0
     return k_vec
 
+
 def get_cap_k(t_bar, obs_norm, eps) -> int:
     numr = np.log(t_bar * obs_norm / eps)
     return int(np.ceil(numr / np.log(numr)))
+
 
 def calculate_exp(time, pauli, k):
     eye = np.identity(pauli.shape[0])
@@ -53,11 +56,13 @@ def calculate_exp(time, pauli, k):
     rotate = (eye - term2) / dr
     return rotate
 
+
 def get_alphas(t_bar, cap_k, r=None):
     if r is None:
         r = np.ceil(t_bar**2)
 
     return get_small_k_probs(t_bar=t_bar, r=r, cap_k=cap_k)
+
 
 def calculate_decomposition_term(prod_inds, rotation_ind, paulis, t_bar, k, alpha):
     exp_pair = paulis[rotation_ind]
@@ -74,7 +79,6 @@ def calculate_decomposition_term(prod_inds, rotation_ind, paulis, t_bar, k, alph
         exp_pauli = exp_pauli * -1
         exp_prob *= -1
 
-
     exp_pauli = exp_pauli.to_matrix()
     rotated = calculate_exp(t_bar, exp_pauli, k)
 
@@ -89,6 +93,7 @@ def calculate_decomposition_term(prod_inds, rotation_ind, paulis, t_bar, k, alph
         cur_pauli *= -1
 
     return (cur_pauli, cur_prob)
+
 
 def sum_decomposition_terms(paulis, t_bar, r, coeffs, k_max):
     pairs = list(zip(paulis, coeffs))
@@ -126,7 +131,8 @@ def sum_decomposition_terms(paulis, t_bar, r, coeffs, k_max):
         np.testing.assert_allclose(prob.imag, 0.0)
         _probs.append(prob.real)
 
-    return (terms, np.array(_probs)) 
+    return (terms, np.array(_probs))
+
 
 def sum_decomposition(paulis, t_bar, r, coeffs, k_max):
     pairs = list(zip(paulis, coeffs))
@@ -187,6 +193,7 @@ class TaylorCircuit:
     """
     Creates the entire decomposition and then samples from that.
     """
+
     def __init__(self, ham: Hamiltonian, h: Parameter, error: float):
         self.ham = ham
         self.num_qubits = ham.sparse_repr.num_qubits
@@ -219,7 +226,6 @@ class TaylorCircuit:
             raise ValueError(
                 "h value has not been substituted, qiskit does not support parametrized Hamiltonians."
             )
-
 
     def get_unitary(self, ind: int):
         """
@@ -269,7 +275,6 @@ class TaylorCircuit:
         return final_rho
 
     def post_v1v2(self, i1s: list[int], i2s: list[int]):
-
         final_rho = self.post_v1(i1s)
 
         for i2 in i2s:
@@ -284,10 +289,8 @@ class TaylorCircuit:
         self.time = time
         self.t_bar = time * self.beta
         self.r = 5 * np.ceil(self.t_bar) ** 2
-        # self.r = 10
         # TODO obs_norm
-        # self.cap_k = get_cap_k(self.t_bar, obs_norm=1, eps=self.error)
-        self.cap_k = 5
+        self.cap_k = get_cap_k(self.t_bar, obs_norm=1, eps=self.error)
         self.terms, self.probs = sum_decomposition_terms(
             self.paulis, self.t_bar, self.r, self.coeffs, self.cap_k
         )
@@ -298,13 +301,15 @@ class TaylorCircuit:
         self.probs /= c_1
         self.inds = np.array(list(range(len(self.terms))))
 
-        count = 10000
+        count = 1000
         results = []
 
         samples_count = Counter(
             [
                 tuple([tuple(x[0]), tuple(x[1])])
-                for x in np.random.choice(self.inds, p=self.probs, size=(count, 2, int(self.r)))
+                for x in np.random.choice(
+                    self.inds, p=self.probs, size=(count, 2, int(self.r))
+                )
             ]
         )
 
@@ -326,8 +331,6 @@ class TaylorCircuit:
         assert total_count == count
 
         magn_h = calculate_mu(results, count, [1])
-        # if time > 0.8:
-        #     assert False
         return magn_h
 
     def get_observations(

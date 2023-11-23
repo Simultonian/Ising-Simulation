@@ -2,15 +2,13 @@ import argparse
 import json
 import numpy as np
 
-from qiskit.quantum_info import Operator
 from qiskit.circuit import Parameter
 
 from ising.hamiltonian import parametrized_ising
 from ising.observables import overall_magnetization
 from ising.utils import read_input_file, close_state
 from ising.simulation.taylor import TaylorCircuit
-
-from ising.utils.constants import PLUS
+from ising.simulation.taylor.taylor_sample import TaylorSample
 
 
 def run_trotter(paras):
@@ -24,14 +22,18 @@ def run_trotter(paras):
 
     method = paras["method"]
 
-    if method != "taylor":
+    if method == "taylor":
+        circuit_synthesis = TaylorCircuit
+    elif method == "taylor_sample":
+        circuit_synthesis = TaylorSample
+    else:
         raise ValueError("This is Taylor file, method called:", method)
 
     for num_qubit in range(paras["start_qubit"], paras["end_qubit"] + 1):
         observable = overall_magnetization(num_qubit)
         h_para = Parameter("h")
         parametrized_ham = parametrized_ising(num_qubit, h_para)
-        circuit_manager = TaylorCircuit(parametrized_ham, h_para, paras["error"])
+        circuit_manager = circuit_synthesis(parametrized_ham, h_para, paras["error"])
 
         h_wise_answers = {}
         for h in h_values:
@@ -46,14 +48,12 @@ def run_trotter(paras):
             init_complete = np.kron(PLUS, init_state)
             init_state = init_state.reshape(-1, 1)
 
-
             # Taking tensor product of the overlap state with `|+>` which is the state after `H`
 
             # Checking for norm
             np.testing.assert_almost_equal(np.sum(np.abs(init_complete) ** 2), 1)
 
             rho_init = np.outer(init_complete, init_complete.conj())
-            # rho_init = np.array(Operator(rho_init).reverse_qargs().data)
 
             ans = circuit_manager.get_observations(rho_init, observable, times)
             h_wise_answers[h] = ans
