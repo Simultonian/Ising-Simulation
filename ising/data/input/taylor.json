@@ -7,6 +7,6 @@
   "time": "2.0",
   "count_time": "2",
   "overlap": "0.5",
-  "method": "taylor",
+  "method": "taylor_single",
   "error": "0.1"
 }

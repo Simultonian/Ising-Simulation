@@ -9,6 +9,7 @@ from ising.observables import overall_magnetization
 from ising.utils import read_input_file, close_state
 from ising.simulation.taylor import TaylorCircuit
 from ising.simulation.taylor.taylor_sample import TaylorSample
+from ising.simulation.taylor.taylor_single import TaylorSingle
 
 
 def run_trotter(paras):
@@ -26,6 +27,8 @@ def run_trotter(paras):
         circuit_synthesis = TaylorCircuit
     elif method == "taylor_sample":
         circuit_synthesis = TaylorSample
+    elif method == "taylor_single":
+        circuit_synthesis = TaylorSingle
     else:
         raise ValueError("This is Taylor file, method called:", method)
 
