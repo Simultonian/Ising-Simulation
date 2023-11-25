@@ -36,7 +36,9 @@ def run_trotter(paras):
         observable = overall_magnetization(num_qubit)
         h_para = Parameter("h")
         parametrized_ham = parametrized_ising(num_qubit, h_para)
-        circuit_manager = circuit_synthesis(parametrized_ham, h_para, paras["error"])
+        circuit_manager = circuit_synthesis(
+            parametrized_ham, h_para, paras["error"], success=paras.get("success", None)
+        )
 
         h_wise_answers = {}
         for h in h_values:

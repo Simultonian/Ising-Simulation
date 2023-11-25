@@ -58,11 +58,13 @@ class TaylorSample:
     Creates the entire decomposition and then samples from that.
     """
 
-    def __init__(self, ham: Hamiltonian, h: Parameter, error: float):
+    def __init__(self, ham: Hamiltonian, h: Parameter, error: float, **kwargs):
         self.ham = ham
         self.num_qubits = ham.sparse_repr.num_qubits
         self.error = error
         self.ham_subbed: Optional[Hamiltonian] = None
+
+        self.success = kwargs.get("success", 0.9)
 
         self.h = h
 
@@ -176,7 +178,8 @@ class TaylorSample:
         self.r = int(5 * np.ceil(self.t_bar) ** 2)
 
         # TODO obs_norm
-        self.cap_k = get_cap_k(self.t_bar, obs_norm=1, eps=self.error)
+        obs_norm = 1
+        self.cap_k = get_cap_k(self.t_bar, obs_norm=obs_norm, eps=self.error)
 
         self.cap_k = 1
         self.r = 4
@@ -193,9 +196,10 @@ class TaylorSample:
         self.alphas = np.array(self.alphas) / self.alpha_sum
 
         c_1 = np.sum(self.coeffs)
+        delta = 1 - self.success
         self.probs = self.coeffs / c_1
 
-        count = 1000
+        count = np.ceil(((obs_norm**2) * (np.log(2 / delta))) / (self.error**2))
         results = []
 
         print(f"r:{self.r} k:{self.cap_k}")

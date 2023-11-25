@@ -22,10 +22,10 @@ from ising.singlelcu.simulation.singlelcu import calculate_mu
 from ising.simulation.taylor.taylor import get_cap_k, calculate_exp, get_alphas
 
 
-def calculate_decomposition_term(prod_inds, rotation_ind, paulis, t_bar, k, alpha):
+def calculate_decomposition_term(prod_inds, rotation_ind, paulis, t_bar, k):
     exp_pair = paulis[rotation_ind]
 
-    cur_prob = alpha
+    cur_prob = 1.0
     cur_pauli = Pauli("I" * len(exp_pair[0]))
     for ind in prod_inds:
         pauli, prob = paulis[ind]
@@ -53,17 +53,24 @@ def calculate_decomposition_term(prod_inds, rotation_ind, paulis, t_bar, k, alph
     return (cur_pauli, cur_prob)
 
 
-def sum_decomposition_terms(paulis, t_bar, r, coeffs, k_max):
+def sum_decomposition_k_fold(paulis, t_bar, r, coeffs, cap_k):
     pairs = list(zip(paulis, coeffs))
-    pairs = list(filter(lambda x: abs(x[1]) > 0, pairs))
     inds = np.arange(len(pairs))
-    terms = []
-    probs = []
+    kth_paulis = []
+    kth_probs = []
+    k_probs = []
 
-    alphas = get_alphas(t_bar, k_max, r)
+    alphas = np.array(get_alphas(t_bar, cap_k, r))
     t_bar = t_bar / r
 
-    for k in range(0, k_max + 1, 2):
+    for k in range(0, cap_k + 1):
+        if k % 2 == 1:
+            # Odd k can not be sampled.
+            k_probs.append(0)
+            kth_probs.append([])
+            kth_paulis.append([])
+            continue
+
         alpha_term = alphas[k]
 
         if t_bar == 0.0:
@@ -71,22 +78,40 @@ def sum_decomposition_terms(paulis, t_bar, r, coeffs, k_max):
                 assert alpha_term == 0.0
 
         mult_inds = cartesian_product(inds, repeat=k + 1)
+        terms = []
+        probs = []
 
-        for inds in mult_inds:
-            prod_inds, rotation_ind = inds[:-1], inds[-1]
+        for term_inds in mult_inds:
+            prod_inds, rotation_ind = term_inds[:-1], term_inds[-1]
 
             cur_pauli, cur_prob = calculate_decomposition_term(
-                prod_inds, rotation_ind, pairs, t_bar, k, alpha_term
+                prod_inds, rotation_ind, pairs, t_bar, k
             )
+
+            if alpha_term < 0:
+                # Transferring the alpha negative to the term.
+                cur_pauli *= -1
+
+            assert isinstance(cur_pauli, np.ndarray)
             terms.append(cur_pauli)
             probs.append(cur_prob)
 
-    _probs = []
-    for prob in probs:
-        np.testing.assert_allclose(prob.imag, 0.0)
-        _probs.append(prob.real)
+        probs = np.array(probs)
+        probs = probs.real
+        npt.assert_allclose(np.sum(probs), 1, atol=1e-5, rtol=1e-5)
 
-    return (terms, np.array(_probs))
+        k_probs.append(abs(alpha_term))
+
+        kth_probs.append(probs)
+        kth_paulis.append(terms)
+
+    assert len(k_probs) == len(kth_probs)
+    assert len(k_probs) == len(kth_paulis)
+
+    k_probs = np.array(k_probs)
+    k_probs /= np.sum(k_probs)
+
+    return (kth_paulis, kth_probs, k_probs)
 
 
 def taylor_observation(ham: Hamiltonian, time: float, error: float, obs, rho_init):
@@ -96,21 +121,26 @@ def taylor_observation(ham: Hamiltonian, time: float, error: float, obs, rho_ini
     coeffs /= beta
 
     t_bar = time * beta
-    r = 5 * np.ceil(t_bar) ** 2
+    r = int(5 * np.ceil(t_bar) ** 2)
+
+    # For t_bar < 1, r is too small to get accurate results.
+    r = max(20, r)
+
     # TODO obs_norm
     cap_k = get_cap_k(t_bar, obs_norm=1, eps=error)
-    terms, probs = sum_decomposition_terms(paulis, t_bar, r, coeffs, cap_k)
 
-    eye = np.identity(terms[0].shape[0])
+    print(f"Computing decomposition for t_bar={t_bar} t={time} r={r} k={cap_k}")
+    kth_paulis, kth_probs, k_probs = sum_decomposition_k_fold(
+        paulis, t_bar, r, coeffs, cap_k
+    )
+    print("Decomposition complete")
 
-    c_1 = np.sum(np.abs(probs))
-    probs /= c_1
-    inds = np.array(list(range(len(terms))))
+    eye = np.identity(kth_paulis[0][0].shape[0])
 
-    def get_unitary(ind: int):
-        return terms[ind]
+    def get_unitary(k, ind: int):
+        return kth_paulis[k][ind]
 
-    def control_unitary(ind: int, control_val: int):
+    def control_unitary(k, ind: int, control_val: int):
         """
         Calculates |0><0| U + |1><1| I if control_val = 0
         Calculates |0><0| I + |1><1| U if control_val = 1
@@ -118,7 +148,7 @@ def taylor_observation(ham: Hamiltonian, time: float, error: float, obs, rho_ini
         Where U is unitary for Hamiltonian evolution with time `times[ind]`.
         """
 
-        unitary = get_unitary(ind)
+        unitary = get_unitary(k, ind)
 
         if control_val == 0:
             op_1 = np.kron(ZEROZERO, unitary)
@@ -130,24 +160,24 @@ def taylor_observation(ham: Hamiltonian, time: float, error: float, obs, rho_ini
             op_2 = np.kron(ONEONE, unitary)
             return op_1 + op_2
 
-    def post_v1(inds: list[int]):
+    def post_v1(k, inds: list[int]):
         if rho_init is None:
             raise ValueError("Initial state not set.")
 
         final_rho = rho_init.copy()
 
         for ind in inds:
-            v1 = control_unitary(ind, control_val=1)
+            v1 = control_unitary(k, ind, control_val=1)
             final_rho = v1 @ final_rho @ v1.conj().T
 
         npt.assert_allclose(np.trace(final_rho), 1, atol=1e-3, rtol=1e-3)
         return final_rho
 
-    def post_v1v2(i1s: list[int], i2s: list[int]):
-        final_rho = post_v1(i1s)
+    def post_v1v2(ks: tuple[int, int], i1s: list[int], i2s: list[int]):
+        final_rho = post_v1(ks[0], i1s)
 
         for i2 in i2s:
-            v2 = control_unitary(i2, control_val=0)
+            v2 = control_unitary(ks[1], i2, control_val=0)
             final_rho = v2 @ final_rho @ v2.conj().T
 
         npt.assert_allclose(np.trace(final_rho), 1, atol=1e-3, rtol=1e-3)
@@ -159,23 +189,40 @@ def taylor_observation(ham: Hamiltonian, time: float, error: float, obs, rho_ini
     total_count = 0
     count = 1000
     results = []
-    samples_count = Counter(
-        [
-            tuple([tuple(x[0]), tuple(x[1])])
-            for x in np.random.choice(inds, p=probs, size=(count, 2, int(r)))
-        ]
+
+    sample_ks = Counter(
+        [tuple(x) for x in np.random.choice(cap_k + 1, p=k_probs, size=(count, 2))]
     )
 
-    for sample in sorted(samples_count.keys()):
-        s_count = samples_count[sample]
+    for k1, k2 in sorted(sample_ks.keys()):
+        k_count = sample_ks[(k1, k2)]
         if total_count % 100 == 0:
             print(f"running: {total_count} out of {count}")
-        total_count += s_count
+        total_count += k_count
 
-        final_rho = post_v1v2(list(sample[0]), list(sample[1]))
+        k1_terms = Counter(
+            [
+                tuple(x)
+                for x in np.random.choice(
+                    len(kth_probs[k1]), p=kth_probs[k1], size=(k_count, r)
+                )
+            ]
+        )
 
-        result = np.trace(np.abs(obs @ final_rho))
-        results.append(result * s_count)
+        k2_terms = Counter(
+            [
+                tuple(x)
+                for x in np.random.choice(
+                    len(kth_probs[k2]), p=kth_probs[k2], size=(k_count, r)
+                )
+            ]
+        )
+
+        for k1_term, k2_term in zip(k1_terms, k2_terms):
+            final_rho = post_v1v2((k1, k2), list(k1_term), list(k2_term))
+
+            result = np.trace(np.abs(obs @ final_rho))
+            results.append(result)
 
     assert total_count == count
 
@@ -188,7 +235,7 @@ class TaylorSingle:
     Creates the entire decomposition and then samples from that.
     """
 
-    def __init__(self, ham: Hamiltonian, h: Parameter, error: float):
+    def __init__(self, ham: Hamiltonian, h: Parameter, error: float, **kwargs):
         self.ham = ham
         self.num_qubits = ham.sparse_repr.num_qubits
         self.error = error

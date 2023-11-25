@@ -1,7 +1,7 @@
 {
   "observable": "magnetization",
   "methods": [
-    "taylor",
+    "taylor_single",
     "exact"
   ],
   "input_file": "data/input/taylor.json",

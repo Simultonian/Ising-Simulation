@@ -57,10 +57,7 @@ def calculate_exp(time, pauli, k):
     return rotate
 
 
-def get_alphas(t_bar, cap_k, r=None):
-    if r is None:
-        r = np.ceil(t_bar**2)
-
+def get_alphas(t_bar, cap_k, r):
     return get_small_k_probs(t_bar=t_bar, r=r, cap_k=cap_k)
 
 
@@ -194,7 +191,7 @@ class TaylorCircuit:
     Creates the entire decomposition and then samples from that.
     """
 
-    def __init__(self, ham: Hamiltonian, h: Parameter, error: float):
+    def __init__(self, ham: Hamiltonian, h: Parameter, error: float, **kwargs):
         self.ham = ham
         self.num_qubits = ham.sparse_repr.num_qubits
         self.error = error
