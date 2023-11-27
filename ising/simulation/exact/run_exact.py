@@ -17,9 +17,7 @@ def run_exact(paras):
         10 ** paras["start_h"], 10 ** paras["end_h"], paras["count_h"]
     )
 
-    qubits = np.linspace(
-        paras["start_qubit"], paras["end_qubit"], paras["qubit_count"]
-    )
+    qubits = np.linspace(paras["start_qubit"], paras["end_qubit"], paras["qubit_count"])
 
     for _num_qubit in qubits:
         num_qubit = int(_num_qubit)

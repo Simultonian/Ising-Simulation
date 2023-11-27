@@ -5,7 +5,14 @@ def read_input_file(file_name):
     with open(file_name, "r") as file:
         data = json.load(file)
 
-    INTEGERS = {"start_qubit", "end_qubit", "steps", "count_h", "count_time", "qubit_count"}
+    INTEGERS = {
+        "start_qubit",
+        "end_qubit",
+        "steps",
+        "count_h",
+        "count_time",
+        "qubit_count",
+    }
     STRING = {"method"}
 
     for key, value in data.items():

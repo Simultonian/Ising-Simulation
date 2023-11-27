@@ -47,10 +47,7 @@ def run_trotter(paras):
     else:
         raise ValueError("Incorrect method:", method)
 
-
-    qubits = np.linspace(
-        paras["start_qubit"], paras["end_qubit"], paras["qubit_count"]
-    )
+    qubits = np.linspace(paras["start_qubit"], paras["end_qubit"], paras["qubit_count"])
 
     for _num_qubit in qubits:
         num_qubit = int(_num_qubit)
