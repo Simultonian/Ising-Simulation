@@ -25,7 +25,7 @@ def plot_method(paras, results: Result, **kwargs):
     h_value = _get_point(results)
     style = kwargs.get("style")
 
-    colors = {"6": "red", "8": "blue"}
+    colors = {"6": "red", "8": "blue", "3": "red"}
 
     for num_qubit, h_wise_results in results.items():
         sns.lineplot(x=[0], y=[h_value], alpha=0.0, label=f"N={num_qubit}")
@@ -87,7 +87,7 @@ def plot_combined(
     ax.set_ylabel("Magnetization M(h)", fontsize=14)
 
     # SETTING: TITLE PAD
-    ax.set_title("1st Order Trotterization", pad=20)
+    ax.set_title("Truncated Taylor Series", pad=20)
     ax.get_legend().remove()
 
     plt.savefig(diagram_name, dpi=300)

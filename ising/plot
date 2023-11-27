@@ -1,2 +1,1 @@
-python plotter/time_simulation.py --input data/plotfig/default.json
-open plots/qiskit_trotter/gs_qdrift_exact_6_to_8.png
+python plotter/time_simulation.py --input data/plotfig/taylor.json
