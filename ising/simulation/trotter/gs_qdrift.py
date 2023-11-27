@@ -18,6 +18,14 @@ from ising.simulation.trotter.grouped_lie import (
 from ising.simulation.trotter.grouped_lie import get_grouped_coeffs
 
 
+def circuit_depth(lambd: float, time: float, err: float) -> int:
+    """
+    Gets the number of iterations required to get the value to epsilon close.
+    """
+    reps = qdrift_count(lambd, time, err)
+    return reps
+
+
 def club_same_terms(terms: NDArray[np.int64]) -> list[tuple[int, int]]:
     """
     If QDrift samples [0, 0, 1, 1, 1, 0] group then this function clubs and
@@ -156,7 +164,6 @@ class GSQDriftCircuit:
         clubs = club_same_terms(samples)
 
         final_op = np.identity(2**self.num_qubits).astype(np.complex128)
-        print(f"{time}:{count}")
 
         for club in clubs:
             group_op = self.club_matrix(club, self.lambd * time, count)
@@ -169,6 +176,8 @@ class GSQDriftCircuit:
     ):
         results = []
         for time in times:
+            depth = qdrift_count(self.lambd, time, self.error)
+            print(f"Time: {time} Depth: {depth}")
             unitary = self.matrix(time)
             rho_final = unitary @ rho_init @ unitary.conj().T
             result = np.trace(np.abs(observable @ rho_final))

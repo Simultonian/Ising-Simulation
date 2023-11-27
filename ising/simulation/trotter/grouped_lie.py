@@ -13,6 +13,16 @@ from ising.utils import MAXSIZE
 from ising.utils import simdiag
 
 
+
+def circuit_depth(ham: Hamiltonian, time: float, err: float) -> int:
+    """
+    Gets the number of iterations required to get the value to epsilon close.
+    """
+    reps = trotter_reps(ham.sparse_repr, time, err)
+    l = len(ham.paulis)
+    return l * reps
+
+
 class GroupedLie(LieTrotter):
     """The Lie-Trotter product formula."""
 
@@ -230,6 +240,11 @@ class GroupedLieCircuit:
         results = []
         for time in times:
             unitary = self.matrix(time)
+
+            assert self.ham_subbed is not None
+            depth = circuit_depth(self.ham_subbed, time, self.error)
+            print(f"Time: {time} Depth: {depth}")
+
             rho_final = unitary @ rho_init @ unitary.conj().T
             result = np.trace(np.abs(observable @ rho_final))
             results.append(result)

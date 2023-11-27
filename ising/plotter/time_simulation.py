@@ -87,7 +87,7 @@ def plot_combined(
     ax.set_ylabel("Magnetization M(h)", fontsize=14)
 
     # SETTING: TITLE PAD
-    ax.set_title("Ising Model State Evolution", pad=20)
+    ax.set_title("qDRIFT", pad=20)
     ax.get_legend().remove()
 
     plt.savefig(diagram_name, dpi=300)
