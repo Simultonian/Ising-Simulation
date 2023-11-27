@@ -13,7 +13,6 @@ from ising.utils import MAXSIZE
 from ising.utils import simdiag
 
 
-
 def circuit_depth(ham: Hamiltonian, time: float, err: float) -> int:
     """
     Gets the number of iterations required to get the value to epsilon close.
