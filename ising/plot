@@ -1,0 +1,2 @@
+python plotter/time_simulation.py --input data/plotfig/default.json
+open plots/qiskit_trotter/grouped_lie_exact_6_to_8.png

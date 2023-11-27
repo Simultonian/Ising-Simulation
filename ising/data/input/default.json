@@ -1,12 +1,13 @@
 {
-  "start_qubit": "4",
-  "end_qubit": "4",
+  "start_qubit": "6",
+  "end_qubit": "8",
+  "qubit_count": "2",
   "start_h": "-1",
   "end_h": "0.3",
   "count_h": "1",
   "time": "10.0",
   "count_time": "10",
   "overlap": "0.5",
-  "method": "gs_qdrift",
+  "method": "grouped_lie",
   "error": "0.1"
 }

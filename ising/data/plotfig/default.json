@@ -1,11 +1,11 @@
 {
   "observable": "magnetization",
   "methods": [
-    "gs_qdrift",
+    "grouped_lie",
     "exact"
   ],
   "input_file": "data/input/default.json",
   "fig_folder": "plots/qiskit_trotter",
-  "scale": [1.5, 1.5],
+  "scale": [1.5, 1],
   "labels": ["x", "L"]
 }
