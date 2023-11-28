@@ -1,1 +1,1 @@
-python plotter/time_simulation.py --input data/plotfig/taylor.json
+python plotter/time_simulation.py --input data/plotfig/default.json

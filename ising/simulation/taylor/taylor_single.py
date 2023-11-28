@@ -114,7 +114,8 @@ def sum_decomposition_k_fold(paulis, t_bar, r, coeffs, cap_k):
     return (kth_paulis, kth_probs, k_probs)
 
 
-def taylor_observation(ham: Hamiltonian, time: float, error: float, obs, rho_init):
+def taylor_observation(ham: Hamiltonian, time: float, error: float, obs, rho_init, success: float):
+    delta = 1 - success
     paulis = ham.paulis
     coeffs = ham.coeffs
     beta = np.sum(np.abs(np.array(coeffs)))
@@ -127,7 +128,8 @@ def taylor_observation(ham: Hamiltonian, time: float, error: float, obs, rho_ini
     r = max(20, r)
 
     # TODO obs_norm
-    cap_k = get_cap_k(t_bar, obs_norm=1, eps=error)
+    obs_norm = 1
+    cap_k = get_cap_k(t_bar, obs_norm=obs_norm, eps=error)
 
     print(f"Computing decomposition for t_bar={t_bar} t={time} r={r} k={cap_k}")
     kth_paulis, kth_probs, k_probs = sum_decomposition_k_fold(
@@ -188,11 +190,14 @@ def taylor_observation(ham: Hamiltonian, time: float, error: float, obs, rho_ini
 
     total_count = 0
     count = 1000
+    count = np.ceil(((obs_norm**2) * (np.log(2 / delta))) / (error**2))
     results = []
 
     sample_ks = Counter(
         [tuple(x) for x in np.random.choice(cap_k + 1, p=k_probs, size=(count, 2))]
     )
+
+    print("Time:{time} Iterations:{count}")
 
     for k1, k2 in sorted(sample_ks.keys()):
         k_count = sample_ks[(k1, k2)]
@@ -242,6 +247,7 @@ class TaylorSingle:
         self.ham_subbed: Optional[Hamiltonian] = None
 
         self.h = h
+        self.success = kwargs.get("success", 0.9)
 
     @property
     def ground_state(self) -> NDArray:
@@ -264,7 +270,7 @@ class TaylorSingle:
         if self.ham_subbed is None:
             raise ValueError("Parameter not substituted.")
         return taylor_observation(
-            self.ham_subbed, time, self.error, self.run_obs, self.rho_init
+            self.ham_subbed, time, self.error, self.run_obs, self.rho_init, self.success
         )
 
     def get_observations(
