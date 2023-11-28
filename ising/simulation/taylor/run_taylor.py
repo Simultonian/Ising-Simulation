@@ -32,7 +32,10 @@ def run_trotter(paras):
     else:
         raise ValueError("This is Taylor file, method called:", method)
 
-    for num_qubit in range(paras["start_qubit"], paras["end_qubit"] + 1):
+    qubits = np.linspace(paras["start_qubit"], paras["end_qubit"], paras["qubit_count"])
+
+    for _num_qubit in qubits:
+        num_qubit = int(_num_qubit)
         observable = overall_magnetization(num_qubit)
         h_para = Parameter("h")
         parametrized_ham = parametrized_ising(num_qubit, h_para)

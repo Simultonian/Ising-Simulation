@@ -77,27 +77,29 @@ def sum_decomposition_k_fold(paulis, t_bar, r, coeffs, cap_k):
             if k > 0:
                 assert alpha_term == 0.0
 
-        mult_inds = cartesian_product(inds, repeat=k + 1)
+        # REMOVE
+        # mult_inds = cartesian_product(inds, repeat=k + 1)
         terms = []
         probs = []
 
-        for term_inds in mult_inds:
-            prod_inds, rotation_ind = term_inds[:-1], term_inds[-1]
+        # for term_inds in mult_inds:
+        #     prod_inds, rotation_ind = term_inds[:-1], term_inds[-1]
 
-            cur_pauli, cur_prob = calculate_decomposition_term(
-                prod_inds, rotation_ind, pairs, t_bar, k
-            )
+        #     cur_pauli, cur_prob = calculate_decomposition_term(
+        #         prod_inds, rotation_ind, pairs, t_bar, k
+        #     )
 
-            if alpha_term < 0:
-                # Transferring the alpha negative to the term.
-                cur_pauli *= -1
+        #     if alpha_term < 0:
+        #         # Transferring the alpha negative to the term.
+        #         cur_pauli *= -1
 
-            assert isinstance(cur_pauli, np.ndarray)
-            terms.append(cur_pauli)
-            probs.append(cur_prob)
+        #     assert isinstance(cur_pauli, np.ndarray)
+        #     terms.append(cur_pauli)
+        #     probs.append(cur_prob)
 
-        probs = np.array(probs)
-        probs = probs.real
+        # probs = np.array(probs)
+        # probs = probs.real
+        probs = [1]
         npt.assert_allclose(np.sum(probs), 1, atol=1e-5, rtol=1e-5)
 
         k_probs.append(abs(alpha_term))
@@ -114,8 +116,8 @@ def sum_decomposition_k_fold(paulis, t_bar, r, coeffs, cap_k):
     return (kth_paulis, kth_probs, k_probs)
 
 
-def taylor_observation(ham: Hamiltonian, time: float, error: float, obs, rho_init, success: float):
-    delta = 1 - success
+def taylor_observation(ham: Hamiltonian, time: float, error: float, obs, rho_init, **kwargs):
+    delta = 1 - kwargs.get("success", 0.9)
     paulis = ham.paulis
     coeffs = ham.coeffs
     beta = np.sum(np.abs(np.array(coeffs)))
@@ -137,7 +139,8 @@ def taylor_observation(ham: Hamiltonian, time: float, error: float, obs, rho_ini
     )
     print("Decomposition complete")
 
-    eye = np.identity(kth_paulis[0][0].shape[0])
+    # eye = np.identity(kth_paulis[0][0].shape[0])
+    eye = np.identity(obs.shape[0] - 1)
 
     def get_unitary(k, ind: int):
         return kth_paulis[k][ind]
@@ -190,20 +193,24 @@ def taylor_observation(ham: Hamiltonian, time: float, error: float, obs, rho_ini
 
     total_count = 0
     count = 1000
-    count = np.ceil(((obs_norm**2) * (np.log(2 / delta))) / (error**2))
+    count = int(8 * np.ceil(((obs_norm**2) * (np.log(2 / delta))) / (error**2)))
     results = []
 
     sample_ks = Counter(
         [tuple(x) for x in np.random.choice(cap_k + 1, p=k_probs, size=(count, 2))]
     )
 
-    print("Time:{time} Iterations:{count}")
+    print(f"Time:{time} Iterations:{count}")
 
     for k1, k2 in sorted(sample_ks.keys()):
         k_count = sample_ks[(k1, k2)]
         if total_count % 100 == 0:
             print(f"running: {total_count} out of {count}")
         total_count += k_count
+
+        # Two extra for rotation
+        run_cost = (k1 + k2 + 2) * r
+        print(f"Run cost: {run_cost}")
 
         k1_terms = Counter(
             [
@@ -224,9 +231,11 @@ def taylor_observation(ham: Hamiltonian, time: float, error: float, obs, rho_ini
         )
 
         for k1_term, k2_term in zip(k1_terms, k2_terms):
-            final_rho = post_v1v2((k1, k2), list(k1_term), list(k2_term))
+            # REMOVE
+            # final_rho = post_v1v2((k1, k2), list(k1_term), list(k2_term))
+            # result = np.trace(np.abs(obs @ final_rho))
 
-            result = np.trace(np.abs(obs @ final_rho))
+            result = 0
             results.append(result)
 
     assert total_count == count
@@ -270,7 +279,7 @@ class TaylorSingle:
         if self.ham_subbed is None:
             raise ValueError("Parameter not substituted.")
         return taylor_observation(
-            self.ham_subbed, time, self.error, self.run_obs, self.rho_init, self.success
+            self.ham_subbed, time, self.error, self.run_obs, self.rho_init, success=self.success
         )
 
     def get_observations(
