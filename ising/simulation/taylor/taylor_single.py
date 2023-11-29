@@ -116,7 +116,9 @@ def sum_decomposition_k_fold(paulis, t_bar, r, coeffs, cap_k):
     return (kth_paulis, kth_probs, k_probs)
 
 
-def taylor_observation(ham: Hamiltonian, time: float, error: float, obs, rho_init, **kwargs):
+def taylor_observation(
+    ham: Hamiltonian, time: float, error: float, obs, rho_init, **kwargs
+):
     delta = 1 - kwargs.get("success", 0.9)
     paulis = ham.paulis
     coeffs = ham.coeffs
@@ -279,7 +281,12 @@ class TaylorSingle:
         if self.ham_subbed is None:
             raise ValueError("Parameter not substituted.")
         return taylor_observation(
-            self.ham_subbed, time, self.error, self.run_obs, self.rho_init, success=self.success
+            self.ham_subbed,
+            time,
+            self.error,
+            self.run_obs,
+            self.rho_init,
+            success=self.success,
         )
 
     def get_observations(
