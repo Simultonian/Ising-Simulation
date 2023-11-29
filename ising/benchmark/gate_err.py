@@ -2,36 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
-from ising.hamiltonian import Hamiltonian
 from ising.hamiltonian import parametrized_ising
-
-
-def trotter_gate_count(ham: Hamiltonian, time: float, err: float) -> int:
-    """
-    First order trotterization gate count for given parameters.
-    """
-    max_lambd = np.max(np.abs(ham.coeffs))
-    l = len(ham.paulis)
-    return np.ceil((l**3) * ((max_lambd * time) ** 2) / err)
-
-
-def qdrift_gate_count(ham: Hamiltonian, time: float, err: float) -> int:
-    """
-    qDRIFT gate count for given parameters.
-    """
-    lambd = sum(np.abs(ham.coeffs))
-    return np.ceil(((lambd * time) ** 2) / err)
-
-
-def taylor_gate_count(ham: Hamiltonian, time: float, err: float, obs_norm: int) -> int:
-    """
-    Truncated Taylor series with single ancilla qubit LCU decomposition.
-    """
-    lambd = sum(np.abs(ham.coeffs))
-    numr = np.log((lambd * time) * obs_norm / err)
-    denr = np.log(numr)
-
-    return np.ceil(((lambd * time) ** 2) * (numr / denr))
+from ising.benchmark.sim_function import (
+        taylor_gate_count, 
+        trotter_gate_count, 
+        qdrift_gate_count
+        )
 
 
 def plot_gate_error(
@@ -63,23 +39,23 @@ def plot_gate_error(
     for method, config in configs.items():
         result = results[method]
         sns.lineplot(
-            y=result, x=inv_err, ax=ax, label=config["label"], color=config["color"]
+            x=result, y=error_points, ax=ax, label=config["label"], color=config["color"]
         )
-        sns.scatterplot(y=result, x=inv_err, ax=ax, color=config["color"])
+        sns.scatterplot(x=result, y=error_points, ax=ax, color=config["color"])
 
     ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.set_xlabel(r"$1/\epsilon$")
-    ax.set_ylabel(r"$\text{gate count}$")
+    ax.set_ylabel(r"$\log_{10}(\epsilon)$")
+    ax.set_xlabel(r"$\log_{10}(\text{gate count})$")
 
     plt.legend()
     diagram_name = "plots/benchmark/gate_count.png"
     print(f"Saving diagram at:{diagram_name}")
-    plt.savefig(diagram_name)
+    plt.savefig(diagram_name, dpi=300)
 
 
 if __name__ == "__main__":
-    qubit = 10
+    qubit = 25
     h_val = 0.1
     start_err_exp = -1
     end_err_exp = -3
