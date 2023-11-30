@@ -50,7 +50,7 @@ def plot_gate_error(
     ax.set_ylabel(r"$\log_{10}(\text{gate count})$")
 
     ax.legend(loc="upper right", framealpha=1)
-    ax.set_title("Depth vs Error for Different Time")
+    ax.set_title("Truncated Taylor: Depth vs Error for Different Simulation Time")
 
     diagram_name = "plots/benchmark/taylor_multi_t.png"
     print(f"Saving diagram at:{diagram_name}")
