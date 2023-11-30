@@ -36,10 +36,12 @@ def plot_iteration_err(start_err_exp, end_err_exp, point_count, obs_norm, delta)
     sns.lineplot(x=result, y=error_points, ax=ax, color="red")
     sns.scatterplot(x=result, y=error_points, ax=ax, color="red")
 
+    ax.invert_yaxis()
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_ylabel(r"$\log_{10}(\epsilon)$")
     ax.set_xlabel(r"$\log_{10}(\text{iteration count})$")
+    ax.set_title("Iteration Cost vs Error")
 
     diagram_name = "plots/benchmark/iteration_count.png"
     print(f"Saving diagram at:{diagram_name}")
