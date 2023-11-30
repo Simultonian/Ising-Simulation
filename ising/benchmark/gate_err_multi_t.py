@@ -59,7 +59,7 @@ def plot_gate_error(
 
             sns.scatterplot(y=result, x=error_points, ax=ax, color=config["color"])
 
-        ax.text(error_points[-1] * 2, results["taylor"][-1] * 1.6, f"t={time}")
+        # ax.text(error_points[-1] * 2, results["taylor"][-1] * 1.6, f"t={time}")
 
     ax.invert_xaxis()
     ax.set_xscale("log")
@@ -67,7 +67,9 @@ def plot_gate_error(
     ax.set_xlabel(r"$\log_{10}(\epsilon)$")
     ax.set_ylabel(r"$\log_{10}(\text{gate count})$")
 
-    ax.legend(loc="upper right", framealpha=1)
+    ax.set_title("Gate vs Error for Simulation Techniques")
+
+    ax.legend(loc="upper left", framealpha=1)
     # plt.legend()
     diagram_name = "plots/benchmark/gate_count_multi_t.png"
     print(f"Saving diagram at:{diagram_name}")
@@ -81,7 +83,7 @@ if __name__ == "__main__":
     end_err_exp = -3
     point_count = 10
     obs_norm = 1
-    time = [10, 10000]
+    time = [1e5]
     scale = [1.5, 1.5]
     plot_gate_error(
         qubit, h_val, start_err_exp, end_err_exp, point_count, obs_norm, time, scale
