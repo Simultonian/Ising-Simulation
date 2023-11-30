@@ -17,9 +17,9 @@ def plot_gate_error(
     fig, ax = plt.subplots()
 
     configs = {
-        "10": {"color": "blue", "label": "t=1e2"},
-        "20": {"color": "black", "label": "t=1e3"},
-        "100": {"color": "red", "label": "t=1e4"},
+        "10": {"color": "blue", "label": "t=10"},
+        "50": {"color": "black", "label": "t=50"},
+        "100": {"color": "red", "label": "t=100"},
     }
 
     error_points = [
@@ -50,7 +50,8 @@ def plot_gate_error(
     ax.set_ylabel(r"$\log_{10}(\text{gate count})$")
 
     ax.legend(loc="upper right", framealpha=1)
-    # plt.legend()
+    ax.set_title("Depth vs Error for Different Time")
+
     diagram_name = "plots/benchmark/taylor_multi_t.png"
     print(f"Saving diagram at:{diagram_name}")
     plt.savefig(diagram_name, dpi=300)

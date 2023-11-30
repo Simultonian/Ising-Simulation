@@ -41,8 +41,8 @@ def plot_gate_error(
             result = results[method]
             if ind == 0:
                 sns.lineplot(
-                    x=result,
-                    y=error_points,
+                    y=result,
+                    x=error_points,
                     ax=ax,
                     label=config["label"],
                     color=config["color"],
@@ -50,26 +50,26 @@ def plot_gate_error(
                 )
             else:
                 sns.lineplot(
-                    x=result,
-                    y=error_points,
+                    y=result,
+                    x=error_points,
                     ax=ax,
                     color=config["color"],
                     linestyle=linestyle[ind],
                 )
 
-            sns.scatterplot(x=result, y=error_points, ax=ax, color=config["color"])
+            sns.scatterplot(y=result, x=error_points, ax=ax, color=config["color"])
 
         # ax.text(error_points[-1] * 2, results["taylor"][-1] * 1.6, f"t={time}")
 
-    # ax.invert_xaxis()
+    ax.invert_xaxis()
     ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.set_ylabel(r"$\log_{10}(\epsilon)$")
-    ax.set_xlabel(r"$\log_{10}(\text{gate count})$")
+    ax.set_xlabel(r"$\log_{10}(\epsilon)$")
+    ax.set_ylabel(r"$\log_{10}(\text{gate count})$")
 
-    ax.set_title("Gate vs Error for Simulation Techniques")
+    ax.set_title("Depth vs Error for Simulation Techniques")
 
-    ax.legend(loc="upper right", framealpha=1)
+    ax.legend(loc="upper left", framealpha=1)
     # plt.legend()
     diagram_name = "plots/benchmark/gate_count_multi_t.png"
     print(f"Saving diagram at:{diagram_name}")
