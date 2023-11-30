@@ -20,62 +20,37 @@ def _get_point(res: Result) -> float:
     raise ValueError("Empty Result provided")
 
 
-COLORS = {
-    "taylor_single": "red",
-    "gs_qdrift": "blue",
-    "grouped_lie": "green",
-    "exact": "black",
-}
-LABELS = {
-    "taylor_single": "Truncated Taylor",
-    "gs_qdrift": "qDRIFT Protocol",
-    "grouped_lie": "First Order Trotter",
-    "exact": "Exact Simulation",
-}
-MARKERS = {"taylor_single": "s", "gs_qdrift": "o", "grouped_lie": "v"}
-
-
-def plot_method(method_name, paras, results: Result, **kwargs):
+def plot_method(paras, results: Result, **kwargs):
     times = np.linspace(0, paras["time"], paras["count_time"])
     h_value = _get_point(results)
     style = kwargs.get("style")
 
-    # for num_qubit, h_wise_results in results.items():
-    h_wise_results = results["8"]
-    for h, result in h_wise_results.items():
-        if method_name in MARKERS:
-            sns.scatterplot(
-                x=times,
-                y=result,
-                label=LABELS[method_name],
-                marker=MARKERS[method_name],
-                color=COLORS[method_name],
-                s=80,
-                alpha=0.8,
-            )
-            sns.lineplot(
-                x=times,
-                y=result,
-                color=COLORS[method_name],
-                linestyle=style,
-                alpha=0.2,
-            )
-        else:
-            sns.lineplot(
-                x=times,
-                y=result,
-                label=LABELS[method_name],
-                color=COLORS[method_name],
-                linestyle=style,
-                linewidth=1.5
-            )
+    colors = {"6": "red", "8": "blue", "3": "red"}
+
+    for num_qubit, h_wise_results in results.items():
+        sns.lineplot(x=[0], y=[h_value], alpha=0.0, label=f"N={num_qubit}")
+        for h, result in h_wise_results.items():
+            h_label = str(h)[:4]
+            if style != "L":
+                sns.scatterplot(
+                    x=times,
+                    y=result,
+                    label=f"{h_label}",
+                    marker=style,
+                    linewidth=3,
+                    color=colors[num_qubit],
+                )
+            else:
+                sns.lineplot(
+                    x=times, y=result, label=f"{h_label}", color=colors[num_qubit]
+                )
 
 
 def plot_combined(
     paras, method_wise_results: dict[str, Result], diagram_name, **kwargs
 ):
     scale = kwargs.get("scale", (1, 1))
-    styles = kwargs.get("labels", ["L"] * len(method_wise_results.items()))
+    styles = kwargs.get("labels", ["L"] * len(method_wise_results))
 
     max_time = paras.get("time")
 
@@ -89,11 +64,11 @@ def plot_combined(
     ax.set_xlim(-1, max_time * scale[0])
 
     for ind, (method, results) in enumerate(method_wise_results.items()):
-        # h_value = _get_point(results)
-        # sns.scatterplot(
-        #     x=[max_time * scale[0]], y=[h_value * scale[1]], alpha=0.0, label=method
-        # )
-        plot_method(method, paras, results, style=styles[ind])
+        h_value = _get_point(results)
+        sns.scatterplot(
+            x=[max_time * scale[0]], y=[h_value * scale[1]], alpha=0.0, label=method
+        )
+        plot_method(paras, results, style=styles[ind])
 
     # SETTING: AXIS VISIBILITY
     ax.spines["top"].set_visible(False)
@@ -112,8 +87,8 @@ def plot_combined(
     ax.set_ylabel("Magnetization M(h)", fontsize=14)
 
     # SETTING: TITLE PAD
-    ax.set_title("Ising Model Simulation with Different Techniques", pad=20)
-    # ax.get_legend().remove()
+    ax.set_title("qDRIFT", pad=20)
+    ax.get_legend().remove()
 
     plt.savefig(diagram_name, dpi=300)
     print(f"Saving diagram at {diagram_name}")
