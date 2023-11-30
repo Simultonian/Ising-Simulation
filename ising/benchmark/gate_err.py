@@ -4,10 +4,10 @@ import seaborn as sns
 
 from ising.hamiltonian import parametrized_ising
 from ising.benchmark.sim_function import (
-        taylor_gate_count, 
-        trotter_gate_count, 
-        qdrift_gate_count
-        )
+    taylor_gate_count,
+    trotter_gate_count,
+    qdrift_gate_count,
+)
 
 
 def plot_gate_error(
@@ -39,7 +39,11 @@ def plot_gate_error(
     for method, config in configs.items():
         result = results[method]
         sns.lineplot(
-            x=result, y=error_points, ax=ax, label=config["label"], color=config["color"]
+            x=result,
+            y=error_points,
+            ax=ax,
+            label=config["label"],
+            color=config["color"],
         )
         sns.scatterplot(x=result, y=error_points, ax=ax, color=config["color"])
 

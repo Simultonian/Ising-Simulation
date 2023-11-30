@@ -6,19 +6,17 @@ import seaborn as sns
 from ising.hamiltonian.hamiltonian import Hamiltonian
 from ising.hamiltonian import parametrized_ising
 from ising.benchmark.sim_function import (
-        taylor_gate_count, 
-        trotter_gate_count, 
-        qdrift_gate_count
-        )
+    taylor_gate_count,
+    trotter_gate_count,
+    qdrift_gate_count,
+)
 
 
-def iteration_count(obs_norm:float, delta:float, error: float):
-    return (obs_norm / error) ** 2 * np.log(1/delta)
+def iteration_count(obs_norm: float, delta: float, error: float):
+    return (obs_norm / error) ** 2 * np.log(1 / delta)
 
 
-def plot_iteration_err(
-    start_err_exp, end_err_exp, point_count, obs_norm, delta 
-):
+def plot_iteration_err(start_err_exp, end_err_exp, point_count, obs_norm, delta):
     fig, ax = plt.subplots()
 
     configs = {
@@ -35,9 +33,7 @@ def plot_iteration_err(
     for error in error_points:
         result.append(iteration_count(obs_norm, delta, error))
 
-    sns.lineplot(
-        x=result, y=error_points, ax=ax, color="red"
-    )
+    sns.lineplot(x=result, y=error_points, ax=ax, color="red")
     sns.scatterplot(x=result, y=error_points, ax=ax, color="red")
 
     ax.set_xscale("log")
@@ -56,6 +52,4 @@ if __name__ == "__main__":
     point_count = 10
     obs_norm = 1
     delta = 0.1
-    plot_iteration_err(
-        start_err_exp, end_err_exp, point_count, obs_norm, delta
-    )
+    plot_iteration_err(start_err_exp, end_err_exp, point_count, obs_norm, delta)

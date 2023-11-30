@@ -6,10 +6,10 @@ from ising.hamiltonian import Hamiltonian
 from ising.hamiltonian import parametrized_ising
 
 from ising.benchmark.sim_function import (
-        taylor_gate_count, 
-        trotter_gate_count, 
-        qdrift_gate_count
-        )
+    taylor_gate_count,
+    trotter_gate_count,
+    qdrift_gate_count,
+)
 
 
 def plot_time_error(
