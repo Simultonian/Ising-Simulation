@@ -235,7 +235,7 @@ class GroupedLieCircuit:
         return np.linalg.matrix_power(final_op, reps)
 
     def get_observation(
-            self, rho_init: NDArray, observable: NDArray, time: float, reps: int
+        self, rho_init: NDArray, observable: NDArray, time: float, reps: int
     ):
         results = []
         unitary = self.matrix(time, reps)

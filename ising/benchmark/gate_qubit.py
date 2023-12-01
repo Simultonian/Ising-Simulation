@@ -10,9 +10,7 @@ from ising.benchmark.sim_function import (
 )
 
 
-def plot_gate_error(
-    time, h_val, error, point_count, obs_norm, start_qubit, end_qubit
-):
+def plot_gate_error(time, h_val, error, point_count, obs_norm, start_qubit, end_qubit):
     fig, ax = plt.subplots()
 
     configs = {
@@ -70,5 +68,11 @@ if __name__ == "__main__":
     error = 1e-3
 
     plot_gate_error(
-        time, h_val, error, point_count, obs_norm, start_qubit, end_qubit, 
+        time,
+        h_val,
+        error,
+        point_count,
+        obs_norm,
+        start_qubit,
+        end_qubit,
     )

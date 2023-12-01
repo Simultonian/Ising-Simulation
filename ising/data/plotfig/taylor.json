@@ -6,6 +6,6 @@
   ],
   "input_file": "data/input/taylor.json",
   "fig_folder": "plots/taylor",
-  "scale": [1.7, 1],
+  "scale": [1, 1.7],
   "labels": ["x", "L"]
 }

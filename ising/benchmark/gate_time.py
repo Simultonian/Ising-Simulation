@@ -10,9 +10,7 @@ from ising.benchmark.sim_function import (
 )
 
 
-def plot_gate_error(
-    qubit, h_val, error, point_count, obs_norm, start_time, end_time
-):
+def plot_gate_error(qubit, h_val, error, point_count, obs_norm, start_time, end_time):
     fig, ax = plt.subplots()
 
     configs = {
@@ -21,9 +19,7 @@ def plot_gate_error(
         "qdrift": {"color": "red", "label": "qDRIFT Protocol"},
     }
 
-    time_points = [
-        10**x for x in np.linspace(start_time, end_time, point_count)
-    ]
+    time_points = [10**x for x in np.linspace(start_time, end_time, point_count)]
     ham = parametrized_ising(qubit, h_val)
 
     taylor, trotter, qdrift = [], [], []
@@ -72,5 +68,11 @@ if __name__ == "__main__":
     error = 1e-3
 
     plot_gate_error(
-        qubit, h_val, error, point_count, obs_norm, start_time, end_time, 
+        qubit,
+        h_val,
+        error,
+        point_count,
+        obs_norm,
+        start_time,
+        end_time,
     )
