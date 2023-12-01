@@ -219,11 +219,12 @@ class GroupedLieCircuit:
             @ eig_inv
         )
 
-    def matrix(self, time: float) -> NDArray:
+    def matrix(self, time: float, reps: int = -1) -> NDArray:
         if self.ham_subbed is None:
             raise ValueError("h value has not been substituted.")
 
-        reps = trotter_reps(self.ham_subbed.sparse_repr, time, self.error)
+        if reps == -1:
+            reps = trotter_reps(self.ham_subbed.sparse_repr, time, self.error)
 
         final_op = np.identity(2**self.num_qubits).astype(np.complex128)
 
@@ -232,6 +233,20 @@ class GroupedLieCircuit:
             final_op = np.dot(group_op, final_op)
 
         return np.linalg.matrix_power(final_op, reps)
+
+    def get_observation(
+            self, rho_init: NDArray, observable: NDArray, time: float, reps: int
+    ):
+        results = []
+        unitary = self.matrix(time, reps)
+
+        assert self.ham_subbed is not None
+
+        rho_final = unitary @ rho_init @ unitary.conj().T
+        result = np.trace(np.abs(observable @ rho_final))
+        results.append(result)
+
+        return results
 
     def get_observations(
         self, rho_init: NDArray, observable: NDArray, times: list[float]
