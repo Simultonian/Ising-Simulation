@@ -10,6 +10,7 @@ from ising.utils import read_input_file, close_state
 from ising.simulation.taylor import TaylorCircuit
 from ising.simulation.taylor.taylor_sample import TaylorSample
 from ising.simulation.taylor.taylor_single import TaylorSingle
+from ising.utils.constants import PLUS
 
 
 def run_trotter(paras):
@@ -48,22 +49,18 @@ def run_trotter(paras):
             print(f"Running for {num_qubit} qubits and h:{h}")
             circuit_manager.subsitute_h(h)
             circuit_manager.construct_parametrized_circuit()
-            ground_state = circuit_manager.ham_subbed.ground_state
 
+            ground_state = circuit_manager.ham_subbed.ground_state
             init_state = close_state(ground_state, paras["overlap"])
 
-            PLUS = np.array([[1], [1]]) / np.sqrt(2)
-            init_complete = np.kron(PLUS, init_state)
+            # Taking tensor product of the overlap state with `|+>` which is the state after `H`
+            init_state = np.kron(PLUS, init_state)
             init_state = init_state.reshape(-1, 1)
 
-            # Taking tensor product of the overlap state with `|+>` which is the state after `H`
-
             # Checking for norm
-            np.testing.assert_almost_equal(np.sum(np.abs(init_complete) ** 2), 1)
+            np.testing.assert_almost_equal(np.sum(np.abs(init_state) ** 2), 1)
 
-            rho_init = np.outer(init_complete, init_complete.conj())
-
-            ans = circuit_manager.get_observations(rho_init, observable, times)
+            ans = circuit_manager.get_observations(init_state, observable, times)
             h_wise_answers[h] = ans
 
         qubit_wise_answers[num_qubit] = h_wise_answers

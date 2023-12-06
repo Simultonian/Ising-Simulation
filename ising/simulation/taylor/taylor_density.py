@@ -119,7 +119,7 @@ def taylor_observation(
     time: float,
     error: float,
     obs,
-    psi_init,
+    rho_init,
     r_factor: float,
     **kwargs,
 ):
@@ -172,24 +172,28 @@ def taylor_observation(
             return op_1 + op_2
 
     def post_v1(k, inds: list[int]):
-        final_psi = psi_init.copy()
+        if rho_init is None:
+            raise ValueError("Initial state not set.")
+
+        final_rho = rho_init.copy()
 
         for ind in inds:
             v1 = control_unitary(k, ind, control_val=1)
-            final_psi = v1 @ final_psi
+            final_rho = v1 @ final_rho @ v1.conj().T
 
-        npt.assert_almost_equal(np.sum(np.abs(final_psi) ** 2), 1)
-        return final_psi
+        npt.assert_allclose(np.trace(final_rho), 1, atol=1e-3, rtol=1e-3)
+        return final_rho
 
     def post_v1v2(ks: tuple[int, int], i1s: list[int], i2s: list[int]):
-        final_psi = post_v1(ks[0], i1s)
+        final_rho = post_v1(ks[0], i1s)
 
         for i2 in i2s:
             v2 = control_unitary(ks[1], i2, control_val=0)
-            final_psi = v2 @ final_psi
+            final_rho = v2 @ final_rho @ v2.conj().T
 
-        npt.assert_almost_equal(np.sum(np.abs(final_psi) ** 2), 1)
-        return final_psi
+        npt.assert_allclose(np.trace(final_rho), 1, atol=1e-3, rtol=1e-3)
+
+        return final_rho
 
     print("Entering loop of Taylor Single")
 
@@ -233,9 +237,7 @@ def taylor_observation(
         )
 
         for k1_term, k2_term in zip(k1_terms, k2_terms):
-            final_psi = post_v1v2((k1, k2), list(k1_term), list(k2_term))
-            final_rho = np.outer(final_psi, final_psi.conj())
-
+            final_rho = post_v1v2((k1, k2), list(k1_term), list(k2_term))
             result = np.trace(np.abs(obs @ final_rho))
             results.append(result)
 
@@ -276,7 +278,7 @@ class TaylorSingle:
                 "h value has not been substituted, qiskit does not support parametrized Hamiltonians."
             )
 
-    def get_observation(self, time):
+    def get_observation_r(self, time: float, r_factor: float = -1):
         if self.ham_subbed is None:
             raise ValueError("Parameter not substituted.")
         return taylor_observation(
@@ -284,13 +286,29 @@ class TaylorSingle:
             time,
             self.error,
             self.run_obs,
-            self.psi_init,
-            1,
+            self.rho_init,
+            r_factor,
+            success=self.success,
+        )
+
+    def get_observation(self, rho_init, observable, time, r):
+        obs_x = SparsePauliOp(["X"], [1.0])
+        run_obs = obs_x.tensor(observable.sparse_repr)
+
+        if self.ham_subbed is None:
+            raise ValueError("Parameter not substituted.")
+        return taylor_observation(
+            self.ham_subbed,
+            time,
+            self.error,
+            run_obs,
+            rho_init,
+            r,
             success=self.success,
         )
 
     def get_observations(
-        self, psi_init: NDArray, observable: Hamiltonian, times: list[float]
+        self, rho_init: NDArray, observable: Hamiltonian, times: list[float]
     ):
         results = []
         self.obs_init = observable.matrix
@@ -299,7 +317,7 @@ class TaylorSingle:
 
         self._run_obs = run_obs
         self.run_obs = run_obs.to_matrix()
-        self.psi_init = psi_init
+        self.rho_init = rho_init
         for time in times:
             result = self.get_observation(time)
             results.append(result)
