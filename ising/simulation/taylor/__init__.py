@@ -1,4 +1,3 @@
-from .taylor import TaylorCircuit
-from .taylor_single import TaylorSingle
+from .taylor import Taylor
 
-__all__ = ["TaylorCircuit", "TaylorSingle"]
+__all__ = ["Taylor"]

@@ -8,10 +8,7 @@ from qiskit.circuit import Parameter
 from ising.hamiltonian import Hamiltonian
 from ising.hamiltonian.hamiltonian import substitute_parameter
 from itertools import product as cartesian_product
-import math
 
-
-from functools import lru_cache
 import numpy as np
 import numpy.testing as npt
 from collections import Counter
@@ -19,52 +16,16 @@ from collections import Counter
 from qiskit.quantum_info import SparsePauliOp
 
 from ising.hamiltonian import Hamiltonian
-from ising.utils.constants import ONEONE, ZEROZERO, PLUS
-from ising.utils import MAXSIZE
+from ising.utils.constants import ONEONE, ZEROZERO
 from ising.singlelcu.simulation.singlelcu import calculate_mu
 
-
-def get_small_k_probs(t_bar, r, cap_k):
-    ks = np.arange(cap_k + 1)
-    k_vec = np.zeros(cap_k + 1, dtype=np.complex128)
-
-    def apply_k(k):
-        # Function according to the formula
-        t1 = ((1j * t_bar / r) ** k) / math.factorial(k)
-        t2 = np.sqrt(1 + ((t_bar / (r * (k + 1))) ** 2))
-        return t1 * t2
-
-    vectorized_apply_k = np.vectorize(apply_k)
-
-    k_vec = vectorized_apply_k(ks)
-
-    # Odd positions are 0
-    k_vec[1::2] = 0
-    return k_vec
+from ising.simulation.taylor.utils import get_cap_k, calculate_exp, get_alphas
 
 
-def get_cap_k(t_bar, obs_norm, eps) -> int:
-    numr = np.log(t_bar * obs_norm / eps)
-    return int(np.ceil(numr / np.log(numr)))
-
-
-def calculate_exp(time, pauli, k):
-    eye = np.identity(pauli.shape[0])
-    dr = np.sqrt(1 + ((time) / (k + 1)) ** 2)
-
-    term2 = (1j * (time) * pauli) / (k + 1)
-    rotate = (eye - term2) / dr
-    return rotate
-
-
-def get_alphas(t_bar, cap_k, r):
-    return get_small_k_probs(t_bar=t_bar, r=r, cap_k=cap_k)
-
-
-def calculate_decomposition_term(prod_inds, rotation_ind, paulis, t_bar, k, alpha):
+def calculate_decomposition_term(prod_inds, rotation_ind, paulis, t_bar, k):
     exp_pair = paulis[rotation_ind]
 
-    cur_prob = alpha
+    cur_prob = 1.0
     cur_pauli = Pauli("I" * len(exp_pair[0]))
     for ind in prod_inds:
         pauli, prob = paulis[ind]
@@ -92,20 +53,24 @@ def calculate_decomposition_term(prod_inds, rotation_ind, paulis, t_bar, k, alph
     return (cur_pauli, cur_prob)
 
 
-def sum_decomposition_terms(paulis, t_bar, r, coeffs, k_max):
+def sum_decomposition_k_fold(paulis, t_bar, r, coeffs, cap_k):
     pairs = list(zip(paulis, coeffs))
-    pairs = list(filter(lambda x: abs(x[1]) > 0, pairs))
     inds = np.arange(len(pairs))
-    terms = []
-    probs = []
+    kth_paulis = []
+    kth_probs = []
+    k_probs = []
 
-    # if r is None:
-    #     r = int(np.ceil(t_bar**2))
-
-    alphas = get_alphas(t_bar, k_max, r)
+    alphas = np.array(get_alphas(t_bar, cap_k, r))
     t_bar = t_bar / r
 
-    for k in range(0, k_max + 1, 2):
+    for k in range(0, cap_k + 1):
+        if k % 2 == 1:
+            # Odd k can not be sampled.
+            k_probs.append(0)
+            kth_probs.append([])
+            kth_paulis.append([])
+            continue
+
         alpha_term = alphas[k]
 
         if t_bar == 0.0:
@@ -113,80 +78,174 @@ def sum_decomposition_terms(paulis, t_bar, r, coeffs, k_max):
                 assert alpha_term == 0.0
 
         mult_inds = cartesian_product(inds, repeat=k + 1)
+        terms = []
+        probs = []
 
-        for inds in mult_inds:
-            prod_inds, rotation_ind = inds[:-1], inds[-1]
+        for term_inds in mult_inds:
+            prod_inds, rotation_ind = term_inds[:-1], term_inds[-1]
 
             cur_pauli, cur_prob = calculate_decomposition_term(
-                prod_inds, rotation_ind, pairs, t_bar, k, alpha_term
+                prod_inds, rotation_ind, pairs, t_bar, k
             )
+
+            if alpha_term < 0:
+                # Transferring the alpha negative to the term.
+                cur_pauli *= -1
+
+            assert isinstance(cur_pauli, np.ndarray)
             terms.append(cur_pauli)
             probs.append(cur_prob)
 
-    _probs = []
-    for prob in probs:
-        np.testing.assert_allclose(prob.imag, 0.0)
-        _probs.append(prob.real)
+        probs = np.array(probs)
+        probs = probs.real
+        npt.assert_allclose(np.sum(probs), 1, atol=1e-5, rtol=1e-5)
 
-    return (terms, np.array(_probs))
+        k_probs.append(abs(alpha_term))
+
+        kth_probs.append(probs)
+        kth_paulis.append(terms)
+
+    assert len(k_probs) == len(kth_probs)
+    assert len(k_probs) == len(kth_paulis)
+
+    k_probs = np.array(k_probs)
+    k_probs /= np.sum(k_probs)
+
+    return (kth_paulis, kth_probs, k_probs)
 
 
-def sum_decomposition(paulis, t_bar, r, coeffs, k_max):
-    pairs = list(zip(paulis, coeffs))
-    final = None
+def taylor_observation(
+    ham: Hamiltonian,
+    time: float,
+    error: float,
+    obs,
+    psi_init,
+    r_factor: float,
+    **kwargs,
+):
+    delta = 1 - kwargs.get("success", 0.9)
+    paulis = ham.paulis
+    coeffs = ham.coeffs
+    beta = np.sum(np.abs(np.array(coeffs)))
+    coeffs /= beta
 
-    if r is None:
-        r = int(np.ceil(t_bar**2))
+    t_bar = time * beta
+    r = int(5 * np.ceil(t_bar) ** 2)
+    # For t_bar < 1, r is too small to get accurate results.
+    r = max(20, r)
 
-    alphas = get_alphas(t_bar, k_max, r)
-    t_bar = t_bar / r
+    r *= r_factor
 
-    for k in range(0, k_max + 1, 2):
-        alpha_term = alphas[k]
+    # TODO obs_norm
+    obs_norm = 1
+    cap_k = get_cap_k(t_bar, obs_norm=obs_norm, eps=error)
 
-        if t_bar == 0.0:
-            if k > 0:
-                assert alpha_term == 0.0
+    print(f"Computing decomposition for t_bar={t_bar} t={time} r={r} k={cap_k}")
+    kth_paulis, kth_probs, k_probs = sum_decomposition_k_fold(
+        paulis, t_bar, r, coeffs, cap_k
+    )
+    print("Decomposition complete")
 
-        mult_paulis = cartesian_product(pairs, repeat=k + 1)
+    eye = np.identity(kth_paulis[0][0].shape[0])
 
-        total_pauli = None
-        for paulis in mult_paulis:
-            pauli_prod = paulis[:-1]
-            exp_pair = paulis[-1]
+    def get_unitary(k, ind: int):
+        return kth_paulis[k][ind]
 
-            cur_prob = 1.0
-            cur_pauli = Pauli("I" * len(exp_pair[0]))
-            for pauli, prob in pauli_prod:
-                cur_prob *= prob
-                cur_pauli = cur_pauli @ pauli
+    def control_unitary(k, ind: int, control_val: int):
+        """
+        Calculates |0><0| U + |1><1| I if control_val = 0
+        Calculates |0><0| I + |1><1| U if control_val = 1
 
-            exp_pauli, exp_prob = exp_pair
-            exp_pauli = exp_pauli.to_matrix()
-            rotated = calculate_exp(t_bar, exp_pauli, k)
+        Where U is unitary for Hamiltonian evolution with time `times[ind]`.
+        """
 
-            cur_pauli = cur_prob * cur_pauli.to_matrix()
-            cur_pauli = cur_pauli @ (exp_prob * rotated)
+        unitary = get_unitary(k, ind)
 
-            assert cur_pauli is not None
-
-            if total_pauli is None:
-                total_pauli = cur_pauli
-            else:
-                total_pauli += cur_pauli
-
-        assert total_pauli is not None
-        total_pauli *= alpha_term
-
-        if final is None:
-            final = total_pauli
+        if control_val == 0:
+            op_1 = np.kron(ZEROZERO, unitary)
+            op_2 = np.kron(ONEONE, eye)
+            return op_1 + op_2
+        # Control value is 1
         else:
-            final += total_pauli
+            op_1 = np.kron(ZEROZERO, eye)
+            op_2 = np.kron(ONEONE, unitary)
+            return op_1 + op_2
 
-    return np.linalg.matrix_power(final, r)
+    def post_v1(k, inds: list[int]):
+        final_psi = psi_init.copy()
+
+        for ind in inds:
+            v1 = control_unitary(k, ind, control_val=1)
+            final_psi = v1 @ final_psi
+
+        npt.assert_almost_equal(np.sum(np.abs(final_psi) ** 2), 1)
+        return final_psi
+
+    def post_v1v2(ks: tuple[int, int], i1s: list[int], i2s: list[int]):
+        final_psi = post_v1(ks[0], i1s)
+
+        for i2 in i2s:
+            v2 = control_unitary(ks[1], i2, control_val=0)
+            final_psi = v2 @ final_psi
+
+        npt.assert_almost_equal(np.sum(np.abs(final_psi) ** 2), 1)
+        return final_psi
+
+    print("Entering loop of Taylor")
+
+    total_count = 0
+    count = 1000
+    count = int(8 * np.ceil(((obs_norm**2) * (np.log(2 / delta))) / (error**2)))
+    results = []
+
+    sample_ks = Counter(
+        [tuple(x) for x in np.random.choice(cap_k + 1, p=k_probs, size=(count, 2))]
+    )
+
+    print(f"Time:{time} Iterations:{count}")
+
+    for k1, k2 in sorted(sample_ks.keys()):
+        k_count = sample_ks[(k1, k2)]
+        if total_count % 100 == 0:
+            print(f"running: {total_count} out of {count}")
+        total_count += k_count
+
+        # Two extra for rotation
+        run_cost = (k1 + k2 + 2) * r
+        print(f"Run cost: {run_cost}")
+
+        k1_terms = Counter(
+            [
+                tuple(x)
+                for x in np.random.choice(
+                    len(kth_probs[k1]), p=kth_probs[k1], size=(k_count, r)
+                )
+            ]
+        )
+
+        k2_terms = Counter(
+            [
+                tuple(x)
+                for x in np.random.choice(
+                    len(kth_probs[k2]), p=kth_probs[k2], size=(k_count, r)
+                )
+            ]
+        )
+
+        for k1_term, k2_term in zip(k1_terms, k2_terms):
+            final_psi = post_v1v2((k1, k2), list(k1_term), list(k2_term))
+            final_rho = np.outer(final_psi, final_psi.conj())
+
+            result = np.trace(np.abs(obs @ final_rho))
+            results.append(result)
+
+    assert total_count == count
+
+    magn_h = calculate_mu(results, count, [1])
+    return magn_h
 
 
-class TaylorCircuit:
+class Taylor:
     """
     Creates the entire decomposition and then samples from that.
     """
@@ -198,6 +257,7 @@ class TaylorCircuit:
         self.ham_subbed: Optional[Hamiltonian] = None
 
         self.h = h
+        self.success = kwargs.get("success", 0.9)
 
     @property
     def ground_state(self) -> NDArray:
@@ -209,129 +269,28 @@ class TaylorCircuit:
 
     def subsitute_h(self, h_val: float) -> None:
         self.ham_subbed = substitute_parameter(self.ham, self.h, h_val)
-        self.paulis = self.ham_subbed.paulis
-        self.coeffs = self.ham_subbed.coeffs
-        self.beta = np.sum(np.abs(np.array(self.coeffs)))
-        self.coeffs /= self.beta
 
     def construct_parametrized_circuit(self) -> None:
-        """
-        This method is called to construct the LCU for the truncated Taylor
-        series.
-        """
         if self.ham_subbed is None:
             raise ValueError(
                 "h value has not been substituted, qiskit does not support parametrized Hamiltonians."
             )
 
-    def get_unitary(self, ind: int):
-        """
-        Uses the synthesizer for constructing Hamiltonian simulation for given
-        lcu time index.
-
-        Inputs:
-            - ind: Sampled index
-        """
-        # hm = self.ham_subbed
-        # assert hm is not None
-        # return hm.eig_vec @ np.diag(np.exp(complex(0, -1) * self.time * hm.eig_val)) @ hm.eig_vec_inv
-        # decomp = sum_decomposition(self.paulis, self.t_bar, self.r, self.coeffs, self.cap_k)
-        return self.terms[ind]
-
-    def control_unitary(self, ind: int, control_val: int):
-        """
-        Calculates |0><0| U + |1><1| I if control_val = 0
-        Calculates |0><0| I + |1><1| U if control_val = 1
-
-        Where U is unitary for Hamiltonian evolution with time `times[ind]`.
-        """
-
-        unitary = self.get_unitary(ind)
-
-        if control_val == 0:
-            op_1 = np.kron(ZEROZERO, unitary)
-            op_2 = np.kron(ONEONE, self.eye)
-            return op_1 + op_2
-        # Control value is 1
-        else:
-            op_1 = np.kron(ZEROZERO, self.eye)
-            op_2 = np.kron(ONEONE, unitary)
-            return op_1 + op_2
-
-    def post_v1(self, inds: list[int]):
-        if self.rho_init is None:
-            raise ValueError("Initial state not set.")
-
-        final_rho = self.rho_init.copy()
-
-        for ind in inds:
-            v1 = self.control_unitary(ind, control_val=1)
-            final_rho = v1 @ final_rho @ v1.conj().T
-
-        npt.assert_allclose(np.trace(final_rho), 1, atol=1e-3, rtol=1e-3)
-        return final_rho
-
-    def post_v1v2(self, i1s: list[int], i2s: list[int]):
-        final_rho = self.post_v1(i1s)
-
-        for i2 in i2s:
-            v2 = self.control_unitary(i2, control_val=0)
-            final_rho = v2 @ final_rho @ v2.conj().T
-
-        npt.assert_allclose(np.trace(final_rho), 1, atol=1e-3, rtol=1e-3)
-
-        return final_rho
-
-    def get_observation(self, time: float):
-        self.time = time
-        self.t_bar = time * self.beta
-        self.r = 5 * np.ceil(self.t_bar) ** 2
-        # TODO obs_norm
-        self.cap_k = get_cap_k(self.t_bar, obs_norm=1, eps=self.error)
-        self.terms, self.probs = sum_decomposition_terms(
-            self.paulis, self.t_bar, self.r, self.coeffs, self.cap_k
+    def get_observation(self, time):
+        if self.ham_subbed is None:
+            raise ValueError("Parameter not substituted.")
+        return taylor_observation(
+            self.ham_subbed,
+            time,
+            self.error,
+            self.run_obs,
+            self.psi_init,
+            1,
+            success=self.success,
         )
-
-        self.eye = np.identity(self.terms[0].shape[0])
-
-        c_1 = np.sum(np.abs(self.probs))
-        self.probs /= c_1
-        self.inds = np.array(list(range(len(self.terms))))
-
-        count = 1000
-        results = []
-
-        samples_count = Counter(
-            [
-                tuple([tuple(x[0]), tuple(x[1])])
-                for x in np.random.choice(
-                    self.inds, p=self.probs, size=(count, 2, int(self.r))
-                )
-            ]
-        )
-
-        print("Entering loop")
-
-        total_count = 0
-
-        for sample in sorted(samples_count.keys()):
-            s_count = samples_count[sample]
-            if total_count % 100 == 0:
-                print(f"running: {total_count} out of {count}")
-            total_count += s_count
-
-            final_rho = self.post_v1v2(list(sample[0]), list(sample[1]))
-
-            result = np.trace(np.abs(self.run_obs @ final_rho))
-            results.append(result * s_count)
-
-        assert total_count == count
-
-        magn_h = calculate_mu(results, count, [1])
-        return magn_h
 
     def get_observations(
-        self, rho_init: NDArray, observable: Hamiltonian, times: list[float]
+        self, psi_init: NDArray, observable: Hamiltonian, times: list[float]
     ):
         results = []
         self.obs_init = observable.matrix
@@ -340,7 +299,7 @@ class TaylorCircuit:
 
         self._run_obs = run_obs
         self.run_obs = run_obs.to_matrix()
-        self.rho_init = rho_init
+        self.psi_init = psi_init
         for time in times:
             result = self.get_observation(time)
             results.append(result)

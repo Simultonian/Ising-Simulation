@@ -7,9 +7,7 @@ from qiskit.circuit import Parameter
 from ising.hamiltonian import parametrized_ising
 from ising.observables import overall_magnetization
 from ising.utils import read_input_file, close_state
-from ising.simulation.taylor import TaylorCircuit
-from ising.simulation.taylor.taylor_sample import TaylorSample
-from ising.simulation.taylor.taylor_single import TaylorSingle
+from ising.simulation.taylor.taylor import Taylor
 from ising.utils.constants import PLUS
 
 
@@ -24,12 +22,8 @@ def run_trotter(paras):
 
     method = paras["method"]
 
-    if method == "taylor":
-        circuit_synthesis = TaylorCircuit
-    elif method == "taylor_sample":
-        circuit_synthesis = TaylorSample
-    elif method == "taylor_single":
-        circuit_synthesis = TaylorSingle
+    if method == "taylor_single":
+        circuit_synthesis = Taylor
     else:
         raise ValueError("This is Taylor file, method called:", method)
 
@@ -50,7 +44,7 @@ def run_trotter(paras):
             circuit_manager.subsitute_h(h)
             circuit_manager.construct_parametrized_circuit()
 
-            ground_state = circuit_manager.ham_subbed.ground_state
+            ground_state = circuit_manager.ground_state
             init_state = close_state(ground_state, paras["overlap"])
 
             # Taking tensor product of the overlap state with `|+>` which is the state after `H`
