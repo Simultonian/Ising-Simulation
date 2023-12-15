@@ -17,9 +17,7 @@ from qiskit.quantum_info import SparsePauliOp
 
 from ising.hamiltonian import Hamiltonian
 from ising.utils.constants import ONEONE, ZEROZERO
-from ising.singlelcu.simulation.singlelcu import calculate_mu
-
-from ising.simulation.taylor.utils import get_cap_k, calculate_exp, get_alphas
+from ising.simulation.taylor.utils import get_cap_k, calculate_exp, get_alphas, calculate_mu
 
 
 def calculate_decomposition_term(prod_inds, rotation_ind, paulis, t_bar, k):
