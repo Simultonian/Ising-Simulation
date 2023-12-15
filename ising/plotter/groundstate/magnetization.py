@@ -12,7 +12,12 @@ from typing import TypeAlias
 Result: TypeAlias = dict[str, dict[float, float]]
 
 
-METHOD_NAMES = {"analytical": "Exact Solution", "taylor": "Truncated Taylor Series"}
+METHOD_NAMES = {
+    "analytical": "Exact Solution",
+    "taylor": "Truncated Taylor Series",
+    "grouped_lie": "First Order Trotterization",
+    "exact": "Precise Unitaries",
+}
 
 
 def _get_point(res: Result) -> float:

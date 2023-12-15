@@ -1,9 +1,10 @@
 {
   "observable": "magnetization",
   "methods": [
-    "analytical"
+    "analytical",
+    "exact"
   ],
   "input_file": "data/input/groundstate.json",
   "scale": [1.5, 1.7],
-  "labels": ["L"]
+  "labels": ["L", "x"]
 }

@@ -2,11 +2,11 @@
   "start_qubit": "3",
   "end_qubit": "6",
   "qubit_count": "2",
-  "start_h": "-2",
+  "start_h": "-1",
   "end_h": "0.03",
   "count_h": "10",
-  "method": "grouped_lie",
+  "method": "exact",
   "error": "0.1",
-  "overlap": "0.4",
+  "overlap": "0.7",
   "success": "0.1"
 }
