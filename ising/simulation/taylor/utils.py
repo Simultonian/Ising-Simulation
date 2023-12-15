@@ -1,6 +1,7 @@
 import numpy as np
 import math
 
+
 def calculate_mu(mu_samples, count, coeffs):
     """
     Formula is in the algorithm 1 of the paper
