@@ -11,7 +11,7 @@ from ising.simulation.taylor.taylor import Taylor
 from ising.utils.constants import PLUS
 
 
-def run_trotter(paras):
+def run_taylor(paras):
     qubit_wise_answers = {}
     times = np.linspace(
         paras["time"] / paras["count_time"], paras["time"], paras["count_time"]
@@ -21,32 +21,32 @@ def run_trotter(paras):
     )
 
     method = paras["method"]
-
     if method != "taylor_single":
         raise ValueError("This is Taylor file, method called:", method)
 
-    qubits = map(int, np.linspace(paras["start_qubit"], paras["end_qubit"], paras["qubit_count"]))
+    qubits = map(
+        int, np.linspace(paras["start_qubit"], paras["end_qubit"], paras["qubit_count"])
+    )
 
     for num_qubit in qubits:
-        observable = overall_magnetization(num_qubit)
         h_para = Parameter("h")
         parametrized_ham = parametrized_ising(num_qubit, h_para)
         circuit_manager = Taylor(
             parametrized_ham, h_para, paras["error"], success=paras.get("success", None)
         )
 
-        circuit_manager.substitute_obs(observable)
+        circuit_manager.substitute_obs(overall_magnetization(num_qubit))
         h_wise_answers = {}
         for h in h_values:
             print(f"Running for {num_qubit} qubits and h:{h}")
             circuit_manager.subsitute_h(h)
 
             ground_state = circuit_manager.ground_state
-            init_state = close_state(ground_state, paras["overlap"])
 
             # Taking tensor product of the overlap state with `|+>` which is the state after `H`
-            init_state = np.kron(PLUS, init_state)
-            init_state = init_state.reshape(-1, 1)
+            init_state = np.kron(
+                PLUS, close_state(ground_state, paras["overlap"])
+            ).reshape(-1, 1)
 
             # Checking for norm
             np.testing.assert_almost_equal(np.sum(np.abs(init_state) ** 2), 1)
@@ -59,34 +59,28 @@ def run_trotter(paras):
     return qubit_wise_answers
 
 
+def file_taylor(file_name):
+    parameters = read_input_file(file_name)
+    results = run_taylor(parameters)
+
+    file_name = f"data/simulation/magnetization_{parameters['method']}_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
+
+    print(f"Saving results at: {file_name}")
+    with open(file_name, "w") as file:
+        json.dump(results, file)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Overall magnetization of Ising using Qiskit"
     )
     parser.add_argument("--input", type=str, help="File for input parameters.")
     args = parser.parse_args()
-
-    parameters = read_input_file(args.input)
-
-    results = run_trotter(parameters)
-
-    file_name = f"data/simulation/magnetization_{parameters['method']}_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
-
-    print(f"Saving results at: {file_name}")
-    with open(file_name, "w") as file:
-        json.dump(results, file)
+    file_taylor(args.input)
 
 
 def test_main():
-    parameters = read_input_file("data/input/taylor.json")
-
-    results = run_trotter(parameters)
-
-    file_name = f"data/simulation/magnetization_{parameters['method']}_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
-
-    print(f"Saving results at: {file_name}")
-    with open(file_name, "w") as file:
-        json.dump(results, file)
+    file_taylor("data/input/taylor.json")
 
 
 if __name__ == "__main__":

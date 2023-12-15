@@ -29,26 +29,22 @@ def calculate_decomposition_term(prod_inds, rotation_ind, paulis, t_bar, k):
     cur_pauli = Pauli("I" * len(exp_pair[0]))
     for ind in prod_inds:
         pauli, prob = paulis[ind]
+        assert prob > 0
         cur_prob *= prob
         cur_pauli = cur_pauli @ pauli
 
     exp_pauli, exp_prob = exp_pair
-    if exp_prob < 0:
-        exp_pauli = exp_pauli * -1
-        exp_prob *= -1
+    assert exp_prob > 0
 
     exp_pauli = exp_pauli.to_matrix()
     rotated = calculate_exp(t_bar, exp_pauli, k)
 
-    assert exp_prob >= 0
     cur_prob *= exp_prob
     cur_pauli = cur_pauli.to_matrix()
     cur_pauli = cur_pauli @ rotated
 
     assert cur_pauli is not None
-    if cur_prob < 0:
-        cur_prob *= -1
-        cur_pauli *= -1
+    assert cur_prob > 0
 
     return (cur_pauli, cur_prob)
 
@@ -96,17 +92,13 @@ def sum_decomposition_k_fold(paulis, t_bar, r, coeffs, cap_k):
             terms.append(cur_pauli)
             probs.append(cur_prob)
 
-        probs = np.array(probs)
-        probs = probs.real
+        probs = np.array(probs).real
         npt.assert_allclose(np.sum(probs), 1, atol=1e-5, rtol=1e-5)
 
         k_probs.append(abs(alpha_term))
 
         kth_probs.append(probs)
         kth_paulis.append(terms)
-
-    assert len(k_probs) == len(kth_probs)
-    assert len(k_probs) == len(kth_paulis)
 
     k_probs = np.array(k_probs)
     k_probs /= np.sum(k_probs)
@@ -121,7 +113,7 @@ def taylor_observation(
     error: float,
     obs,
     psi_init,
-    success:float,
+    success: float,
 ):
     beta = np.sum(np.array(coeffs))
     coeffs /= beta
@@ -141,6 +133,16 @@ def taylor_observation(
     print("Decomposition complete")
 
     eye = np.identity(kth_paulis[0][0].shape[0])
+
+    def get_k_terms(k, count):
+        return Counter(
+            [
+                tuple(x)
+                for x in np.random.choice(
+                    len(kth_probs[k]), p=kth_probs[k], size=(count, r)
+                )
+            ]
+        )
 
     def get_unitary(k, ind: int):
         return kth_paulis[k][ind]
@@ -165,7 +167,7 @@ def taylor_observation(
             op_2 = np.kron(ONEONE, unitary)
             return op_1 + op_2
 
-    def post_v1(k, inds: list[int]):
+    def post_v1(k, inds: tuple[int, ...]):
         final_psi = psi_init.copy()
 
         for ind in inds:
@@ -175,7 +177,7 @@ def taylor_observation(
         npt.assert_almost_equal(np.sum(np.abs(final_psi) ** 2), 1)
         return final_psi
 
-    def post_v1v2(ks: tuple[int, int], i1s: list[int], i2s: list[int]):
+    def post_v1v2(ks: tuple[int, int], i1s: tuple[int, ...], i2s: tuple[int, ...]):
         final_psi = post_v1(ks[0], i1s)
 
         for i2 in i2s:
@@ -185,11 +187,10 @@ def taylor_observation(
         npt.assert_almost_equal(np.sum(np.abs(final_psi) ** 2), 1)
         return final_psi
 
-    print("Entering loop of Taylor")
-
     total_count = 0
-    count = 1000
-    count = int(8 * np.ceil(((obs_norm**2) * (np.log(2 / (1 - success)))) / (error**2)))
+    count = int(
+        8 * np.ceil(((obs_norm**2) * (np.log(2 / (1 - success)))) / (error**2))
+    )
     results = []
 
     sample_ks = Counter(
@@ -204,30 +205,11 @@ def taylor_observation(
             print(f"running: {total_count} out of {count}")
         total_count += k_count
 
-        # Two extra for rotation
-        run_cost = (k1 + k2 + 2) * r
-        print(f"Run cost: {run_cost}")
-
-        k1_terms = Counter(
-            [
-                tuple(x)
-                for x in np.random.choice(
-                    len(kth_probs[k1]), p=kth_probs[k1], size=(k_count, r)
-                )
-            ]
-        )
-
-        k2_terms = Counter(
-            [
-                tuple(x)
-                for x in np.random.choice(
-                    len(kth_probs[k2]), p=kth_probs[k2], size=(k_count, r)
-                )
-            ]
-        )
+        k1_terms = get_k_terms(k1, k_count)
+        k2_terms = get_k_terms(k2, k_count)
 
         for k1_term, k2_term in zip(k1_terms, k2_terms):
-            final_psi = post_v1v2((k1, k2), list(k1_term), list(k2_term))
+            final_psi = post_v1v2((k1, k2), k1_term, k2_term)
             final_rho = np.outer(final_psi, final_psi.conj())
 
             result = np.trace(np.abs(obs @ final_rho))
@@ -247,7 +229,7 @@ class Taylor:
     def __init__(self, ham: Hamiltonian, h_para: Parameter, error: float, **kwargs):
         self._ham = ham
         self.h_para = h_para
-        self.ham : Optional[Hamiltonian] = None
+        self.ham: Optional[Hamiltonian] = None
 
         self.num_qubits = ham.sparse_repr.num_qubits
         self.error = error
@@ -299,7 +281,5 @@ class Taylor:
             self.success,
         )
 
-    def get_observations(
-        self, psi_init: NDArray, times: list[float]
-    ):
+    def get_observations(self, psi_init: NDArray, times: list[float]):
         return [self.get_observation(time, psi_init) for time in times]
