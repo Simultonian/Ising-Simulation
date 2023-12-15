@@ -22,27 +22,24 @@ def run_trotter(paras):
 
     method = paras["method"]
 
-    if method == "taylor_single":
-        circuit_synthesis = Taylor
-    else:
+    if method != "taylor_single":
         raise ValueError("This is Taylor file, method called:", method)
 
-    qubits = np.linspace(paras["start_qubit"], paras["end_qubit"], paras["qubit_count"])
+    qubits = map(int, np.linspace(paras["start_qubit"], paras["end_qubit"], paras["qubit_count"]))
 
-    for _num_qubit in qubits:
-        num_qubit = int(_num_qubit)
+    for num_qubit in qubits:
         observable = overall_magnetization(num_qubit)
         h_para = Parameter("h")
         parametrized_ham = parametrized_ising(num_qubit, h_para)
-        circuit_manager = circuit_synthesis(
+        circuit_manager = Taylor(
             parametrized_ham, h_para, paras["error"], success=paras.get("success", None)
         )
 
+        circuit_manager.substitute_obs(observable)
         h_wise_answers = {}
         for h in h_values:
             print(f"Running for {num_qubit} qubits and h:{h}")
             circuit_manager.subsitute_h(h)
-            circuit_manager.construct_parametrized_circuit()
 
             ground_state = circuit_manager.ground_state
             init_state = close_state(ground_state, paras["overlap"])
@@ -54,7 +51,7 @@ def run_trotter(paras):
             # Checking for norm
             np.testing.assert_almost_equal(np.sum(np.abs(init_state) ** 2), 1)
 
-            ans = circuit_manager.get_observations(init_state, observable, times)
+            ans = circuit_manager.get_observations(init_state, times)
             h_wise_answers[h] = ans
 
         qubit_wise_answers[num_qubit] = h_wise_answers

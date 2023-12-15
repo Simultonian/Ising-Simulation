@@ -115,26 +115,20 @@ def sum_decomposition_k_fold(paulis, t_bar, r, coeffs, cap_k):
 
 
 def taylor_observation(
-    ham: Hamiltonian,
+    paulis: list[Pauli],
+    coeffs: NDArray,
     time: float,
     error: float,
     obs,
     psi_init,
-    r_factor: float,
-    **kwargs,
+    success:float,
 ):
-    delta = 1 - kwargs.get("success", 0.9)
-    paulis = ham.paulis
-    coeffs = ham.coeffs
-    beta = np.sum(np.abs(np.array(coeffs)))
+    beta = np.sum(np.array(coeffs))
     coeffs /= beta
 
     t_bar = time * beta
-    r = int(5 * np.ceil(t_bar) ** 2)
     # For t_bar < 1, r is too small to get accurate results.
-    r = max(20, r)
-
-    r *= r_factor
+    r = max(20, int(5 * np.ceil(t_bar) ** 2))
 
     # TODO obs_norm
     obs_norm = 1
@@ -195,7 +189,7 @@ def taylor_observation(
 
     total_count = 0
     count = 1000
-    count = int(8 * np.ceil(((obs_norm**2) * (np.log(2 / delta))) / (error**2)))
+    count = int(8 * np.ceil(((obs_norm**2) * (np.log(2 / (1 - success)))) / (error**2)))
     results = []
 
     sample_ks = Counter(
@@ -250,58 +244,62 @@ class Taylor:
     Creates the entire decomposition and then samples from that.
     """
 
-    def __init__(self, ham: Hamiltonian, h: Parameter, error: float, **kwargs):
-        self.ham = ham
+    def __init__(self, ham: Hamiltonian, h_para: Parameter, error: float, **kwargs):
+        self._ham = ham
+        self.h_para = h_para
+        self.ham : Optional[Hamiltonian] = None
+
         self.num_qubits = ham.sparse_repr.num_qubits
         self.error = error
-        self.ham_subbed: Optional[Hamiltonian] = None
 
-        self.h = h
         self.success = kwargs.get("success", 0.9)
 
     @property
     def ground_state(self) -> NDArray:
-        if self.ham_subbed is None:
+        if self.ham is None:
             raise ValueError(
                 "h value has not been substituted, qiskit does not support parametrized Hamiltonians."
             )
-        return self.ham_subbed.ground_state
+        return self.ham.ground_state
 
     def subsitute_h(self, h_val: float) -> None:
-        self.ham_subbed = substitute_parameter(self.ham, self.h, h_val)
+        self.ham = substitute_parameter(self._ham, self.h_para, h_val)
+        paulis, coeffs = [], []
 
-    def construct_parametrized_circuit(self) -> None:
-        if self.ham_subbed is None:
-            raise ValueError(
-                "h value has not been substituted, qiskit does not support parametrized Hamiltonians."
-            )
+        for pauli, _coeff in zip(self.ham.paulis, self.ham.coeffs):
+            assert _coeff.imag == 0
+            coeff = _coeff.real
+            if coeff < 0:
+                paulis.append(-pauli)
+                coeffs.append(-coeff)
+            elif coeff > 0:
+                paulis.append(pauli)
+                coeffs.append(coeff)
 
-    def get_observation(self, time):
-        if self.ham_subbed is None:
+        self.paulis, self.coeffs = paulis, np.array(coeffs)
+
+    def substitute_obs(self, obs: Hamiltonian):
+        obs_x = SparsePauliOp(["X"], np.array([1.0]))
+        run_obs = obs_x.tensor(obs.sparse_repr)
+        self.obs = run_obs.to_matrix()
+
+    def get_observation(self, time, psi_init):
+        if self.ham is None:
             raise ValueError("Parameter not substituted.")
+        if self.obs is None:
+            raise ValueError("Observable not substituted.")
+
         return taylor_observation(
-            self.ham_subbed,
+            self.paulis,
+            self.coeffs,
             time,
             self.error,
-            self.run_obs,
-            self.psi_init,
-            1,
-            success=self.success,
+            self.obs,
+            psi_init,
+            self.success,
         )
 
     def get_observations(
-        self, psi_init: NDArray, observable: Hamiltonian, times: list[float]
+        self, psi_init: NDArray, times: list[float]
     ):
-        results = []
-        self.obs_init = observable.matrix
-        obs_x = SparsePauliOp(["X"], [1.0])
-        run_obs = obs_x.tensor(observable.sparse_repr)
-
-        self._run_obs = run_obs
-        self.run_obs = run_obs.to_matrix()
-        self.psi_init = psi_init
-        for time in times:
-            result = self.get_observation(time)
-            results.append(result)
-
-        return results
+        return [self.get_observation(time, psi_init) for time in times]
