@@ -34,6 +34,7 @@ def log_label_maker(values: list[float]) -> list[str]:
 
 def plot_method(paras, results: Result, **kwargs):
     style = kwargs.get("style")
+    color = kwargs.get("color")
 
     for num_qubit, h_wise_results in results.items():
         # h_wise_results: h -> magn
@@ -46,9 +47,12 @@ def plot_method(paras, results: Result, **kwargs):
                 label=f"N={num_qubit}",
                 marker=style,
                 linewidth=3,
+                color=color,
             )
         else:
-            ax = sns.lineplot(x=x_values, y=y_values, label=f"N={num_qubit}")
+            ax = sns.lineplot(
+                x=x_values, y=y_values, label=f"N={num_qubit}", color=color
+            )
 
 
 def plot_combined(
@@ -56,6 +60,7 @@ def plot_combined(
 ):
     scale = kwargs.get("scale", (1, 1))
     styles = kwargs.get("labels", ["L"] * len(method_wise_results))
+    colors = kwargs.get("colors", [None] * len(method_wise_results))
 
     max_h = 10 ** paras.get("end_h")
 
@@ -73,7 +78,7 @@ def plot_combined(
             alpha=0.0,
             label=METHOD_NAMES[method],
         )
-        plot_method(paras, results, style=styles[ind])
+        plot_method(paras, results, style=styles[ind], color=colors[ind])
 
     # SETTING: AXIS VISIBILITY
     ax.spines["top"].set_visible(False)
