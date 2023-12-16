@@ -202,6 +202,7 @@ class GroupedLieCircuit:
         eig_vec = self.svd_map[g_ind][1]
         eig_inv = self.svd_map[g_ind][2]
 
+        assert reps > 0
         return (
             eig_vec
             @ np.diag(np.exp(complex(0, -1) * (time / reps) * eig_val))
@@ -213,6 +214,7 @@ class GroupedLieCircuit:
         eig_vec = self.svd_map[g_ind][1]
         eig_inv = self.svd_map[g_ind][2]
 
+        assert reps > 0
         return (
             eig_vec
             @ np.diag(np.exp(complex(0, -1) * (time / reps) * eig_sum))
@@ -232,7 +234,9 @@ class GroupedLieCircuit:
             group_op = self.group_matrix(g_ind, time, reps)
             final_op = np.dot(group_op, final_op)
 
-        return np.linalg.matrix_power(final_op, reps)
+        mat = np.linalg.matrix_power(final_op, reps)
+
+        return mat
 
     def get_observation(
         self, rho_init: NDArray, observable: NDArray, time: float, reps: int

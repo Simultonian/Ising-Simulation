@@ -86,6 +86,8 @@ class LCUSynthesizer:
         Inputs:
             - ind: Sampled index
         """
+        # reps = int(abs(self.lcu_times[ind]))
+        # reps = max(1, reps)
         return self.synth.matrix(self.lcu_times[ind])
 
     def control_unitary(self, ind: int, control_val: int):

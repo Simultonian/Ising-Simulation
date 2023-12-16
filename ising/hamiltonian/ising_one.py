@@ -18,6 +18,7 @@ def trotter_reps(ham: SparsePauliOp, time: float, eps: float) -> int:
     if final < 0:
         raise ValueError("Incorrect calculation")
 
+    final = max(final, 1)
     return final
 
 
