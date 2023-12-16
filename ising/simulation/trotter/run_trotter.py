@@ -9,9 +9,7 @@ from ising.hamiltonian import parametrized_ising
 from ising.observables import overall_magnetization
 from ising.utils import read_input_file, close_state
 from ising.simulation.trotter import (
-    LieCircuit,
     QDriftCircuit,
-    SparseLie,
     GroupedLieCircuit,
     GroupedQDriftCircuit,
     TwoQDriftCircuit,
@@ -30,12 +28,8 @@ def run_trotter(paras):
 
     method = paras["method"]
 
-    if method == "lie":
-        circuit_synthesis = LieCircuit
-    elif method == "qdrift":
+    if method == "qdrift":
         circuit_synthesis = QDriftCircuit
-    elif method == "sparse_lie":
-        circuit_synthesis = SparseLie
     elif method == "grouped_lie":
         circuit_synthesis = GroupedLieCircuit
     elif method == "grouped_qdrift":

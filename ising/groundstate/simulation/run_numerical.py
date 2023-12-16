@@ -12,7 +12,6 @@ from ising.hamiltonian import parametrized_ising
 from ising.observables import overall_magnetization
 from ising.utils import read_input_file, close_state
 from ising.simulation.trotter import (
-    LieCircuit,
     QDriftCircuit,
     GroupedLieCircuit,
     GroupedQDriftCircuit,
@@ -25,7 +24,6 @@ from ising.groundstate.simulation.singlelcu import LCUSynthesizer
 
 SYNTH_MAP = {
     "exact": ExactSimulation,
-    "lie": LieCircuit,
     "qdrift": QDriftCircuit,
     "grouped_lie": GroupedLieCircuit,
     "grouped_qdrift": GroupedQDriftCircuit,
