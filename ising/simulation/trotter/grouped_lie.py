@@ -147,6 +147,7 @@ class GroupedLieCircuit:
         self.num_qubits = ham.sparse_repr.num_qubits
         self.error = error
         self.ham_subbed: Optional[Hamiltonian] = None
+        self.obs: Optional[NDArray] = None
 
         self.h = h
         self.time = Parameter("t")
@@ -190,10 +191,7 @@ class GroupedLieCircuit:
         ]
 
     def construct_parametrized_circuit(self) -> None:
-        if self.ham_subbed is None:
-            raise ValueError(
-                "h value has not been substituted, qiskit does not support parametrized Hamiltonians."
-            )
+        pass
 
     @lru_cache(maxsize=MAXSIZE)
     def pauli_matrix(self, pauli: Pauli, time: float, reps: int) -> NDArray:
@@ -234,37 +232,36 @@ class GroupedLieCircuit:
             group_op = self.group_matrix(g_ind, time, reps)
             final_op = np.dot(group_op, final_op)
 
-        mat = np.linalg.matrix_power(final_op, reps)
+        return np.linalg.matrix_power(final_op, reps)
 
-        return mat
+    def substitute_obs(self, obs: Hamiltonian):
+        self.obs = obs.matrix
 
-    def get_observation(
-        self, rho_init: NDArray, observable: NDArray, time: float, reps: int
-    ):
-        results = []
+    def get_observation(self, psi_init: NDArray, time: float, reps: int):
+        if self.obs is None:
+            raise ValueError("Observable not set")
+
         unitary = self.matrix(time, reps)
 
-        assert self.ham_subbed is not None
+        psi_final = unitary @ psi_init
+        rho_final = np.outer(psi_final, psi_final.conj())
 
-        rho_final = unitary @ rho_init @ unitary.conj().T
-        result = np.trace(np.abs(observable @ rho_final))
-        results.append(result)
+        return np.trace(np.abs(self.obs @ rho_final))
 
-        return results
+    def get_observations(self, psi_init: NDArray, times: list[float]):
+        if self.obs is None:
+            raise ValueError("Observable not set")
 
-    def get_observations(
-        self, rho_init: NDArray, observable: NDArray, times: list[float]
-    ):
         results = []
         for time in times:
             unitary = self.matrix(time)
+            # assert self.ham_subbed is not None
+            # depth = circuit_depth(self.ham_subbed, time, self.error)
+            # print(f"Time: {time} Depth: {depth}")
 
-            assert self.ham_subbed is not None
-            depth = circuit_depth(self.ham_subbed, time, self.error)
-            print(f"Time: {time} Depth: {depth}")
-
-            rho_final = unitary @ rho_init @ unitary.conj().T
-            result = np.trace(np.abs(observable @ rho_final))
+            final_psi = unitary @ psi_init
+            final_rho = np.outer(final_psi, final_psi.conj())
+            result = np.trace(np.abs(self.obs @ final_rho))
             results.append(result)
 
         return results

@@ -9,7 +9,6 @@ from ising.hamiltonian import Hamiltonian
 from ising.utils.constants import ONEONE, ZEROZERO, PLUS
 from ising.utils import close_state, MAXSIZE
 from ising.groundstate.simulation.utils import (
-    spectral_norm,
     calculate_mu,
     ground_state_constants,
     calculate_lcu_constants,
@@ -26,34 +25,43 @@ class LCUSynthesizer:
             - observable: Observable to run LCU simulation on.
 
         Kwargs must contain:
-            - eeta
-            - eps
-            - prob
+            - overlap
+            - error
+            - success
         """
         self.synth = synthesizer
+
         obs_x = SparsePauliOp(["X"], [1.0])
         run_obs = obs_x.tensor(observable.sparse_repr)
 
         self.run_obs = run_obs.to_matrix()
+
         # TODO: Replace with `spectral_norm`
         self.obs_norm = 1
 
-        self.params = {x: kwargs[x] for x in ["eeta", "eps", "prob"]}
+        # Useful constants for single-ancilla LCU groundstate
+        self.overlap = kwargs["overlap"]
+        self.error = kwargs["error"]
+        self.success = kwargs["success"]
+
         self.ground_params = ground_state_constants(
             self.synth.ham_subbed.spectral_gap,
-            self.params["eeta"],
-            self.params["eps"],
-            self.params["prob"],
+            self.overlap,
+            self.error,
+            self.success,
             self.obs_norm,
         )
 
+        # Decomposition information fully contained in this
         self.lcu_coeffs, self.lcu_times = calculate_lcu_constants(
             self.ground_params["m"],
             self.ground_params["delta_t"],
             self.ground_params["t"],
         )
-        self.lcu_indices = list(range(len(self.lcu_times)))
 
+        """
+        Preparation of Initial State
+        """
         self.eye = np.identity(self.synth.ham_subbed.eig_vec.shape[0])
 
         # Normalized plus state of size N: [1...1] / sqrt{N}
@@ -66,17 +74,14 @@ class LCUSynthesizer:
 
         init_state = close_state(
             state=self.synth.ground_state,
-            overlap=self.params["eeta"],
+            overlap=self.overlap,
             other_states=np.array([plus_state, computational_state]),
         )
         init_state = init_state.reshape(-1, 1)
         init_complete = np.kron(PLUS, init_state)
 
         npt.assert_almost_equal(np.sum(np.abs(init_complete) ** 2), 1)
-
-        self.rho_init = np.outer(init_complete, init_complete.conj())
-
-        npt.assert_almost_equal(np.trace(self.rho_init), 1)
+        self.psi_init = init_complete
 
     def get_unitary(self, ind: int):
         """
@@ -86,8 +91,6 @@ class LCUSynthesizer:
         Inputs:
             - ind: Sampled index
         """
-        # reps = int(abs(self.lcu_times[ind]))
-        # reps = max(1, reps)
         return self.synth.matrix(self.lcu_times[ind])
 
     def control_unitary(self, ind: int, control_val: int):
@@ -112,31 +115,34 @@ class LCUSynthesizer:
 
     @lru_cache(maxsize=MAXSIZE)
     def post_v1(self, ind):
-        final_rho = self.rho_init.copy()
+        psi_final = self.psi_init.copy()
         v1 = self.control_unitary(ind, control_val=1)
-        final_rho = v1 @ final_rho @ v1.conj().T
-        npt.assert_allclose(np.trace(final_rho), 1, atol=1e-3, rtol=1e-3)
-        return final_rho
+        psi_final = v1 @ psi_final
+        npt.assert_allclose(np.sum(np.abs(psi_final) ** 2), 1, atol=1e-5)
+
+        return psi_final
 
     def post_v1v2(self, i1, i2):
-        final_rho = self.post_v1(i1)
+        psi_final = self.post_v1(i1)
 
         v2 = self.control_unitary(i2, control_val=0)
-        final_rho = v2 @ final_rho @ v2.conj().T
+        psi_final = v2 @ psi_final
+        npt.assert_allclose(np.sum(np.abs(psi_final) ** 2), 1, atol=1e-5)
 
-        npt.assert_allclose(np.trace(final_rho), 1, atol=1e-3, rtol=1e-3)
-
-        return final_rho
+        return psi_final
 
     def calculate_mu(self):
         p = np.abs(self.lcu_coeffs) / np.linalg.norm(self.lcu_coeffs, ord=1)
         count = self.ground_params["count"]
 
-        print("Entering loop")
+        print("Entering loop mu")
         results = []
 
         samples_count = Counter(
-            [tuple(x) for x in np.random.choice(self.lcu_indices, p=p, size=(count, 2))]
+            [
+                tuple(x)
+                for x in np.random.choice(len(self.lcu_times), p=p, size=(count, 2))
+            ]
         )
 
         total_count = 0
@@ -147,12 +153,12 @@ class LCUSynthesizer:
                 print(f"running: {total_count} out of {count}")
             total_count += s_count
 
-            final_rho = self.post_v1v2(sample[0], sample[1])
+            psi_final = self.post_v1v2(sample[0], sample[1])
+            final_rho = np.outer(psi_final, psi_final.conj())
 
             result = np.trace(np.abs(self.run_obs @ final_rho))
             results.append(result * s_count)
 
         assert total_count == count
 
-        magn_h = calculate_mu(results, count, self.lcu_coeffs)
-        return magn_h
+        return calculate_mu(results, count, self.lcu_coeffs)

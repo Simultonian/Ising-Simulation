@@ -5,12 +5,11 @@ import numpy as np
 from ising.hamiltonian import parametrized_ising
 from ising.utils import read_input_file
 
-from qiskit.quantum_info import Operator
 from qiskit.circuit import Parameter
 
 from ising.hamiltonian import parametrized_ising
 from ising.observables import overall_magnetization
-from ising.utils import read_input_file, close_state
+from ising.utils import read_input_file
 from ising.simulation.trotter import (
     QDriftCircuit,
     GroupedLieCircuit,
@@ -60,19 +59,12 @@ def run_numerical(paras):
             lcu_run = LCUSynthesizer(
                 circuit_manager,
                 observable,
-                eeta=paras["overlap"],
-                eps=paras["error"],
-                prob=paras["success"],
+                overlap=paras["overlap"],
+                error=paras["error"],
+                success=paras["success"],
             )
 
-            ground_state = circuit_manager.ground_state
-            init_state = close_state(ground_state, paras["overlap"])
-            rho_init = np.outer(init_state, init_state.conj().T)
-
-            rho_init = np.array(Operator(rho_init).reverse_qargs().data)
-
-            ans = lcu_run.calculate_mu()
-            h_wise_answers[h] = ans
+            h_wise_answers[h] = lcu_run.calculate_mu()
 
         qubit_wise_answers[num_qubit] = h_wise_answers
 
