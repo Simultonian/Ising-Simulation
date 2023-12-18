@@ -7,8 +7,14 @@ from qiskit.circuit import Parameter
 from ising.hamiltonian import parametrized_ising
 from ising.observables import overall_magnetization
 from ising.utils import read_input_file, close_state
-from ising.simulation.taylor.taylor_sample import TaylorSample
+from ising.simulation.taylor import TaylorSample, Taylor
 from ising.utils.constants import PLUS
+
+
+SYNTH = {
+    "taylor_sample": TaylorSample,
+    "taylor_single": Taylor,
+}
 
 
 def run_taylor(paras):
@@ -21,8 +27,10 @@ def run_taylor(paras):
     )
 
     method = paras["method"]
-    if method != "taylor_single":
+    if method not in SYNTH:
         raise ValueError("This is Taylor file, method called:", method)
+
+    synth = SYNTH[method]
 
     qubits = map(
         int, np.linspace(paras["start_qubit"], paras["end_qubit"], paras["qubit_count"])
@@ -31,7 +39,7 @@ def run_taylor(paras):
     for num_qubit in qubits:
         h_para = Parameter("h")
         parametrized_ham = parametrized_ising(num_qubit, h_para)
-        circuit_manager = TaylorSample(
+        circuit_manager = synth(
             parametrized_ham, h_para, paras["error"], success=paras.get("success", None)
         )
 
