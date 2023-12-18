@@ -16,6 +16,7 @@ from collections import Counter
 from qiskit.quantum_info import SparsePauliOp
 
 from ising.hamiltonian import Hamiltonian
+from ising.utils import MAXSIZE, control_version
 from ising.utils.constants import ONEONE, ZEROZERO
 from ising.simulation.taylor.utils import (
     get_cap_k,
@@ -135,17 +136,8 @@ def taylor_observation(
     )
     print("Decomposition complete")
 
-    eye = np.identity(kth_paulis[0][0].shape[0])
-
-    def get_k_terms(k, count):
-        return Counter(
-            [
-                tuple(x)
-                for x in np.random.choice(
-                    len(kth_probs[k]), p=kth_probs[k], size=(count, r)
-                )
-            ]
-        )
+    def get_k_terms(k):
+        return np.random.choice(len(kth_probs[k]), p=kth_probs[k], size=r)
 
     def get_unitary(k, ind: int):
         return kth_paulis[k][ind]
@@ -154,24 +146,12 @@ def taylor_observation(
         """
         Calculates |0><0| U + |1><1| I if control_val = 0
         Calculates |0><0| I + |1><1| U if control_val = 1
-
-        Where U is unitary for Hamiltonian evolution with time `times[ind]`.
         """
+        return control_version(get_unitary(k, ind), control_val)
 
-        unitary = get_unitary(k, ind)
-
-        if control_val == 0:
-            op_1 = np.kron(ZEROZERO, unitary)
-            op_2 = np.kron(ONEONE, eye)
-            return op_1 + op_2
-        # Control value is 1
-        else:
-            op_1 = np.kron(ZEROZERO, eye)
-            op_2 = np.kron(ONEONE, unitary)
-            return op_1 + op_2
-
-    def post_v1(k, inds: tuple[int, ...]):
+    def post_v1(k):
         final_psi = psi_init.copy()
+        inds = get_k_terms(k)
 
         for ind in inds:
             v1 = control_unitary(k, ind, control_val=1)
@@ -180,11 +160,12 @@ def taylor_observation(
         npt.assert_almost_equal(np.sum(np.abs(final_psi) ** 2), 1)
         return final_psi
 
-    def post_v1v2(ks: tuple[int, int], i1s: tuple[int, ...], i2s: tuple[int, ...]):
-        final_psi = post_v1(ks[0], i1s)
+    def post_v1v2(k1: int, k2: int):
+        final_psi = post_v1(k1)
+        i2s = get_k_terms(k2)
 
         for i2 in i2s:
-            v2 = control_unitary(ks[1], i2, control_val=0)
+            v2 = control_unitary(k2, i2, control_val=0)
             final_psi = v2 @ final_psi
 
         npt.assert_almost_equal(np.sum(np.abs(final_psi) ** 2), 1)
@@ -208,11 +189,8 @@ def taylor_observation(
             print(f"running: {total_count} out of {count}")
         total_count += k_count
 
-        k1_terms = get_k_terms(k1, k_count)
-        k2_terms = get_k_terms(k2, k_count)
-
-        for k1_term, k2_term in zip(k1_terms, k2_terms):
-            final_psi = post_v1v2((k1, k2), k1_term, k2_term)
+        for _ in range(k_count):
+            final_psi = post_v1v2(k1, k2)
             final_rho = np.outer(final_psi, final_psi.conj())
 
             result = np.trace(np.abs(obs @ final_rho))
