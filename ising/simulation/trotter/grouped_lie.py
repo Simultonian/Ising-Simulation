@@ -268,8 +268,7 @@ class GroupedLieCircuit:
             # depth = circuit_depth(self.ham_subbed, time, self.error)
             # print(f"Time: {time} Depth: {depth}")
 
-            unitary = self.matrix(time)
-            final_psi = unitary @ psi_init
+            final_psi = self.evolve(psi_init, time)
             final_rho = np.outer(final_psi, final_psi.conj())
             result = np.trace(np.abs(self.obs @ final_rho))
             results.append(result)

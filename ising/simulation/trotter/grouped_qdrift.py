@@ -9,7 +9,7 @@ from qiskit.circuit import Parameter
 from ising.hamiltonian import Hamiltonian, general_grouping
 from ising.hamiltonian import Hamiltonian, general_grouping, qdrift_count
 from ising.hamiltonian.hamiltonian import substitute_parameter
-from ising.utils import MAXSIZE
+from ising.utils import MAXSIZE, control_version
 
 from ising.simulation.trotter import GroupedLie
 from ising.simulation.trotter.grouped_lie import (
@@ -168,6 +168,15 @@ class GSQDriftCircuit:
 
         return final_op
 
+    def evolve(self, psi_init: NDArray, time) -> NDArray:
+        return self.matrix(time) @ psi_init
+
+    def control_evolve(
+        self, psi_init: NDArray, time: float, control_val: int
+    ) -> NDArray:
+        op = control_version(self.matrix(time), control_val)
+        return op @ psi_init
+
     def get_observations(self, psi_init: NDArray, times: list[float]):
         if self.obs is None:
             raise ValueError("Observable not set")
@@ -177,8 +186,7 @@ class GSQDriftCircuit:
             depth = qdrift_count(self.lambd, time, self.error)
             print(f"Time: {time} Depth: {depth}")
 
-            unitary = self.matrix(time)
-            final_psi = unitary @ psi_init
+            final_psi = self.evolve(psi_init, time)
             final_rho = np.outer(final_psi, final_psi.conj())
             result = np.trace(np.abs(self.obs @ final_rho))
             results.append(result)
