@@ -17,7 +17,7 @@ from ising.simulation.trotter import (
 )
 from ising.simulation.exact import ExactSimulation
 
-from ising.groundstate.simulation.singlelcu import LCUSynthesizer
+from ising.groundstate.simulation.lcusynth import LCUSynthesizer
 
 
 SYNTH_MAP = {
