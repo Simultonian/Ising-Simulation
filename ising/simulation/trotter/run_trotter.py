@@ -10,7 +10,6 @@ from ising.utils import read_input_file, close_state
 from ising.simulation.trotter import (
     QDriftCircuit,
     GroupedLieCircuit,
-    GroupedQDriftCircuit,
     GSQDriftCircuit,
 )
 
@@ -18,7 +17,6 @@ from ising.simulation.trotter import (
 SYNTH_MAP = {
     "qdrift": QDriftCircuit,
     "grouped_lie": GroupedLieCircuit,
-    "grouped_qdrift": GroupedQDriftCircuit,
     "gs_qdrift": GSQDriftCircuit,
 }
 

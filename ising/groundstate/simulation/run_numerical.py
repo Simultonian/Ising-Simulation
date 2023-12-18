@@ -13,7 +13,6 @@ from ising.utils import read_input_file
 from ising.simulation.trotter import (
     QDriftCircuit,
     GroupedLieCircuit,
-    GroupedQDriftCircuit,
     GSQDriftCircuit,
 )
 from ising.simulation.exact import ExactSimulation
@@ -25,7 +24,6 @@ SYNTH_MAP = {
     "exact": ExactSimulation,
     "qdrift": QDriftCircuit,
     "grouped_lie": GroupedLieCircuit,
-    "grouped_qdrift": GroupedQDriftCircuit,
     "gs_qdrift": GSQDriftCircuit,
 }
 
