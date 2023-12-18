@@ -110,10 +110,6 @@ class GSQDriftCircuit:
             for g_ind, _ in enumerate(self.groups)
         ]
 
-        self.pauli_mapping = self.synthesizer.parameterized_map(
-            self.ham_subbed.sparse_repr, self.time / self.reps
-        )
-
     def substitute_obs(self, obs: Hamiltonian):
         self.obs = obs.matrix
 
@@ -149,11 +145,6 @@ class GSQDriftCircuit:
         return np.linalg.matrix_power(single, count)
 
     def matrix(self, time: float) -> NDArray:
-        if self.ham_subbed is None:
-            raise ValueError("h value has not been substituted.")
-        if self.pauli_mapping is None:
-            raise ValueError("Para circuit has not been constructed.")
-
         # Sampling
         count = qdrift_count(self.lambd, time, self.error)
         samples = np.random.choice(self.indices, p=self.probs, size=count).astype(int)
@@ -169,7 +160,17 @@ class GSQDriftCircuit:
         return final_op
 
     def evolve(self, psi_init: NDArray, time) -> NDArray:
-        return self.matrix(time) @ psi_init
+        count = qdrift_count(self.lambd, time, self.error)
+        samples = np.random.choice(self.indices, p=self.probs, size=count).astype(int)
+
+        clubs = club_same_terms(samples)
+
+        psi_final = psi_init.copy()
+        for club in clubs:
+            group_op = self.club_matrix(club, self.lambd * time, count)
+            psi_final = group_op @ psi_final
+
+        return psi_final
 
     def control_evolve(
         self, psi_init: NDArray, time: float, control_val: int
@@ -186,8 +187,8 @@ class GSQDriftCircuit:
             depth = qdrift_count(self.lambd, time, self.error)
             print(f"Time: {time} Depth: {depth}")
 
-            final_psi = self.evolve(psi_init, time)
-            final_rho = np.outer(final_psi, final_psi.conj())
+            psi_final = self.evolve(psi_init, time)
+            final_rho = np.outer(psi_final, psi_final.conj())
             result = np.trace(np.abs(self.obs @ final_rho))
             results.append(result)
 

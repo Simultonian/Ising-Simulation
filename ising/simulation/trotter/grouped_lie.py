@@ -190,7 +190,6 @@ class GroupedLieCircuit:
             for g_ind, _ in enumerate(self.groups)
         ]
 
-    @lru_cache(maxsize=MAXSIZE)
     def pauli_matrix(self, pauli: Pauli, time: float, reps: int) -> NDArray:
         p_ind, g_ind = self.group_map[pauli]
         eig_val = self.svd_map[g_ind][0][p_ind]
