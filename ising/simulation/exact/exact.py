@@ -7,6 +7,7 @@ from ising.hamiltonian import Hamiltonian
 from qiskit.circuit import Parameter
 
 from ising.hamiltonian.hamiltonian import substitute_parameter
+from ising.utils import control_version
 
 
 class ExactSimulation:
@@ -43,6 +44,15 @@ class ExactSimulation:
             @ np.diag(np.exp(complex(0, -1) * time * self.ham_subbed.eig_val))
             @ self.ham_subbed.eig_vec_inv
         )
+
+    def evolve(self, psi_init: NDArray, time) -> NDArray:
+        return self.matrix(time) @ psi_init
+
+    def control_evolve(
+        self, psi_init: NDArray, time: float, control_val: int
+    ) -> NDArray:
+        op = control_version(self.matrix(time), control_val)
+        return op @ psi_init
 
     def get_observations(
         self, rho_init: NDArray, observable: NDArray, times: list[float]

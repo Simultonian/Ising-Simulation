@@ -9,7 +9,7 @@ from qiskit.synthesis import LieTrotter
 
 from ising.hamiltonian import Hamiltonian, trotter_reps, general_grouping
 from ising.hamiltonian.hamiltonian import substitute_parameter
-from ising.utils import MAXSIZE
+from ising.utils import MAXSIZE, control_version
 from ising.utils import simdiag
 
 
@@ -230,6 +230,19 @@ class GroupedLieCircuit:
             final_op = np.dot(group_op, final_op)
 
         return np.linalg.matrix_power(final_op, reps)
+
+    def evolve(self, psi_init: NDArray, time) -> NDArray:
+        return self.matrix(time) @ psi_init
+
+    def control_evolve(
+        self, psi_init: NDArray, time: float, control_val: int
+    ) -> NDArray:
+        """
+        There is no further optimization that can be done here, since it is
+        faster to use `matrix_power` than apply the operation `reps` times.
+        """
+        op = control_version(self.matrix(time), control_val)
+        return op @ psi_init
 
     def substitute_obs(self, obs: Hamiltonian):
         self.obs = obs.matrix

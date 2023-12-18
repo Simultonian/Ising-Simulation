@@ -83,40 +83,22 @@ class LCUSynthesizer:
         npt.assert_almost_equal(np.sum(np.abs(init_complete) ** 2), 1)
         self.psi_init = init_complete
 
-    def get_unitary(self, ind: int):
-        """
-        Uses the synthesizer for constructing Hamiltonian simulation for given
-        lcu time index.
-
-        Inputs:
-            - ind: Sampled index
-        """
-        return self.synth.matrix(self.lcu_times[ind])
-
-    def control_unitary(self, ind: int, control_val: int):
-        """
-        Calculates |0><0| U + |1><1| I if control_val = 0
-        Calculates |0><0| I + |1><1| U if control_val = 1
-
-        Where U is unitary for Hamiltonian evolution with time `times[ind]`.
-        """
-        return control_version(self.get_unitary(ind), control_val)
-
     @lru_cache(maxsize=MAXSIZE)
     def post_v1(self, ind):
         psi_final = self.psi_init.copy()
-        v1 = self.control_unitary(ind, control_val=1)
+        psi_final = self.synth.control_evolve(
+            psi_final, self.lcu_times[ind], control_val=1
+        )
 
-        psi_final = v1 @ psi_final
         npt.assert_allclose(np.sum(np.abs(psi_final) ** 2), 1, atol=1e-5)
 
         return psi_final
 
     def post_v1v2(self, i1, i2):
         psi_final = self.post_v1(i1)
-
-        v2 = self.control_unitary(i2, control_val=0)
-        psi_final = v2 @ psi_final
+        psi_final = self.synth.control_evolve(
+            psi_final, self.lcu_times[i2], control_val=0
+        )
         npt.assert_allclose(np.sum(np.abs(psi_final) ** 2), 1, atol=1e-5)
 
         return psi_final
