@@ -26,8 +26,10 @@ def qdrift_count(lambd: float, time: float, eps: float) -> int:
     numr = np.abs(2 * (lambd * time) ** 2)
     dr = eps
     final = np.ceil(numr / dr).astype(int)
-    final = final // 10
-    final =  max(final, 100)
+    while final > 10000:
+        final = final // 10
+
+    final =  max(final, 1)
     return final
 
 
