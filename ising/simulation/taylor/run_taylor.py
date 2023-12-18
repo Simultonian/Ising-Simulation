@@ -7,7 +7,7 @@ from qiskit.circuit import Parameter
 from ising.hamiltonian import parametrized_ising
 from ising.observables import overall_magnetization
 from ising.utils import read_input_file, close_state
-from ising.simulation.taylor.taylor import Taylor
+from ising.simulation.taylor.taylor_sample import TaylorSample
 from ising.utils.constants import PLUS
 
 
@@ -31,7 +31,7 @@ def run_taylor(paras):
     for num_qubit in qubits:
         h_para = Parameter("h")
         parametrized_ham = parametrized_ising(num_qubit, h_para)
-        circuit_manager = Taylor(
+        circuit_manager = TaylorSample(
             parametrized_ham, h_para, paras["error"], success=paras.get("success", None)
         )
 

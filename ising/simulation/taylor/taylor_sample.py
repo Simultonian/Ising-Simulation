@@ -7,7 +7,6 @@ from qiskit.circuit import Parameter
 
 from ising.hamiltonian import Hamiltonian
 from ising.hamiltonian.hamiltonian import substitute_parameter
-from itertools import product as cartesian_product
 
 import numpy as np
 import numpy.testing as npt
@@ -16,8 +15,7 @@ from collections import Counter
 from qiskit.quantum_info import SparsePauliOp
 
 from ising.hamiltonian import Hamiltonian
-from ising.utils import MAXSIZE, control_version
-from ising.utils.constants import ONEONE, ZEROZERO
+from ising.utils import control_version
 from ising.simulation.taylor.utils import (
     get_cap_k,
     calculate_exp,
@@ -25,89 +23,35 @@ from ising.simulation.taylor.utils import (
     calculate_mu,
 )
 
+from tqdm import tqdm
 
-def calculate_decomposition_term(prod_inds, rotation_ind, paulis, t_bar, k):
-    exp_pair = paulis[rotation_ind]
 
-    cur_prob = 1.0
-    cur_pauli = Pauli("I" * len(exp_pair[0]))
-    for ind in prod_inds:
-        pauli, prob = paulis[ind]
-        assert prob > 0
-        cur_prob *= prob
-        cur_pauli = cur_pauli @ pauli
+def sample_for_fixed_k(paulis, coeffs, t_bar, r, k, alpha):
+    """
+    For a fixed `k` a unitary from LCU is sampled. `alpha` is required for the
+    sake of changing the sign of the Pauli matrix.
+    """
+    t_bar = t_bar / r
 
-    exp_pauli, exp_prob = exp_pair
-    assert exp_prob > 0
+    # Sampling the exponential term.
+    exp_ind = np.random.choice(len(coeffs), p=coeffs)
+    exp_pauli = paulis[exp_ind]
+
+    cur_pauli = Pauli("I" * len(exp_pauli))
+    # Sampling the first `k` terms for the product.
+    k_inds = np.random.choice(len(coeffs), p=coeffs, size=k)
+    for ind in k_inds:
+        cur_pauli = cur_pauli @ paulis[ind]
+
+    if alpha < 0:
+        cur_pauli = -1 * cur_pauli
 
     exp_pauli = exp_pauli.to_matrix()
     rotated = calculate_exp(t_bar, exp_pauli, k)
 
-    cur_prob *= exp_prob
     cur_pauli = cur_pauli.to_matrix()
     cur_pauli = cur_pauli @ rotated
-
-    assert cur_pauli is not None
-    assert cur_prob > 0
-
-    return (cur_pauli, cur_prob)
-
-
-def sum_decomposition_k_fold(paulis, t_bar, r, coeffs, cap_k):
-    pairs = list(zip(paulis, coeffs))
-    inds = np.arange(len(pairs))
-    kth_paulis = []
-    kth_probs = []
-    k_probs = []
-
-    alphas = np.array(get_alphas(t_bar, cap_k, r))
-    t_bar = t_bar / r
-
-    for k in range(0, cap_k + 1):
-        if k % 2 == 1:
-            # Odd k can not be sampled.
-            k_probs.append(0)
-            kth_probs.append([])
-            kth_paulis.append([])
-            continue
-
-        alpha_term = alphas[k]
-
-        if t_bar == 0.0:
-            if k > 0:
-                assert alpha_term == 0.0
-
-        mult_inds = cartesian_product(inds, repeat=k + 1)
-        terms = []
-        probs = []
-
-        for term_inds in mult_inds:
-            prod_inds, rotation_ind = term_inds[:-1], term_inds[-1]
-
-            cur_pauli, cur_prob = calculate_decomposition_term(
-                prod_inds, rotation_ind, pairs, t_bar, k
-            )
-
-            if alpha_term < 0:
-                # Transferring the alpha negative to the term.
-                cur_pauli *= -1
-
-            assert isinstance(cur_pauli, np.ndarray)
-            terms.append(cur_pauli)
-            probs.append(cur_prob)
-
-        probs = np.array(probs).real
-        npt.assert_allclose(np.sum(probs), 1, atol=1e-5, rtol=1e-5)
-
-        k_probs.append(abs(alpha_term))
-
-        kth_probs.append(probs)
-        kth_paulis.append(terms)
-
-    k_probs = np.array(k_probs)
-    k_probs /= np.sum(k_probs)
-
-    return (kth_paulis, kth_probs, k_probs)
+    return cur_pauli
 
 
 def taylor_observation(
@@ -130,31 +74,26 @@ def taylor_observation(
     obs_norm = 1
     cap_k = get_cap_k(t_bar, obs_norm=obs_norm, eps=error)
 
-    print(f"Computing decomposition for t_bar={t_bar} t={time} r={r} k={cap_k}")
-    kth_paulis, kth_probs, k_probs = sum_decomposition_k_fold(
-        paulis, t_bar, r, coeffs, cap_k
-    )
-    print("Decomposition complete")
+    alphas = np.array(get_alphas(t_bar, cap_k, r))
+    k_probs = np.array([abs(alpha) for alpha in alphas])
+    # TODO: What to do of this?
+    k_probs /= np.sum(k_probs)
 
-    def get_k_terms(k):
-        return np.random.choice(len(kth_probs[k]), p=kth_probs[k], size=r)
+    def get_unitary(k):
+        return sample_for_fixed_k(paulis, coeffs, t_bar, r, k, alphas[k])
 
-    def get_unitary(k, ind: int):
-        return kth_paulis[k][ind]
-
-    def control_unitary(k, ind: int, control_val: int):
+    def control_unitary(k, control_val: int):
         """
         Calculates |0><0| U + |1><1| I if control_val = 0
         Calculates |0><0| I + |1><1| U if control_val = 1
         """
-        return control_version(get_unitary(k, ind), control_val)
+        return control_version(get_unitary(k), control_val)
 
     def post_v1(k):
         final_psi = psi_init.copy()
-        inds = get_k_terms(k)
 
-        for ind in inds:
-            v1 = control_unitary(k, ind, control_val=1)
+        for _ in range(r):
+            v1 = control_unitary(k, control_val=1)
             final_psi = v1 @ final_psi
 
         npt.assert_almost_equal(np.sum(np.abs(final_psi) ** 2), 1)
@@ -162,10 +101,9 @@ def taylor_observation(
 
     def post_v1v2(k1: int, k2: int):
         final_psi = post_v1(k1)
-        i2s = get_k_terms(k2)
 
-        for i2 in i2s:
-            v2 = control_unitary(k2, i2, control_val=0)
+        for _ in range(r):
+            v2 = control_unitary(k2, control_val=0)
             final_psi = v2 @ final_psi
 
         npt.assert_almost_equal(np.sum(np.abs(final_psi) ** 2), 1)
@@ -183,18 +121,18 @@ def taylor_observation(
 
     print(f"Time:{time} Iterations:{count}")
 
-    for k1, k2 in sorted(sample_ks.keys()):
-        k_count = sample_ks[(k1, k2)]
-        if total_count % 100 == 0:
-            print(f"running: {total_count} out of {count}")
-        total_count += k_count
+    with tqdm(total=count) as pbar:
+        for k1, k2 in sorted(sample_ks.keys()):
+            k_count = sample_ks[(k1, k2)]
+            total_count += k_count
 
-        for _ in range(k_count):
-            final_psi = post_v1v2(k1, k2)
-            final_rho = np.outer(final_psi, final_psi.conj())
+            for _ in range(k_count):
+                final_psi = post_v1v2(k1, k2)
+                final_rho = np.outer(final_psi, final_psi.conj())
 
-            result = np.trace(np.abs(obs @ final_rho))
-            results.append(result)
+                result = np.trace(np.abs(obs @ final_rho))
+                pbar.update(1)
+                results.append(result)
 
     assert total_count == count
 
@@ -202,7 +140,7 @@ def taylor_observation(
     return magn_h
 
 
-class Taylor:
+class TaylorSample:
     """
     Creates the entire decomposition and then samples from that.
     """

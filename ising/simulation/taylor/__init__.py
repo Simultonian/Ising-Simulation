@@ -1,3 +1,3 @@
-from .taylor import Taylor
+from .taylor_sample import TaylorSample
 
-__all__ = ["Taylor"]
+__all__ = ["TaylorSample"]
