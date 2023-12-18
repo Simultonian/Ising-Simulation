@@ -7,7 +7,7 @@ from qiskit.quantum_info import SparsePauliOp
 
 from ising.hamiltonian import Hamiltonian
 from ising.utils.constants import PLUS
-from ising.utils import close_state, MAXSIZE, control_version
+from ising.utils import close_state, MAXSIZE
 from ising.groundstate.simulation.utils import (
     calculate_mu,
     ground_state_constants,

@@ -144,6 +144,14 @@ class GSQDriftCircuit:
         single = self.group_matrix(g_ind, time, reps)
         return np.linalg.matrix_power(single, count)
 
+    @lru_cache(maxsize=MAXSIZE)
+    def control_club_matrix(
+        self, club: tuple[int, int], time: float, reps: int, control_val: int
+    ) -> NDArray:
+        g_ind, count = club
+        single = self.group_matrix(g_ind, time, reps)
+        return control_version(np.linalg.matrix_power(single, count), control_val)
+
     def matrix(self, time: float) -> NDArray:
         # Sampling
         count = qdrift_count(self.lambd, time, self.error)
@@ -175,8 +183,21 @@ class GSQDriftCircuit:
     def control_evolve(
         self, psi_init: NDArray, time: float, control_val: int
     ) -> NDArray:
-        op = control_version(self.matrix(time), control_val)
-        return op @ psi_init
+        count = qdrift_count(self.lambd, time, self.error)
+        samples = np.random.choice(self.indices, p=self.probs, size=count).astype(int)
+
+        clubs = club_same_terms(samples)
+
+        # print(f"Time: {time} Depth: {qdrift_count(self.lambd, time, self.error)} clubs: {len(clubs)}")
+
+        psi_final = psi_init.copy()
+        for club in clubs:
+            group_op = self.control_club_matrix(
+                club, self.lambd * time, count, control_val
+            )
+            psi_final = group_op @ psi_final
+
+        return psi_final
 
     def get_observations(self, psi_init: NDArray, times: list[float]):
         if self.obs is None:
