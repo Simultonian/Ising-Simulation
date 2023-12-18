@@ -9,6 +9,7 @@ ising = {editable = true, path = "."}
 qiskit = "*"
 matplotlib = "*"
 seaborn = "*"
+tqdm = "*"
 
 [dev-packages]
 black = "*"

@@ -14,6 +14,8 @@ from ising.groundstate.simulation.utils import (
     calculate_lcu_constants,
 )
 
+from tqdm import tqdm
+
 
 class LCUSynthesizer:
     def __init__(self, synthesizer, observable: Hamiltonian, **kwargs):
@@ -119,18 +121,18 @@ class LCUSynthesizer:
 
         total_count = 0
 
-        for sample in sorted(samples_count.keys()):
-            s_count = samples_count[sample]
-            if total_count % 100 == 0:
-                print(f"running: {total_count} out of {count}")
-            total_count += s_count
+        with tqdm(total=count) as pbar:
+            for sample in sorted(samples_count.keys()):
+                s_count = samples_count[sample]
+                total_count += s_count
+                pbar.update(s_count)
 
-            psi_final = self.post_v1v2(sample[0], sample[1])
-            final_rho = np.outer(psi_final, psi_final.conj())
+                psi_final = self.post_v1v2(sample[0], sample[1])
+                final_rho = np.outer(psi_final, psi_final.conj())
 
-            result = np.trace(np.abs(self.run_obs @ final_rho))
-            results.append(result * s_count)
+                result = np.trace(np.abs(self.run_obs @ final_rho))
+                results.append(result * s_count)
 
-        assert total_count == count
+            assert total_count == count
 
         return calculate_mu(results, count, self.lcu_coeffs)
