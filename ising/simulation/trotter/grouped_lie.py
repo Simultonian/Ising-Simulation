@@ -190,9 +190,6 @@ class GroupedLieCircuit:
             for g_ind, _ in enumerate(self.groups)
         ]
 
-    def construct_parametrized_circuit(self) -> None:
-        pass
-
     @lru_cache(maxsize=MAXSIZE)
     def pauli_matrix(self, pauli: Pauli, time: float, reps: int) -> NDArray:
         p_ind, g_ind = self.group_map[pauli]
@@ -254,11 +251,11 @@ class GroupedLieCircuit:
 
         results = []
         for time in times:
-            unitary = self.matrix(time)
             # assert self.ham_subbed is not None
             # depth = circuit_depth(self.ham_subbed, time, self.error)
             # print(f"Time: {time} Depth: {depth}")
 
+            unitary = self.matrix(time)
             final_psi = unitary @ psi_init
             final_rho = np.outer(final_psi, final_psi.conj())
             result = np.trace(np.abs(self.obs @ final_rho))

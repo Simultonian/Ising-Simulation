@@ -16,6 +16,7 @@ METHOD_NAMES = {
     "analytical": "Exact Solution",
     "taylor": "Truncated Taylor Series",
     "grouped_lie": "First Order Trotterization",
+    "gs_qdrift": "qDRIFT Protocol",
     "exact": "Precise Unitaries",
 }
 

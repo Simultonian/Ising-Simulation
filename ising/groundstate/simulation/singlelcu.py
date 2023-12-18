@@ -149,7 +149,7 @@ class LCUSynthesizer:
 
         for sample in sorted(samples_count.keys()):
             s_count = samples_count[sample]
-            if total_count % 100 == 0:
+            if total_count % 1 == 0:
                 print(f"running: {total_count} out of {count}")
             total_count += s_count
 

@@ -110,15 +110,12 @@ class GSQDriftCircuit:
             for g_ind, _ in enumerate(self.groups)
         ]
 
-    def construct_parametrized_circuit(self) -> None:
-        if self.ham_subbed is None:
-            raise ValueError(
-                "h value has not been substituted, qiskit does not support parametrized Hamiltonians."
-            )
-
         self.pauli_mapping = self.synthesizer.parameterized_map(
             self.ham_subbed.sparse_repr, self.time / self.reps
         )
+
+    def substitute_obs(self, obs: Hamiltonian):
+        self.obs = obs.matrix
 
     @lru_cache(maxsize=MAXSIZE)
     def pauli_matrix(self, pauli: Pauli, time: float, reps: int) -> NDArray:
@@ -171,16 +168,19 @@ class GSQDriftCircuit:
 
         return final_op
 
-    def get_observations(
-        self, rho_init: NDArray, observable: NDArray, times: list[float]
-    ):
+    def get_observations(self, psi_init: NDArray, times: list[float]):
+        if self.obs is None:
+            raise ValueError("Observable not set")
+
         results = []
         for time in times:
             depth = qdrift_count(self.lambd, time, self.error)
             print(f"Time: {time} Depth: {depth}")
+
             unitary = self.matrix(time)
-            rho_final = unitary @ rho_init @ unitary.conj().T
-            result = np.trace(np.abs(observable @ rho_final))
+            final_psi = unitary @ psi_init
+            final_rho = np.outer(final_psi, final_psi.conj())
+            result = np.trace(np.abs(self.obs @ final_rho))
             results.append(result)
 
         return results

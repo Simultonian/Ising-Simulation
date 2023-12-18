@@ -8,6 +8,6 @@
   "time": "5.0",
   "count_time": "10",
   "overlap": "0.5",
-  "method": "grouped_lie",
+  "method": "gs_qdrift",
   "error": "0.1"
 }

@@ -54,7 +54,6 @@ def run_numerical(paras):
         for h in h_values:
             print(f"Running for {num_qubit} qubits and h:{h}")
             circuit_manager.subsitute_h(h)
-            circuit_manager.construct_parametrized_circuit()
 
             lcu_run = LCUSynthesizer(
                 circuit_manager,

@@ -53,7 +53,6 @@ def run_trotter(paras):
         for h in h_values:
             print(f"Running for {num_qubit} qubits and h:{h}")
             circuit_manager.subsitute_h(h)
-            circuit_manager.construct_parametrized_circuit()
             ground_state = circuit_manager.ground_state
             init_state = close_state(ground_state, paras["overlap"])
 
@@ -87,7 +86,7 @@ def main():
 
 
 def test_main():
-    file_trotter("data/input/default.json")
+    file_trotter("data/input/simulation.json")
 
 
 if __name__ == "__main__":
