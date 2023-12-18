@@ -6,8 +6,8 @@ from collections import Counter
 from qiskit.quantum_info import SparsePauliOp
 
 from ising.hamiltonian import Hamiltonian
-from ising.utils.constants import ONEONE, ZEROZERO, PLUS
-from ising.utils import close_state, MAXSIZE
+from ising.utils.constants import PLUS
+from ising.utils import close_state, MAXSIZE, control_version
 from ising.groundstate.simulation.utils import (
     calculate_mu,
     ground_state_constants,
@@ -100,23 +100,13 @@ class LCUSynthesizer:
 
         Where U is unitary for Hamiltonian evolution with time `times[ind]`.
         """
-
-        unitary = self.get_unitary(ind)
-
-        if control_val == 0:
-            op_1 = np.kron(ZEROZERO, unitary)
-            op_2 = np.kron(ONEONE, self.eye)
-            return op_1 + op_2
-        # Control value is 1
-        else:
-            op_1 = np.kron(ZEROZERO, self.eye)
-            op_2 = np.kron(ONEONE, unitary)
-            return op_1 + op_2
+        return control_version(self.get_unitary(ind), control_val)
 
     @lru_cache(maxsize=MAXSIZE)
     def post_v1(self, ind):
         psi_final = self.psi_init.copy()
         v1 = self.control_unitary(ind, control_val=1)
+
         psi_final = v1 @ psi_final
         npt.assert_allclose(np.sum(np.abs(psi_final) ** 2), 1, atol=1e-5)
 
@@ -149,7 +139,7 @@ class LCUSynthesizer:
 
         for sample in sorted(samples_count.keys()):
             s_count = samples_count[sample]
-            if total_count % 1 == 0:
+            if total_count % 100 == 0:
                 print(f"running: {total_count} out of {count}")
             total_count += s_count
 
