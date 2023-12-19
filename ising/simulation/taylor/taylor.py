@@ -1,4 +1,5 @@
 from typing import Optional
+from functools import lru_cache
 import numpy as np
 from numpy.typing import NDArray
 
@@ -16,7 +17,7 @@ from collections import Counter
 from qiskit.quantum_info import SparsePauliOp
 
 from ising.hamiltonian import Hamiltonian
-from ising.utils.constants import ONEONE, ZEROZERO
+from ising.utils import MAXSIZE, control_version
 from ising.simulation.taylor.utils import (
     get_cap_k,
     calculate_exp,
@@ -28,18 +29,14 @@ from tqdm import tqdm
 
 
 def calculate_decomposition_term(prod_inds, rotation_ind, paulis, t_bar, k):
-    exp_pair = paulis[rotation_ind]
+    exp_pauli, exp_prob = paulis[rotation_ind]
 
     cur_prob = 1.0
-    cur_pauli = Pauli("I" * len(exp_pair[0]))
+    cur_pauli = Pauli("I" * len(exp_pauli))
     for ind in prod_inds:
         pauli, prob = paulis[ind]
-        assert prob > 0
         cur_prob *= prob
         cur_pauli = cur_pauli @ pauli
-
-    exp_pauli, exp_prob = exp_pair
-    assert exp_prob > 0
 
     exp_pauli = exp_pauli.to_matrix()
     rotated = calculate_exp(t_bar, exp_pauli, k)
@@ -48,15 +45,44 @@ def calculate_decomposition_term(prod_inds, rotation_ind, paulis, t_bar, k):
     cur_pauli = cur_pauli.to_matrix()
     cur_pauli = cur_pauli @ rotated
 
-    assert cur_pauli is not None
     assert cur_prob > 0
 
     return (cur_pauli, cur_prob)
 
 
+def vectorized_probs(coeffs, mult_inds):
+    """
+    Calculate probability of each indices in a vectorized manner using numpy.
+    """
+    return np.prod(coeffs[mult_inds], axis=1).real
+
+
+def paulis_product(paulis, prod_inds, alpha_term):
+    """
+    Split `mult_inds` into two pieces and return the product Pauli and the
+    exp Pauli without exponentiating.
+    """
+    prod_paulis = []
+    for inds in prod_inds:
+        cur_pauli = Pauli("I" * len(paulis[0]))
+        for ind in inds:
+            cur_pauli = paulis[ind] @ cur_pauli
+        if alpha_term < 0:
+            cur_pauli = -1 * cur_pauli
+
+        prod_paulis.append(cur_pauli)
+
+    return prod_paulis
+
+
 def sum_decomposition_k_fold(paulis, t_bar, r, coeffs, cap_k):
+    if len(paulis) == 0:
+        raise ValueError("Empty Pauli list provided.")
+
     pairs = list(zip(paulis, coeffs))
     inds = np.arange(len(pairs))
+
+    kth_exps = []
     kth_paulis = []
     kth_probs = []
     k_probs = []
@@ -70,49 +96,34 @@ def sum_decomposition_k_fold(paulis, t_bar, r, coeffs, cap_k):
             k_probs.append(0)
             kth_probs.append([])
             kth_paulis.append([])
+            kth_exps.append([])
             continue
 
         alpha_term = alphas[k]
 
-        if t_bar == 0.0:
-            if k > 0:
-                assert alpha_term == 0.0
+        mult_inds = np.array(list(cartesian_product(inds, repeat=k + 1)))
 
-        mult_inds = cartesian_product(inds, repeat=k + 1)
-        terms = []
-        probs = []
+        probs = vectorized_probs(coeffs, mult_inds)
 
-        for term_inds in mult_inds:
-            prod_inds, rotation_ind = term_inds[:-1], term_inds[-1]
+        cur_paulis = paulis_product(paulis, mult_inds[:, :-1], alpha_term)
 
-            cur_pauli, cur_prob = calculate_decomposition_term(
-                prod_inds, rotation_ind, pairs, t_bar, k
-            )
-
-            if alpha_term < 0:
-                # Transferring the alpha negative to the term.
-                cur_pauli *= -1
-
-            assert isinstance(cur_pauli, np.ndarray)
-            terms.append(cur_pauli)
-            probs.append(cur_prob)
-
-        probs = np.array(probs).real
         npt.assert_allclose(np.sum(probs), 1, atol=1e-5, rtol=1e-5)
 
         k_probs.append(abs(alpha_term))
 
         kth_probs.append(probs)
-        kth_paulis.append(terms)
+        kth_exps.append(mult_inds[:, -1])
+        kth_paulis.append(cur_paulis)
 
     k_probs = np.array(k_probs)
+    # TODO: What?
     k_probs /= np.sum(k_probs)
 
-    return (kth_paulis, kth_probs, k_probs)
+    return (kth_paulis, kth_probs, kth_exps, k_probs)
 
 
 def taylor_observation(
-    paulis: list[Pauli],
+    paulis,
     coeffs: NDArray,
     time: float,
     error: float,
@@ -132,12 +143,10 @@ def taylor_observation(
     cap_k = get_cap_k(t_bar, obs_norm=obs_norm, eps=error)
 
     print(f"Computing decomposition for t_bar={t_bar} t={time} r={r} k={cap_k}")
-    kth_paulis, kth_probs, k_probs = sum_decomposition_k_fold(
+    kth_paulis, kth_probs, kth_exps, k_probs = sum_decomposition_k_fold(
         paulis, t_bar, r, coeffs, cap_k
     )
     print("Decomposition complete")
-
-    eye = np.identity(kth_paulis[0][0].shape[0])
 
     def get_k_terms(k, count):
         return Counter(
@@ -149,28 +158,22 @@ def taylor_observation(
             ]
         )
 
-    def get_unitary(k, ind: int):
-        return kth_paulis[k][ind]
+    @lru_cache(maxsize=None)
+    def pauli_to_matrix(pauli):
+        return pauli.to_matrix()
 
+    def get_unitary(k, ind: int):
+        pauli = pauli_to_matrix(kth_paulis[k][ind])
+        rotated = calculate_exp(t_bar, pauli_to_matrix(paulis[kth_exps[k][ind]]), k)
+        return pauli @ rotated
+
+    @lru_cache(maxsize=MAXSIZE)
     def control_unitary(k, ind: int, control_val: int):
         """
         Calculates |0><0| U + |1><1| I if control_val = 0
         Calculates |0><0| I + |1><1| U if control_val = 1
-
-        Where U is unitary for Hamiltonian evolution with time `times[ind]`.
         """
-
-        unitary = get_unitary(k, ind)
-
-        if control_val == 0:
-            op_1 = np.kron(ZEROZERO, unitary)
-            op_2 = np.kron(ONEONE, eye)
-            return op_1 + op_2
-        # Control value is 1
-        else:
-            op_1 = np.kron(ZEROZERO, eye)
-            op_2 = np.kron(ONEONE, unitary)
-            return op_1 + op_2
+        return control_version(get_unitary(k, ind), control_val)
 
     def post_v1(k, inds: tuple[int, ...]):
         final_psi = psi_init.copy()
@@ -207,8 +210,6 @@ def taylor_observation(
     with tqdm(total=count) as pbar:
         for k1, k2 in sorted(sample_ks.keys()):
             k_count = sample_ks[(k1, k2)]
-            if total_count % 100 == 0:
-                print(f"running: {total_count} out of {count}")
 
             k1_terms = get_k_terms(k1, k_count)
             k2_terms = get_k_terms(k2, k_count)
