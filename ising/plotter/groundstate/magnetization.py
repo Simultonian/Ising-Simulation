@@ -18,6 +18,7 @@ METHOD_NAMES = {
     "grouped_lie": "First Order Trotterization",
     "gs_qdrift": "qDRIFT Protocol",
     "exact": "Precise Unitaries",
+    "taylor_sample": "Truncated Taylor Series Samples",
 }
 
 

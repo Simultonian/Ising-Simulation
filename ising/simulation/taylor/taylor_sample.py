@@ -54,6 +54,26 @@ def sample_for_fixed_k(paulis, coeffs, t_bar, r, k, alpha):
     return cur_pauli
 
 
+def sample_lcu(
+    paulis: list[Pauli],
+    norm_coeffs: NDArray,
+    t_bar: float,
+    r: int,
+    error: float,
+):
+    # TODO obs_norm
+    obs_norm = 1
+    cap_k = get_cap_k(t_bar, obs_norm=obs_norm, eps=error)
+
+    alphas = np.array(get_alphas(t_bar, cap_k, r))
+    k_probs = np.array([abs(alpha) for alpha in alphas])
+    # TODO: What to do of this?
+    k_probs /= np.sum(k_probs)
+    k = np.random.choice(cap_k + 1, p=k_probs)
+
+    return sample_for_fixed_k(paulis, norm_coeffs, t_bar, r, k, alphas[k])
+
+
 def taylor_observation(
     paulis: list[Pauli],
     coeffs: NDArray,
@@ -178,6 +198,8 @@ class TaylorSample:
                 coeffs.append(coeff)
 
         self.paulis, self.coeffs = paulis, np.array(coeffs)
+        self.beta = np.sum(coeffs)
+        self.norm_coeffs = self.coeffs / self.beta
 
     def substitute_obs(self, obs: Hamiltonian):
         obs_x = SparsePauliOp(["X"], np.array([1.0]))
@@ -199,6 +221,29 @@ class TaylorSample:
             psi_init,
             self.success,
         )
+
+    def sample_from_lcu(self, time, psi_init, obs, control_val):
+        if self.ham is None:
+            raise ValueError("Parameter not substituted.")
+        if self.obs is None:
+            raise ValueError("Observable not substituted.")
+
+        t_bar = time * self.beta
+        # For t_bar < 1, r is too small to get accurate results.
+        r = max(20, int(np.ceil(t_bar) ** 2))
+
+        psi_final = psi_init.copy()
+
+        print(f"Sampling:{r} terms")
+        for _ in range(r):
+            unitary = control_version(
+                sample_lcu(self.paulis, self.norm_coeffs, t_bar, r, self.error),
+                control_val,
+            )
+            psi_final = unitary @ psi_final
+
+        final_rho = np.outer(psi_final, psi_final.conj())
+        return np.trace(np.abs(obs @ final_rho))
 
     def get_observations(self, psi_init: NDArray, times: list[float]):
         return [self.get_observation(time, psi_init) for time in times]

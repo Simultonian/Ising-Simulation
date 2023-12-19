@@ -33,6 +33,7 @@ def get_small_k_probs(t_bar, r, cap_k):
 
 
 def get_cap_k(t_bar, obs_norm, eps) -> int:
+    t_bar = abs(t_bar)
     numr = np.log(t_bar * obs_norm / eps)
     return int(np.ceil(numr / np.log(numr)))
 
