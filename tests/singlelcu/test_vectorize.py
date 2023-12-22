@@ -1,7 +1,7 @@
 import numpy as np
 
-from ising.simulation.taylor.taylor import vectorized_probs, paulis_product
-from qiskit.quantum_info import Pauli
+from ising.simulation.taylor.taylor import vectorized_probs, product_mult_inds
+from qiskit.quantum_info import Pauli, PauliList
 from itertools import product as cartesian_product
 
 
@@ -30,17 +30,37 @@ def test_vectorized_probs():
     expected = np.array(expected)
     np.all(result == expected)
 
-def test_vectorized_paulis():
-    paulis = [Pauli("IX"), Pauli("XI")]
-    mult_inds = np.array([[0, 0], [1, 0], [1, 1], [0, 1]])
-    result = paulis_product(paulis, mult_inds, 1)
+def test_pauli_list_product_simple():
+    paulis = PauliList([Pauli("IX"), Pauli("XI")])
+    mult_inds = np.array([[0], [1]])
 
-    expected = []
-    for inds in mult_inds:
-        pauli = Pauli("II")
-        for ind in inds:
-            pauli = pauli @ paulis[ind]
-        expected.append(pauli)
+    result = product_mult_inds(paulis, mult_inds)
+    target = PauliList([Pauli("IX"), Pauli("XI")])
 
-    assert np.all(result == expected)
+    assert np.all(result == target)
 
+def test_pauli_list_product():
+    paulis = PauliList([Pauli("IX"), Pauli("XI")])
+    mult_inds = np.array([[0, 1], [1, 1]])
+
+    result = product_mult_inds(paulis, mult_inds)
+    target = PauliList([Pauli("XX"), Pauli("II")])
+
+    assert np.all(result == target)
+
+def test_pauli_list_product_unequal():
+    paulis = PauliList([Pauli("IX"), Pauli("XI")])
+    mult_inds = np.array([[0, 1, 1], [1, 1, 0]])
+
+    result = product_mult_inds(paulis, mult_inds)
+    target = PauliList([Pauli("IX"), Pauli("IX")])
+
+    assert np.all(result == target)
+
+def test_pauli_list_negative():
+    paulis = PauliList([Pauli("-IX"), Pauli("XI")])
+    result = -paulis
+
+    target = PauliList([Pauli("IX"), Pauli("-XI")])
+
+    assert np.all(result == target)

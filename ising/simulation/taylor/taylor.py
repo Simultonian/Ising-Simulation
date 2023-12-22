@@ -3,7 +3,7 @@ from functools import lru_cache
 import numpy as np
 from numpy.typing import NDArray
 
-from qiskit.quantum_info import Pauli
+from qiskit.quantum_info import PauliList
 from qiskit.circuit import Parameter
 
 from ising.hamiltonian import Hamiltonian
@@ -28,28 +28,6 @@ from ising.simulation.taylor.utils import (
 from tqdm import tqdm
 
 
-def calculate_decomposition_term(prod_inds, rotation_ind, paulis, t_bar, k):
-    exp_pauli, exp_prob = paulis[rotation_ind]
-
-    cur_prob = 1.0
-    cur_pauli = Pauli("I" * len(exp_pauli))
-    for ind in prod_inds:
-        pauli, prob = paulis[ind]
-        cur_prob *= prob
-        cur_pauli = cur_pauli @ pauli
-
-    exp_pauli = exp_pauli.to_matrix()
-    rotated = calculate_exp(t_bar, exp_pauli, k)
-
-    cur_prob *= exp_prob
-    cur_pauli = cur_pauli.to_matrix()
-    cur_pauli = cur_pauli @ rotated
-
-    assert cur_prob > 0
-
-    return (cur_pauli, cur_prob)
-
-
 def vectorized_probs(coeffs, mult_inds):
     """
     Calculate probability of each indices in a vectorized manner using numpy.
@@ -57,33 +35,29 @@ def vectorized_probs(coeffs, mult_inds):
     return np.prod(coeffs[mult_inds], axis=1).real
 
 
-def paulis_product(paulis, prod_inds, alpha_term):
+def product_mult_inds(paulis, mult_inds):
     """
-    Split `mult_inds` into two pieces and return the product Pauli and the
-    exp Pauli without exponentiating.
+    Given a 2D array, return the product of all paulis in each row
     """
-    prod_paulis = []
-    for inds in prod_inds:
-        cur_pauli = Pauli("I" * len(paulis[0]))
-        for ind in inds:
-            cur_pauli = paulis[ind] @ cur_pauli
-        if alpha_term < 0:
-            cur_pauli = -1 * cur_pauli
+    num_qubits = len(paulis[0])
+    terms_count = mult_inds.shape[0]
 
-        prod_paulis.append(cur_pauli)
+    if terms_count == 0:
+        return PauliList(["I" * num_qubits] * terms_count)
+    if terms_count == 1:
+        return PauliList([paulis[ind] for ind in mult_inds.T[0]])
 
-    return prod_paulis
+    target = PauliList(["I" * num_qubits] * terms_count)
+    for inds in mult_inds.T:
+        target.compose(PauliList([paulis[ind] for ind in inds]), inplace=True)
+
+    return target
 
 
 def sum_decomposition_k_fold(paulis, t_bar, r, coeffs, cap_k):
-    if len(paulis) == 0:
-        raise ValueError("Empty Pauli list provided.")
-
-    pairs = list(zip(paulis, coeffs))
-    inds = np.arange(len(pairs))
-
-    kth_exps = []
+    cart_inds = np.arange(len(paulis))
     kth_paulis = []
+    kth_exps = []
     kth_probs = []
     k_probs = []
 
@@ -95,31 +69,26 @@ def sum_decomposition_k_fold(paulis, t_bar, r, coeffs, cap_k):
             # Odd k can not be sampled.
             k_probs.append(0)
             kth_probs.append([])
-            kth_paulis.append([])
             kth_exps.append([])
+            kth_paulis.append([])
             continue
 
-        alpha_term = alphas[k]
+        mult_inds = np.array(list(cartesian_product(cart_inds, repeat=k + 1)))
 
-        mult_inds = np.array(list(cartesian_product(inds, repeat=k + 1)))
+        kth_probs.append(vectorized_probs(coeffs, mult_inds))
+        kth_exps.append(paulis[mult_inds[:, -1]])
 
-        probs = vectorized_probs(coeffs, mult_inds)
+        pauli_terms = product_mult_inds(paulis, mult_inds[:, :-1])
+        if alphas[k] < 0:
+            pauli_terms = -pauli_terms
 
-        cur_paulis = paulis_product(paulis, mult_inds[:, :-1], alpha_term)
-
-        npt.assert_allclose(np.sum(probs), 1, atol=1e-5, rtol=1e-5)
-
-        k_probs.append(abs(alpha_term))
-
-        kth_probs.append(probs)
-        kth_exps.append(mult_inds[:, -1])
-        kth_paulis.append(cur_paulis)
+        k_probs.append(abs(alphas[k]))
+        kth_paulis.append(pauli_terms)
 
     k_probs = np.array(k_probs)
-    # TODO: What?
     k_probs /= np.sum(k_probs)
 
-    return (kth_paulis, kth_probs, kth_exps, k_probs)
+    return (kth_paulis, kth_exps, kth_probs, k_probs)
 
 
 def taylor_observation(
@@ -143,7 +112,7 @@ def taylor_observation(
     cap_k = get_cap_k(t_bar, obs_norm=obs_norm, eps=error)
 
     print(f"Computing decomposition for t_bar={t_bar} t={time} r={r} k={cap_k}")
-    kth_paulis, kth_probs, kth_exps, k_probs = sum_decomposition_k_fold(
+    kth_paulis, kth_exps, kth_probs, k_probs = sum_decomposition_k_fold(
         paulis, t_bar, r, coeffs, cap_k
     )
     print("Decomposition complete")
@@ -162,10 +131,10 @@ def taylor_observation(
     def pauli_to_matrix(pauli):
         return pauli.to_matrix()
 
+    @lru_cache(maxsize=None)
     def get_unitary(k, ind: int):
-        pauli = pauli_to_matrix(kth_paulis[k][ind])
-        rotated = calculate_exp(t_bar, pauli_to_matrix(paulis[kth_exps[k][ind]]), k)
-        return pauli @ rotated
+        rotated = calculate_exp(t_bar / r, pauli_to_matrix(kth_exps[k][ind]), k)
+        return pauli_to_matrix(kth_paulis[k][ind]) @ rotated
 
     @lru_cache(maxsize=MAXSIZE)
     def control_unitary(k, ind: int, control_val: int):
@@ -195,7 +164,6 @@ def taylor_observation(
         npt.assert_almost_equal(np.sum(np.abs(final_psi) ** 2), 1)
         return final_psi
 
-    total_count = 0
     count = int(
         8 * np.ceil(((obs_norm**2) * (np.log(2 / (1 - success)))) / (error**2))
     )
@@ -216,14 +184,11 @@ def taylor_observation(
 
             for k1_term, k2_term in zip(k1_terms, k2_terms):
                 final_psi = post_v1v2((k1, k2), k1_term, k2_term)
-                total_count += 1
                 final_rho = np.outer(final_psi, final_psi.conj())
 
                 result = np.trace(np.abs(obs @ final_rho))
                 pbar.update(1)
                 results.append(result)
-
-    assert total_count == count
 
     magn_h = calculate_mu(results, count, [1])
     return magn_h
@@ -266,7 +231,7 @@ class Taylor:
                 paulis.append(pauli)
                 coeffs.append(coeff)
 
-        self.paulis, self.coeffs = paulis, np.array(coeffs)
+        self.paulis, self.coeffs = PauliList(paulis), np.array(coeffs)
 
     def substitute_obs(self, obs: Hamiltonian):
         obs_x = SparsePauliOp(["X"], np.array([1.0]))

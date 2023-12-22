@@ -25,7 +25,7 @@ def plot_method(paras, results: Result, **kwargs):
     h_value = _get_point(results)
     style = kwargs.get("style")
 
-    colors = {"6": "red", "8": "blue", "3": "red"}
+    colors = {"6": "red", "8": "blue", "4": "red"}
 
     for num_qubit, h_wise_results in results.items():
         sns.lineplot(x=[0], y=[h_value], alpha=0.0, label=f"N={num_qubit}")
