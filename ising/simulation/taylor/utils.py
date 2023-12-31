@@ -13,25 +13,6 @@ def calculate_mu(mu_samples, count, coeffs):
     return mu
 
 
-def get_small_k_probs(t_bar, r, cap_k):
-    ks = np.arange(cap_k + 1)
-    k_vec = np.zeros(cap_k + 1, dtype=np.complex128)
-
-    def apply_k(k):
-        # Function according to the formula
-        t1 = ((1j * t_bar / r) ** k) / math.factorial(k)
-        t2 = np.sqrt(1 + ((t_bar / (r * (k + 1))) ** 2))
-        return t1 * t2
-
-    vectorized_apply_k = np.vectorize(apply_k)
-
-    k_vec = vectorized_apply_k(ks)
-
-    # Odd positions are 0
-    k_vec[1::2] = 0
-    return k_vec
-
-
 def get_cap_k(t_bar, obs_norm, eps) -> int:
     t_bar = abs(t_bar)
     numr = np.log(t_bar * obs_norm / eps)
@@ -48,4 +29,19 @@ def calculate_exp(time, pauli, k):
 
 
 def get_alphas(t_bar, cap_k, r):
-    return get_small_k_probs(t_bar=t_bar, r=r, cap_k=cap_k)
+    ks = np.arange(cap_k + 1)
+    k_vec = np.zeros(cap_k + 1, dtype=np.complex128)
+
+    def apply_k(k):
+        # Function according to the formula
+        t1 = ((1j * t_bar / r) ** k) / math.factorial(k)
+        t2 = np.sqrt(1 + ((t_bar / (r * (k + 1))) ** 2))
+        return t1 * t2
+
+    vectorized_apply_k = np.vectorize(apply_k)
+
+    k_vec = vectorized_apply_k(ks)
+
+    # Odd positions are 0
+    k_vec[1::2] = 0
+    return k_vec

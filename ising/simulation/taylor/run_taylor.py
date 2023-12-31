@@ -59,6 +59,7 @@ def run_taylor(paras):
             # Checking for norm
             np.testing.assert_almost_equal(np.sum(np.abs(init_state) ** 2), 1)
 
+            circuit_manager.set_up_decomposition(max(times))
             ans = circuit_manager.get_observations(init_state, times)
             h_wise_answers[h] = ans
 

@@ -54,20 +54,15 @@ def product_mult_inds(paulis, mult_inds):
     return target
 
 
-def sum_decomposition_k_fold(paulis, t_bar, r, coeffs, cap_k):
+def sum_decomposition_k_fold(paulis, coeffs, cap_k):
     cart_inds = np.arange(len(paulis))
     kth_paulis = []
     kth_exps = []
     kth_probs = []
-    k_probs = []
-
-    alphas = np.array(get_alphas(t_bar, cap_k, r))
-    t_bar = t_bar / r
 
     for k in range(0, cap_k + 1):
         if k % 2 == 1:
             # Odd k can not be sampled.
-            k_probs.append(0)
             kth_probs.append([])
             kth_exps.append([])
             kth_paulis.append([])
@@ -79,119 +74,9 @@ def sum_decomposition_k_fold(paulis, t_bar, r, coeffs, cap_k):
         kth_exps.append(paulis[mult_inds[:, -1]])
 
         pauli_terms = product_mult_inds(paulis, mult_inds[:, :-1])
-        if alphas[k] < 0:
-            pauli_terms = -pauli_terms
-
-        k_probs.append(abs(alphas[k]))
         kth_paulis.append(pauli_terms)
 
-    k_probs = np.array(k_probs)
-    k_probs /= np.sum(k_probs)
-
-    return (kth_paulis, kth_exps, kth_probs, k_probs)
-
-
-def taylor_observation(
-    paulis,
-    coeffs: NDArray,
-    time: float,
-    error: float,
-    obs,
-    psi_init,
-    success: float,
-):
-    beta = np.sum(np.array(coeffs))
-    coeffs /= beta
-
-    t_bar = time * beta
-    # For t_bar < 1, r is too small to get accurate results.
-    r = max(20, int(5 * np.ceil(t_bar) ** 2))
-
-    # TODO obs_norm
-    obs_norm = 1
-    cap_k = get_cap_k(t_bar, obs_norm=obs_norm, eps=error)
-
-    print(f"Computing decomposition for t_bar={t_bar} t={time} r={r} k={cap_k}")
-    kth_paulis, kth_exps, kth_probs, k_probs = sum_decomposition_k_fold(
-        paulis, t_bar, r, coeffs, cap_k
-    )
-    print("Decomposition complete")
-
-    def get_k_terms(k, count):
-        return Counter(
-            [
-                tuple(x)
-                for x in np.random.choice(
-                    len(kth_probs[k]), p=kth_probs[k], size=(count, r)
-                )
-            ]
-        )
-
-    @lru_cache(maxsize=None)
-    def pauli_to_matrix(pauli):
-        return pauli.to_matrix()
-
-    @lru_cache(maxsize=None)
-    def get_unitary(k, ind: int):
-        rotated = calculate_exp(t_bar / r, pauli_to_matrix(kth_exps[k][ind]), k)
-        return pauli_to_matrix(kth_paulis[k][ind]) @ rotated
-
-    @lru_cache(maxsize=MAXSIZE)
-    def control_unitary(k, ind: int, control_val: int):
-        """
-        Calculates |0><0| U + |1><1| I if control_val = 0
-        Calculates |0><0| I + |1><1| U if control_val = 1
-        """
-        return control_version(get_unitary(k, ind), control_val)
-
-    def post_v1(k, inds: tuple[int, ...]):
-        final_psi = psi_init.copy()
-
-        for ind in inds:
-            v1 = control_unitary(k, ind, control_val=1)
-            final_psi = v1 @ final_psi
-
-        npt.assert_almost_equal(np.sum(np.abs(final_psi) ** 2), 1)
-        return final_psi
-
-    def post_v1v2(ks: tuple[int, int], i1s: tuple[int, ...], i2s: tuple[int, ...]):
-        final_psi = post_v1(ks[0], i1s)
-
-        for i2 in i2s:
-            v2 = control_unitary(ks[1], i2, control_val=0)
-            final_psi = v2 @ final_psi
-
-        npt.assert_almost_equal(np.sum(np.abs(final_psi) ** 2), 1)
-        return final_psi
-
-    count = int(
-        8 * np.ceil(((obs_norm**2) * (np.log(2 / (1 - success)))) / (error**2))
-    )
-    results = []
-
-    sample_ks = Counter(
-        [tuple(x) for x in np.random.choice(cap_k + 1, p=k_probs, size=(count, 2))]
-    )
-
-    print(f"Time:{time} Iterations:{count}")
-
-    with tqdm(total=count) as pbar:
-        for k1, k2 in sorted(sample_ks.keys()):
-            k_count = sample_ks[(k1, k2)]
-
-            k1_terms = get_k_terms(k1, k_count)
-            k2_terms = get_k_terms(k2, k_count)
-
-            for k1_term, k2_term in zip(k1_terms, k2_terms):
-                final_psi = post_v1v2((k1, k2), k1_term, k2_term)
-                final_rho = np.outer(final_psi, final_psi.conj())
-
-                result = np.trace(np.abs(obs @ final_rho))
-                pbar.update(1)
-                results.append(result)
-
-    magn_h = calculate_mu(results, count, [1])
-    return magn_h
+    return (kth_paulis, kth_exps, kth_probs)
 
 
 class Taylor:
@@ -218,6 +103,9 @@ class Taylor:
         return self.ham.ground_state
 
     def subsitute_h(self, h_val: float) -> None:
+        """
+        Setting up the Hamiltonian and the terms to sample.
+        """
         self.ham = substitute_parameter(self._ham, self.h_para, h_val)
         paulis, coeffs = [], []
 
@@ -232,6 +120,20 @@ class Taylor:
                 coeffs.append(coeff)
 
         self.paulis, self.coeffs = PauliList(paulis), np.array(coeffs)
+        self.beta = np.sum(np.array(self.coeffs))
+        self.coeffs /= self.beta
+
+    def set_up_decomposition(self, max_time: float) -> None:
+        t_bar = max_time * self.beta
+        # TODO obs_norm
+        obs_norm = 1
+        self.cap_k = get_cap_k(t_bar, obs_norm=obs_norm, eps=self.error)
+
+        print(f"Computing decomposition for t_bar={t_bar} t={max_time} k={self.cap_k}")
+        self.kth_paulis, self.kth_exps, self.kth_probs = sum_decomposition_k_fold(
+            self.paulis, self.coeffs, self.cap_k
+        )
+        print("Decomposition complete")
 
     def substitute_obs(self, obs: Hamiltonian):
         obs_x = SparsePauliOp(["X"], np.array([1.0]))
@@ -244,15 +146,119 @@ class Taylor:
         if self.obs is None:
             raise ValueError("Observable not substituted.")
 
-        return taylor_observation(
-            self.paulis,
-            self.coeffs,
+        return self.taylor_observation(
             time,
-            self.error,
-            self.obs,
             psi_init,
-            self.success,
         )
 
     def get_observations(self, psi_init: NDArray, times: list[float]):
-        return [self.get_observation(time, psi_init) for time in times]
+        if self.ham is None:
+            raise ValueError("Parameter not substituted.")
+        if self.obs is None:
+            raise ValueError("Observable not substituted.")
+
+        return [self.taylor_observation(time, psi_init) for time in times]
+
+    @lru_cache(maxsize=None)
+    def pauli_to_matrix(self, pauli):
+        return pauli.to_matrix()
+
+    def taylor_observation(
+        self,
+        time: float,
+        psi_init,
+    ):
+        t_bar = time * self.beta
+        # For t_bar < 1, r is too small to get accurate results.
+        r = max(20, int(5 * np.ceil(t_bar) ** 2))
+
+        # TODO obs_norm
+        obs_norm = 1
+
+        alphas = get_alphas(t_bar, self.cap_k, r)
+        self.k_probs = np.abs(alphas)
+        self.k_probs /= np.sum(self.k_probs)
+
+        def get_k_terms(k, count):
+            return Counter(
+                [
+                    tuple(x)
+                    for x in np.random.choice(
+                        len(self.kth_probs[k]), p=self.kth_probs[k], size=(count, r)
+                    )
+                ]
+            )
+
+        @lru_cache(maxsize=None)
+        def get_unitary(k, ind: int):
+            rotated = calculate_exp(
+                t_bar / r, self.pauli_to_matrix(self.kth_exps[k][ind]), k
+            )
+            if alphas[k] < 0:
+                return -self.pauli_to_matrix(self.kth_paulis[k][ind]) @ rotated
+            return self.pauli_to_matrix(self.kth_paulis[k][ind]) @ rotated
+
+        @lru_cache(maxsize=MAXSIZE)
+        def control_unitary(k, ind: int, control_val: int):
+            """
+            Calculates |0><0| U + |1><1| I if control_val = 0
+            Calculates |0><0| I + |1><1| U if control_val = 1
+            """
+            return control_version(get_unitary(k, ind), control_val)
+
+        def post_v1(k, inds: tuple[int, ...]):
+            final_psi = psi_init.copy()
+
+            for ind in inds:
+                v1 = control_unitary(k, ind, control_val=1)
+                final_psi = v1 @ final_psi
+
+            npt.assert_almost_equal(np.sum(np.abs(final_psi) ** 2), 1)
+            return final_psi
+
+        def post_v1v2(ks: tuple[int, int], i1s: tuple[int, ...], i2s: tuple[int, ...]):
+            final_psi = post_v1(ks[0], i1s)
+
+            for i2 in i2s:
+                v2 = control_unitary(ks[1], i2, control_val=0)
+                final_psi = v2 @ final_psi
+
+            npt.assert_almost_equal(np.sum(np.abs(final_psi) ** 2), 1)
+            return final_psi
+
+        count = int(
+            8
+            * np.ceil(
+                ((obs_norm**2) * (np.log(2 / (1 - self.success)))) / (self.error**2)
+            )
+        )
+        results = []
+
+        sample_ks = Counter(
+            [
+                tuple(x)
+                for x in np.random.choice(
+                    self.cap_k + 1, p=self.k_probs, size=(count, 2)
+                )
+            ]
+        )
+
+        print(f"Time:{time} Iterations:{count}")
+
+        with tqdm(total=count) as pbar:
+            for k1, k2 in sorted(sample_ks.keys()):
+                k_count = sample_ks[(k1, k2)]
+
+                k1_terms = get_k_terms(k1, k_count)
+                k2_terms = get_k_terms(k2, k_count)
+
+                for k1_term, k2_term in zip(k1_terms, k2_terms):
+                    final_psi = post_v1v2((k1, k2), k1_term, k2_term)
+                    final_rho = np.outer(final_psi, final_psi.conj())
+
+                    result = np.trace(np.abs(self.obs @ final_rho))
+                    pbar.update(1)
+                    results.append(result)
+
+        magn_h = calculate_mu(results, count, [1])
+        return magn_h
