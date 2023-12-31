@@ -163,11 +163,67 @@ class Taylor:
     def pauli_to_matrix(self, pauli):
         return pauli.to_matrix()
 
+    def get_k_terms(self, k, count, r):
+        return Counter(
+            [
+                tuple(x)
+                for x in np.random.choice(
+                    len(self.kth_probs[k]), p=self.kth_probs[k], size=(count, r)
+                )
+            ]
+        )
+
+    @lru_cache(maxsize=None)
+    def get_unitary(self, time: float, k: int, ind: int):
+        rotated = calculate_exp(time, self.pauli_to_matrix(self.kth_exps[k][ind]), k)
+        return self.pauli_to_matrix(self.kth_paulis[k][ind]) @ rotated
+
+    @lru_cache(maxsize=None)
+    def control_unitary(self, time: float, k, ind: int, control_val: int):
+        """
+        Calculates |0><0| U + |1><1| I if control_val = 0
+        Calculates |0><0| I + |1><1| U if control_val = 1
+        """
+        return control_version(self.get_unitary(time, k, ind), control_val)
+
+    @lru_cache(maxsize=MAXSIZE)
+    def post_v1(self, time: float, k, inds: tuple[int, ...]):
+        final_psi = self.psi_init.copy()
+
+        for ind in inds:
+            v1 = self.control_unitary(time, k, ind, control_val=1)
+            final_psi = v1 @ final_psi
+
+        npt.assert_almost_equal(np.sum(np.abs(final_psi) ** 2), 1)
+        return final_psi
+
+    def post_v1v2(
+        self,
+        time: float,
+        ks: tuple[int, int],
+        i1s: tuple[int, ...],
+        i2s: tuple[int, ...],
+    ):
+        k1, k2 = ks
+        final_psi = self.post_v1(time, k1, i1s)
+
+        for i2 in i2s:
+            v2 = self.control_unitary(time, k2, i2, control_val=0)
+            final_psi = v2 @ final_psi
+
+        npt.assert_almost_equal(np.sum(np.abs(final_psi) ** 2), 1)
+        return final_psi
+
     def taylor_observation(
         self,
         time: float,
         psi_init,
     ):
+        self.post_v1.cache_clear()
+        self.control_unitary.cache_clear()
+        self.get_unitary.cache_clear()
+
+        self.psi_init = psi_init
         t_bar = time * self.beta
         # For t_bar < 1, r is too small to get accurate results.
         r = max(20, int(5 * np.ceil(t_bar) ** 2))
@@ -176,55 +232,8 @@ class Taylor:
         obs_norm = 1
 
         alphas = get_alphas(t_bar, self.cap_k, r)
-        self.k_probs = np.abs(alphas)
-        self.k_probs /= np.sum(self.k_probs)
-
-        def get_k_terms(k, count):
-            return Counter(
-                [
-                    tuple(x)
-                    for x in np.random.choice(
-                        len(self.kth_probs[k]), p=self.kth_probs[k], size=(count, r)
-                    )
-                ]
-            )
-
-        @lru_cache(maxsize=None)
-        def get_unitary(k, ind: int):
-            rotated = calculate_exp(
-                t_bar / r, self.pauli_to_matrix(self.kth_exps[k][ind]), k
-            )
-            if alphas[k] < 0:
-                return -self.pauli_to_matrix(self.kth_paulis[k][ind]) @ rotated
-            return self.pauli_to_matrix(self.kth_paulis[k][ind]) @ rotated
-
-        @lru_cache(maxsize=MAXSIZE)
-        def control_unitary(k, ind: int, control_val: int):
-            """
-            Calculates |0><0| U + |1><1| I if control_val = 0
-            Calculates |0><0| I + |1><1| U if control_val = 1
-            """
-            return control_version(get_unitary(k, ind), control_val)
-
-        def post_v1(k, inds: tuple[int, ...]):
-            final_psi = psi_init.copy()
-
-            for ind in inds:
-                v1 = control_unitary(k, ind, control_val=1)
-                final_psi = v1 @ final_psi
-
-            npt.assert_almost_equal(np.sum(np.abs(final_psi) ** 2), 1)
-            return final_psi
-
-        def post_v1v2(ks: tuple[int, int], i1s: tuple[int, ...], i2s: tuple[int, ...]):
-            final_psi = post_v1(ks[0], i1s)
-
-            for i2 in i2s:
-                v2 = control_unitary(ks[1], i2, control_val=0)
-                final_psi = v2 @ final_psi
-
-            npt.assert_almost_equal(np.sum(np.abs(final_psi) ** 2), 1)
-            return final_psi
+        k_probs = np.abs(alphas)
+        k_probs /= np.sum(k_probs)
 
         count = int(
             8
@@ -237,23 +246,33 @@ class Taylor:
         sample_ks = Counter(
             [
                 tuple(x)
-                for x in np.random.choice(
-                    self.cap_k + 1, p=self.k_probs, size=(count, 2)
-                )
+                for x in np.random.choice(self.cap_k + 1, p=k_probs, size=(count, 2))
             ]
         )
 
         print(f"Time:{time} Iterations:{count}")
 
+        evo_time = np.round(t_bar / r, 6)
+
         with tqdm(total=count) as pbar:
             for k1, k2 in sorted(sample_ks.keys()):
                 k_count = sample_ks[(k1, k2)]
 
-                k1_terms = get_k_terms(k1, k_count)
-                k2_terms = get_k_terms(k2, k_count)
+                k1_terms = self.get_k_terms(k1, k_count, r)
+                k2_terms = self.get_k_terms(k2, k_count, r)
 
                 for k1_term, k2_term in zip(k1_terms, k2_terms):
-                    final_psi = post_v1v2((k1, k2), k1_term, k2_term)
+                    final_psi = self.post_v1v2(evo_time, (k1, k2), k1_term, k2_term)
+
+                    neg = 1
+                    if alphas[k1] < 0 and len(k1_term) % 2 == 1:
+                        neg *= -1
+
+                    if alphas[k2] < 0 and len(k2_term) % 2 == 1:
+                        neg *= -1
+
+                    final_psi = neg * final_psi
+
                     final_rho = np.outer(final_psi, final_psi.conj())
 
                     result = np.trace(np.abs(self.obs @ final_rho))

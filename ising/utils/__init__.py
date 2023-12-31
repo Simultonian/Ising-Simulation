@@ -3,6 +3,6 @@ from .overlap import close_state
 from .simdiag import simdiag
 from .kron import control_version
 
-MAXSIZE = 1000
+MAXSIZE = 100000
 
 __all__ = ["read_input_file", "close_state", "read_json", "MAXSIZE", "simdiag"]
