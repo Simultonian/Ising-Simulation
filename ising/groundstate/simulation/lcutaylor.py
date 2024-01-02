@@ -60,6 +60,7 @@ class LCUTaylor:
             self.ground_params["delta_t"],
             self.ground_params["t"],
         )
+        self.synth.set_up_decomposition(max(self.lcu_times))
 
         """
         Preparation of Initial State
@@ -85,12 +86,9 @@ class LCUTaylor:
         npt.assert_almost_equal(np.sum(np.abs(init_complete) ** 2), 1)
         self.psi_init = init_complete
 
-    @lru_cache(maxsize=MAXSIZE)
     def post_v1(self, ind):
         psi_final = self.psi_init.copy()
-        psi_final = self.synth.sample_from_lcu(
-            self.lcu_times[ind], psi_final, self.run_obs, control_val=1
-        )
+        psi_final = self.synth.apply_lcu(self.lcu_times[ind], psi_final, control_val=1)
 
         npt.assert_allclose(np.sum(np.abs(psi_final) ** 2), 1, atol=1e-5)
 
@@ -98,9 +96,7 @@ class LCUTaylor:
 
     def post_v1v2(self, i1, i2):
         psi_final = self.post_v1(i1)
-        psi_final = self.synth.sample_from_lcu(
-            self.lcu_times[i2], psi_final, self.run_obs, control_val=0
-        )
+        psi_final = self.synth.apply_lcu(self.lcu_times[i2], psi_final, control_val=0)
         npt.assert_allclose(np.sum(np.abs(psi_final) ** 2), 1, atol=1e-5)
 
         return psi_final

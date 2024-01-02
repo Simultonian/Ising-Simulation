@@ -186,7 +186,6 @@ class Taylor:
         """
         return control_version(self.get_unitary(time, k, ind), control_val)
 
-    @lru_cache(maxsize=MAXSIZE)
     def post_v1(self, time: float, k, inds: tuple[int, ...]):
         final_psi = self.psi_init.copy()
 
@@ -213,6 +212,38 @@ class Taylor:
 
         npt.assert_almost_equal(np.sum(np.abs(final_psi) ** 2), 1)
         return final_psi
+
+    def apply_lcu(self, time, final_psi, control_val):
+        """
+        Samples V from the LCU and applies it to `psi_init` with given
+        control value. The groundstate preparation algorithm calls this
+        function twice for V1, V2. It is done separately because `time` is
+        independently sampled for V1 and V2 unlike LCU simulation.
+        ---
+        `final_psi` has already been copied in the parent function call
+        """
+        t_bar = time * self.beta
+        # For t_bar < 1, r is too small to get accurate results.
+        r = max(20, int(np.ceil(t_bar) ** 2))
+
+        evo_time = np.round(t_bar / r, 6)
+
+        alphas = get_alphas(t_bar, self.cap_k, r)
+        k_probs = np.abs(alphas)
+        k_probs /= np.sum(k_probs)
+
+        k = np.random.choice(self.cap_k + 1, p=k_probs)
+
+        k_terms = np.random.choice(len(self.kth_probs[k]), p=self.kth_probs[k], size=r)
+        for k_term in k_terms:
+            v = self.control_unitary(evo_time, k, k_term, control_val)
+            final_psi = v @ final_psi
+
+        neg = 1
+        if alphas[k] < 0 and r % 2 == 1:
+            neg *= -1
+
+        return neg * final_psi
 
     def taylor_observation(
         self,
