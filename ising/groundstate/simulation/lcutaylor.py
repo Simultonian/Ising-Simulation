@@ -108,27 +108,15 @@ class LCUTaylor:
         print("Entering loop mu")
         results = []
 
-        samples_count = Counter(
-            [
-                tuple(x)
-                for x in np.random.choice(len(self.lcu_times), p=p, size=(count, 2))
-            ]
-        )
-
-        total_count = 0
-
         with tqdm(total=count) as pbar:
-            for sample in sorted(samples_count.keys()):
-                s_count = samples_count[sample]
-                total_count += s_count
-                pbar.update(s_count)
+            for _ in range(count):
+                sample = np.random.choice(len(self.lcu_times), p=p, size=2)
 
                 psi_final = self.post_v1v2(sample[0], sample[1])
                 final_rho = np.outer(psi_final, psi_final.conj())
 
                 result = np.trace(np.abs(self.run_obs @ final_rho))
-                results.append(result * s_count)
-
-            assert total_count == count
+                results.append(result)
+                pbar.update(1)
 
         return calculate_mu(results, count, self.lcu_coeffs)
