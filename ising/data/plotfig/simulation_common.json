@@ -2,7 +2,7 @@
   "observable": "magnetization",
   "methods": [
     "exact",
-    "gs_qdrift"
+    "grouped_lie"
   ],
   "input_file": "data/input/simulation.json",
   "fig_folder": "plots/qiskit_trotter",

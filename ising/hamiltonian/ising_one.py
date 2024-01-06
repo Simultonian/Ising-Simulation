@@ -5,15 +5,29 @@ from .hamiltonian import Hamiltonian
 import numpy as np
 
 
-def trotter_reps(ham: SparsePauliOp, time: float, eps: float) -> int:
+def trotter_reps_general(ham: SparsePauliOp, time: float, eps: float) -> int:
     """
-    Calculate the Trotter error for Ising model specifically
+    Calculate the Trotter error for general Hamiltonian
     """
     l = len(ham.coeffs)
     coeff_sum = sum(ham.coeffs)
 
     numr = np.abs(l * (coeff_sum * time) ** 2)
     dr = np.abs(2 * eps)
+    final = int(np.ceil(numr / dr))
+    if final < 0:
+        raise ValueError("Incorrect calculation")
+
+    final = max(final, 1)
+    return final
+
+
+def trotter_reps(num_qubits, h, time: float, eps: float) -> int:
+    """
+    Calculate the Trotter error for Ising model specifically
+    """
+    numr = 8 * np.abs(h) * (num_qubits**2) * (time**2)
+    dr = np.abs(eps)
     final = int(np.ceil(numr / dr))
     if final < 0:
         raise ValueError("Incorrect calculation")

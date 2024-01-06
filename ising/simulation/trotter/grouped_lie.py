@@ -17,7 +17,7 @@ def circuit_depth(ham: Hamiltonian, time: float, err: float) -> int:
     """
     Gets the number of iterations required to get the value to epsilon close.
     """
-    reps = trotter_reps(ham.sparse_repr, time, err)
+    reps = trotter_reps(ham.sparse_repr.num_qubits, ham.coeffs[0], time, err)
     l = len(ham.paulis)
     return l * reps
 
@@ -175,6 +175,7 @@ class GroupedLieCircuit:
         return self.ham_subbed.ground_state
 
     def subsitute_h(self, h_val: float) -> None:
+        self.h_val = h_val
         self.ham_subbed = substitute_parameter(self.ham, self.h, h_val)
 
         self.group_coeffs = [
@@ -220,7 +221,7 @@ class GroupedLieCircuit:
             raise ValueError("h value has not been substituted.")
 
         if reps == -1:
-            reps = trotter_reps(self.ham_subbed.sparse_repr, time, self.error)
+            reps = trotter_reps(self.num_qubits, self.h_val, time, self.error)
 
         final_op = np.identity(2**self.num_qubits).astype(np.complex128)
 
