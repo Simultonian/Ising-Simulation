@@ -26,7 +26,7 @@ def trotter_reps(num_qubits, h, time: float, eps: float) -> int:
     """
     Calculate the Trotter error for Ising model specifically
     """
-    numr = 8 * np.abs(h) * (num_qubits**2) * (time**2)
+    numr = np.abs(h) * num_qubits * (time**2)
     dr = np.abs(eps)
     final = int(np.ceil(numr / dr))
     if final < 0:
