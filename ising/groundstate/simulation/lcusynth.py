@@ -109,7 +109,7 @@ class LCUSynthesizer:
         p = np.abs(self.lcu_coeffs) / np.linalg.norm(self.lcu_coeffs, ord=1)
         count = self.ground_params["count"]
 
-        print("Entering loop mu")
+        print("Entering loop")
         results = []
 
         samples_count = Counter(
