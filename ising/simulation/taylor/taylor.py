@@ -225,7 +225,7 @@ class Taylor:
         """
         t_bar = time * self.beta
         # For t_bar < 1, r is too small to get accurate results.
-        r = max(20, int(np.ceil(t_bar) ** 2))
+        r = max(20, int(10 * np.ceil(t_bar) ** 2))
 
         evo_time = np.round(t_bar / r, 6)
 
