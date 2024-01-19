@@ -1,14 +1,13 @@
-from typing import Optional, Callable
+from typing import Optional
 from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
-
+from scipy.sparse import linalg
 from qiskit.circuit import Parameter
 from qiskit.quantum_info import SparsePauliOp, Pauli
 
 
 def normalized_eigen(matrix: NDArray, normalize: bool) -> tuple[NDArray, NDArray]:
-    print("HERE")
     eig_val, eig_vec = np.linalg.eig(matrix)
     if normalize:
         lam_0 = np.min(eig_val)
@@ -16,11 +15,10 @@ def normalized_eigen(matrix: NDArray, normalize: bool) -> tuple[NDArray, NDArray
 
     return (eig_vec, eig_val)
 
-
 @dataclass
 class Hamiltonian:
     sparse_repr: SparsePauliOp
-    approx_spectral_gap: float = 0
+    _approx_spectral_gap: Optional[float] = None
     normalized: bool = False
     _eig_vec: Optional[NDArray] = None
     _eig_val: Optional[NDArray] = None
@@ -36,6 +34,12 @@ class Hamiltonian:
         if self._map is None:
             self._map = {Pauli(p): v for (p, v) in self.sparse_repr.to_list()}
         return self._map[pauli]
+
+    @property
+    def approx_spectral_gap(self) -> float:
+        if self._approx_spectral_gap is None:
+            self._approx_spectral_gap = sparse_spectral_gap(self)
+        return self._approx_spectral_gap
 
     @property
     def num_qubits(self) -> int:
@@ -115,3 +119,12 @@ class Hamiltonian:
 def substitute_parameter(ham: Hamiltonian, para: Parameter, val: float) -> Hamiltonian:
     new_sparse_repr = ham.sparse_repr.assign_parameters({para: val})
     return Hamiltonian(sparse_repr=new_sparse_repr, normalized=ham.normalized)
+
+def sparse_spectral_gap(ham: Hamiltonian) -> float:
+    """
+    Calculates the spectral gap using the sparse representation of the
+    Hamiltonian.
+    """
+    sparse_mat = ham.sparse_repr.to_matrix(sparse=True)
+    eigval, _ = linalg.eigs(sparse_mat, k=2, which='SR')
+    return abs(eigval[1] - eigval[0])

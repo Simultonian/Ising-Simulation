@@ -46,6 +46,7 @@ def plot_qubit_gate_count(
         results[method] = []
 
     for qubit in qubit_points:
+        print(f"Running for {qubit}")
         ham = parametrized_ising(qubit, h_val)
         for method, fn in methods.items():
             result = fn(ham, eeta, eps, obs_norm)
@@ -68,7 +69,8 @@ def plot_qubit_gate_count(
     # ax.set_xscale("log")
     # ax.set_yscale("log")
     ax.set_xlabel(r"$\text{qubits }(N)$")
-    ax.set_ylabel(r"$\log_{10}(\text{gate count})$")
+    ax.set_ylabel(r"gate count")
+    # ax.set_ylabel(r"$\log_{10}(\text{gate count})$")
 
     ax.set_title("Gate Count vs Qubits for Simulation Techniques")
 
@@ -81,7 +83,7 @@ def plot_qubit_gate_count(
 
 if __name__ == "__main__":
     h_val = 1
-    start_qubit, end_qubit = 4, 10
+    start_qubit, end_qubit = 4, 30
     point_count = 10
     obs_norm = 1
     eps = 1e-3

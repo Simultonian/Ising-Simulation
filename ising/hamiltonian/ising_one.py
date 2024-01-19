@@ -1,7 +1,7 @@
 from typing import Union
 from qiskit.circuit import Parameter
 from qiskit.quantum_info import SparsePauliOp, Pauli, PauliList
-from .hamiltonian import Hamiltonian
+from .hamiltonian import Hamiltonian, sparse_spectral_gap
 import numpy as np
 
 
@@ -117,5 +117,4 @@ def parametrized_ising(
             zz_terms + x_terms, np.concatenate([zz_coeffs, x_coeffs])
         ),
         normalized=normalize,
-        approx_spectral_gap=1 / qubits,
     )
