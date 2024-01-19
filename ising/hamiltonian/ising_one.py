@@ -117,4 +117,5 @@ def parametrized_ising(
             zz_terms + x_terms, np.concatenate([zz_coeffs, x_coeffs])
         ),
         normalized=normalize,
+        approx_spectral_gap=1 / qubits,
     )

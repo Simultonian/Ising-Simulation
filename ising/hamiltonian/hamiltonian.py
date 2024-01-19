@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Callable
 from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
@@ -8,6 +8,7 @@ from qiskit.quantum_info import SparsePauliOp, Pauli
 
 
 def normalized_eigen(matrix: NDArray, normalize: bool) -> tuple[NDArray, NDArray]:
+    print("HERE")
     eig_val, eig_vec = np.linalg.eig(matrix)
     if normalize:
         lam_0 = np.min(eig_val)
@@ -19,6 +20,7 @@ def normalized_eigen(matrix: NDArray, normalize: bool) -> tuple[NDArray, NDArray
 @dataclass
 class Hamiltonian:
     sparse_repr: SparsePauliOp
+    approx_spectral_gap: float = 0
     normalized: bool = False
     _eig_vec: Optional[NDArray] = None
     _eig_val: Optional[NDArray] = None
@@ -34,6 +36,10 @@ class Hamiltonian:
         if self._map is None:
             self._map = {Pauli(p): v for (p, v) in self.sparse_repr.to_list()}
         return self._map[pauli]
+
+    @property
+    def num_qubits(self) -> int:
+        return self.sparse_repr.num_qubits
 
     @property
     def map(self) -> dict[Pauli, complex]:
