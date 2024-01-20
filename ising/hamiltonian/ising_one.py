@@ -68,7 +68,7 @@ def general_grouping(ops: Union[list[Pauli], PauliList]) -> list[list[Pauli]]:
 
 
 def parametrized_ising(
-    qubits: int, h: Union[Parameter, float], j: float = -1, normalize: bool = True
+    qubits: int, h: Union[Parameter, float], J: float = -1, normalize: bool = True
 ) -> Hamiltonian:
     """
     One dimensional Transverse-field Ising model parameterized by external
@@ -89,7 +89,7 @@ def parametrized_ising(
     i_n = ["I"] * qubits
 
     zz_terms = []
-    zz_coeffs = np.array([j] * (qubits - 1))
+    zz_coeffs = np.array([J] * (qubits - 1))
     for i in range(qubits - 1):
         j = i + 1
         p_i = i_n
@@ -117,4 +117,5 @@ def parametrized_ising(
             zz_terms + x_terms, np.concatenate([zz_coeffs, x_coeffs])
         ),
         normalized=normalize,
+        _approx_spectral_gap=2*abs(J)*abs(1 - h)
     )

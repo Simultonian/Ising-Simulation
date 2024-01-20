@@ -10,7 +10,8 @@ def plot_spectral_gap(h_val: float, start_qubit: int, end_qubit: int, point_coun
 
     qubit_points = [int(x) for x in np.linspace(start_qubit, end_qubit, point_count)]
 
-    gap = [parametrized_ising(qubit, h_val).spectral_gap for qubit in qubit_points]
+    gap = [parametrized_ising(qubit, h_val).approx_spectral_gap for qubit in qubit_points]
+    print(gap)
     sns.lineplot(
         y=gap,
         x=qubit_points,
@@ -21,7 +22,7 @@ def plot_spectral_gap(h_val: float, start_qubit: int, end_qubit: int, point_coun
 
     # ax.invert_xaxis()
     # ax.set_xscale("log")
-    # ax.set_yscale("log")
+    ax.set_yscale("log")
     ax.set_xlabel(r"$\text{qubits }(N)$")
     ax.set_ylabel(r"Spectral gap")
 
@@ -35,7 +36,7 @@ def plot_spectral_gap(h_val: float, start_qubit: int, end_qubit: int, point_coun
 
 
 if __name__ == "__main__":
-    h_val = 1
+    h_val = 0.1
     start_qubit, end_qubit = 4, 10
     point_count = 10
 

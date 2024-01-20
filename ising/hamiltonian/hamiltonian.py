@@ -94,6 +94,10 @@ class Hamiltonian:
 
     @property
     def spectral_gap(self) -> float:
+        """
+        WARNING: This code is flawed since due to precision error and
+        degeneracy.
+        """
         if self._spectral_gap is None:
             sorted_eigval = sorted(self.eig_val)
             self._spectral_gap = np.abs(sorted_eigval[0] - sorted_eigval[1])
@@ -119,6 +123,7 @@ class Hamiltonian:
 def substitute_parameter(ham: Hamiltonian, para: Parameter, val: float) -> Hamiltonian:
     new_sparse_repr = ham.sparse_repr.assign_parameters({para: val})
     return Hamiltonian(sparse_repr=new_sparse_repr, normalized=ham.normalized)
+
 
 def sparse_spectral_gap(ham: Hamiltonian) -> float:
     """

@@ -8,7 +8,7 @@ import ising.benchmark.groundstate_depth as groundstate_depth
 from typing import Callable
 
 methods: dict[str, Callable[[Hamiltonian, float, float, float], int]] = {
-    "Ge et al": groundstate_depth.ge_et_al,
+    # "Ge et al": groundstate_depth.ge_et_al,
     # "Phase Estimation and Amplitude Amplification": groundstate_depth.phase_estimation,
     # "Poulin et al": groundstate_depth.poulin_et_al,
     "Lin et al": groundstate_depth.lin_et_al,
@@ -82,12 +82,12 @@ def plot_qubit_gate_count(
 
 
 if __name__ == "__main__":
-    h_val = 1
-    start_qubit, end_qubit = 4, 30
+    h_val = 10
+    start_qubit, end_qubit = 4, 20
     point_count = 10
     obs_norm = 1
     eps = 1e-3
-    eeta = 0.6
+    eeta = 0.2
 
     plot_qubit_gate_count(
         h_val, start_qubit, end_qubit, obs_norm, eps, eeta, point_count
