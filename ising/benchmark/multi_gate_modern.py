@@ -71,25 +71,24 @@ def plot_qubit_gate_count(
 
                 sns.scatterplot(y=result, x=qubit_points, ax=ax, color=colors[method], s=5)
 
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
             # ax.invert_xaxis()
             # ax.set_xscale("log")
-            ax.set_yscale("log")
-            # ax.set_ylabel(r"$\log_{10}(\text{gate count})$")
-            ax.get_legend().remove()
-            ax.set_title(f"h={h_val}")
 
-    # fig.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
-    # ax.legend(loc='upper right')
+            ax.set_yscale("log")
+            ax.tick_params(axis='both', labelsize=5)
+
+            ax.get_legend().remove()
+            ax.set_title(f"h={h_val}",pad=0.1, fontsize=7)
+
+    # ADDING THE COMMON LABEL
     lines_labels = [ax.get_legend_handles_labels() for ax in fig.axes][:1]
     lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
-    fig.legend(lines, labels)
+    fig.legend(lines, labels, loc="upper center", ncol=2)
+    
+    fig.subplots_adjust(wspace=0.2, hspace=0.1)
 
-    fig.tight_layout()
-    # fig.xlabel(r"$\text{qubits}(N)$")
-    # fig.ylabel("Gate Count")
-    # plt.set_title("Gate Count vs Qubits for Simulation Techniques")
-    # ax.legend(loc="upper left", framealpha=1)
-    # plt.legend()
     fig.supxlabel(r"$\text{qubits}(N)$")
     fig.supylabel("Gate Count")
     diagram_name = "plots/benchmark/multi_modern.png"
