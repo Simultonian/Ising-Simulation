@@ -102,8 +102,8 @@ def main():
     start_qubit, end_qubit = 20, 200
     point_count = 10
     obs_norm = 1
-    eps = 1e-3
-    eeta = 0.2
+    eps = 1e-1
+    eeta = 0.8
 
     plot_qubit_gate_count(
         h_vals, start_qubit, end_qubit, obs_norm, eps, eeta, point_count
