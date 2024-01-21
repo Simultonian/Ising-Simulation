@@ -67,7 +67,7 @@ def plot_spectral_across_h(side: int, start_h: float, end_h: float, point_count:
 
 
 if __name__ == "__main__":
-    start_h, end_h = 0, 3
+    start_h, end_h = -3, 3
     side = 2
     point_count = 30
 

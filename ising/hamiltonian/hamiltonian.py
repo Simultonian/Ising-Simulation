@@ -100,7 +100,7 @@ class Hamiltonian:
         degeneracy.
         """
         if self._spectral_gap is None:
-            rounded = list(set(np.round(self.eig_val, decimals=11).real.tolist()))
+            rounded = list(set(np.round(self.eig_val, decimals=8).real.tolist()))
             rounded.sort()
             self._spectral_gap = np.abs(rounded[0] - rounded[1])
         return self._spectral_gap
