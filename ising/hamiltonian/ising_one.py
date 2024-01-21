@@ -117,5 +117,5 @@ def parametrized_ising(
             zz_terms + x_terms, np.concatenate([zz_coeffs, x_coeffs])
         ),
         normalized=normalize,
-        _approx_spectral_gap=2*abs(J)*abs(1 - h)
+        _approx_spectral_gap=2 * abs(J) * abs(1 - h),
     )

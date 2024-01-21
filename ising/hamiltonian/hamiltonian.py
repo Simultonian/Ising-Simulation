@@ -15,6 +15,7 @@ def normalized_eigen(matrix: NDArray, normalize: bool) -> tuple[NDArray, NDArray
 
     return (eig_vec, eig_val)
 
+
 @dataclass
 class Hamiltonian:
     sparse_repr: SparsePauliOp
@@ -99,8 +100,9 @@ class Hamiltonian:
         degeneracy.
         """
         if self._spectral_gap is None:
-            sorted_eigval = sorted(self.eig_val)
-            self._spectral_gap = np.abs(sorted_eigval[0] - sorted_eigval[1])
+            rounded = list(set(np.round(self.eig_val, decimals=11).real.tolist()))
+            rounded.sort()
+            self._spectral_gap = np.abs(rounded[0] - rounded[1])
         return self._spectral_gap
 
     @property
@@ -131,5 +133,5 @@ def sparse_spectral_gap(ham: Hamiltonian) -> float:
     Hamiltonian.
     """
     sparse_mat = ham.sparse_repr.to_matrix(sparse=True)
-    eigval, _ = linalg.eigs(sparse_mat, k=2, which='SR')
+    eigval, _ = linalg.eigs(sparse_mat, k=2, which="SR")
     return abs(eigval[1] - eigval[0])

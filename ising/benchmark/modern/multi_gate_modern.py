@@ -45,7 +45,9 @@ def plot_qubit_gate_count(
             print(f"Running for h={h_val}")
 
             ax = axes[r, c]
-            qubit_points = [int(x) for x in np.linspace(start_qubit, end_qubit, point_count)]
+            qubit_points = [
+                int(x) for x in np.linspace(start_qubit, end_qubit, point_count)
+            ]
 
             results: dict[str, list[int]] = {}
             for method in methods.keys():
@@ -69,24 +71,26 @@ def plot_qubit_gate_count(
                     alpha=0.6,
                 )
 
-                sns.scatterplot(y=result, x=qubit_points, ax=ax, color=colors[method], s=5)
+                sns.scatterplot(
+                    y=result, x=qubit_points, ax=ax, color=colors[method], s=5
+                )
 
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
+            ax.spines["right"].set_visible(False)
+            ax.spines["top"].set_visible(False)
             # ax.invert_xaxis()
             # ax.set_xscale("log")
 
             ax.set_yscale("log")
-            ax.tick_params(axis='both', labelsize=5)
+            ax.tick_params(axis="both", labelsize=5)
 
             ax.get_legend().remove()
-            ax.set_title(f"h={h_val}",pad=0.1, fontsize=7)
+            ax.set_title(f"h={h_val}", pad=0.1, fontsize=7)
 
     # ADDING THE COMMON LABEL
     lines_labels = [ax.get_legend_handles_labels() for ax in fig.axes][:1]
     lines, labels = [sum(lol, []) for lol in zip(*lines_labels)]
     fig.legend(lines, labels, loc="upper center", ncol=2)
-    
+
     fig.subplots_adjust(wspace=0.2, hspace=0.1)
 
     fig.supxlabel(r"$\text{qubits}(N)$")
@@ -112,6 +116,7 @@ def main():
 
 def test_main():
     main()
+
 
 if __name__ == "__main__":
     main()

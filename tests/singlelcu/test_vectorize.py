@@ -14,6 +14,7 @@ def test_cartesian():
 
     assert np.all(expected == mult_inds)
 
+
 def test_vectorized_probs():
     coeffs = np.array([1, 2, 3, 4, 5])
     mult_inds = np.array([[0, 1], [1, 2], [3, 4], [1, 4]])
@@ -30,6 +31,7 @@ def test_vectorized_probs():
     expected = np.array(expected)
     np.all(result == expected)
 
+
 def test_pauli_list_product_simple():
     paulis = PauliList([Pauli("IX"), Pauli("XI")])
     mult_inds = np.array([[0], [1]])
@@ -38,6 +40,7 @@ def test_pauli_list_product_simple():
     target = PauliList([Pauli("IX"), Pauli("XI")])
 
     assert np.all(result == target)
+
 
 def test_pauli_list_product():
     paulis = PauliList([Pauli("IX"), Pauli("XI")])
@@ -48,6 +51,7 @@ def test_pauli_list_product():
 
     assert np.all(result == target)
 
+
 def test_pauli_list_product_unequal():
     paulis = PauliList([Pauli("IX"), Pauli("XI")])
     mult_inds = np.array([[0, 1, 1], [1, 1, 0]])
@@ -56,6 +60,7 @@ def test_pauli_list_product_unequal():
     target = PauliList([Pauli("IX"), Pauli("IX")])
 
     assert np.all(result == target)
+
 
 def test_pauli_list_negative():
     paulis = PauliList([Pauli("-IX"), Pauli("XI")])

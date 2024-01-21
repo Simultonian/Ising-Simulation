@@ -9,13 +9,16 @@ from ising.simulation.trotter import Lie, LieCircuit, GroupedLieCircuit, Grouped
 from ising.hamiltonian import general_grouping, parametrized_ising
 
 
-def pauli_matrix(eig_val:NDArray, eig_vec:NDArray, eig_inv:NDArray, time: float) -> NDArray:
+def pauli_matrix(
+    eig_val: NDArray, eig_vec: NDArray, eig_inv: NDArray, time: float
+) -> NDArray:
     return eig_vec @ np.diag(np.exp(complex(0, -1) * time * eig_val)) @ eig_inv
+
 
 def test_grouping():
     ising = [Pauli("XI"), Pauli("IX"), Pauli("ZZ")]
     group_mapping = general_grouping(ising)
-    exp_mapping= [[Pauli("ZZ")], [Pauli("XI"), Pauli("IX")]]
+    exp_mapping = [[Pauli("ZZ")], [Pauli("XI"), Pauli("IX")]]
     assert group_mapping == exp_mapping
 
 
@@ -55,6 +58,7 @@ def test_exp():
     np.testing.assert_almost_equal(g_final, f_final)
     np.testing.assert_almost_equal(g_final, norm_final)
 
+
 def test_circuit_match():
     time = 2.0
     p, coeff = (Pauli("ZZ"), -1)
@@ -64,7 +68,7 @@ def test_circuit_match():
 
     ea *= coeff
 
-    op = ee @ np.diag(np.exp(complex(0, -1) * time * ea)) @ ei 
+    op = ee @ np.diag(np.exp(complex(0, -1) * time * ea)) @ ei
 
     lie = Lie()
     circuit = lie.atomic_evolution(p, coeff * time)
@@ -95,17 +99,14 @@ def test_lie_grouped():
         circuit = p_map[p]
 
         # No reverse_qargs makes the correct
-        r_op = np.array(Operator.from_circuit(circuit).data).astype(
-            np.complex128
-        )
-
+        r_op = np.array(Operator.from_circuit(circuit).data).astype(np.complex128)
 
         eas, ee, ei = eig_list[g_ind]
         ea = eas[p_ind]
 
         e_op = ee @ np.diag(np.exp(complex(0, -1) * time * ea)) @ ei
         np.testing.assert_allclose(r_op, e_op, rtol=1e-7, atol=1e-7)
-    
+
     for p in op.paulis:
         check_circuit_match(p)
 
@@ -125,11 +126,11 @@ def test_pauli_lie():
 
         return circuit_manager.pauli_matrix(pauli, time, 1)
 
-
     for pauli in parametrized_ham.sparse_repr.paulis:
         lie_matrix = get_pauli(LieCircuit, pauli, time)
         grouped_matrix = get_pauli(GroupedLieCircuit, pauli, time)
         np.testing.assert_almost_equal(lie_matrix, grouped_matrix)
+
 
 def test_grouped_pauli():
     h_para = Parameter("h")
@@ -148,12 +149,14 @@ def test_grouped_pauli():
 
         for time in [1.0, 10.0, 5.0]:
             for pauli in parametrized_ham.sparse_repr.paulis:
+
                 def get_pauli(circuit_manager, time):
                     return circuit_manager.pauli_matrix(pauli, time, 1)
 
                 lie_matrix = get_pauli(lie_circuit, time)
                 grouped_matrix = get_pauli(grouped_circuit, time)
                 np.testing.assert_almost_equal(lie_matrix, grouped_matrix)
+
 
 def test_grouped_matrix():
     h_para = Parameter("h")
@@ -171,6 +174,7 @@ def test_grouped_matrix():
         grouped_circuit.construct_parametrized_circuit()
 
         for time in [1.0, 10.0, 5.0]:
+
             def get_pauli(circuit_manager, time):
                 return circuit_manager.matrix(time)
 

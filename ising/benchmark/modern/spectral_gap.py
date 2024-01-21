@@ -10,7 +10,9 @@ def plot_spectral_gap(h_val: float, start_qubit: int, end_qubit: int, point_coun
 
     qubit_points = [int(x) for x in np.linspace(start_qubit, end_qubit, point_count)]
 
-    gap = [parametrized_ising(qubit, h_val).approx_spectral_gap for qubit in qubit_points]
+    gap = [
+        parametrized_ising(qubit, h_val).approx_spectral_gap for qubit in qubit_points
+    ]
     print(gap)
     sns.lineplot(
         y=gap,

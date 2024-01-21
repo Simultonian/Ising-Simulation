@@ -16,8 +16,15 @@ def test_simdiag_simple():
         t_m = e_vec @ np.diag(e_val) @ e_inv
         np.testing.assert_allclose(t_m, m, rtol=1e-7, atol=1e-7)
 
+
 def test_simdiag_bigger():
-    ps = [Pauli("ZZIIII"), Pauli("IZZIII"), Pauli("IIZZII"), Pauli("IIIZZI"), Pauli("IIIIZZ")]
+    ps = [
+        Pauli("ZZIIII"),
+        Pauli("IZZIII"),
+        Pauli("IIZZII"),
+        Pauli("IIIZZI"),
+        Pauli("IIIIZZ"),
+    ]
     ms = [np.array(x.to_matrix()) for x in ps]
     e_vals, e_vec = simdiag(ms)
     e_inv = np.linalg.inv(e_vec)
@@ -26,9 +33,17 @@ def test_simdiag_bigger():
         e_val = e_vals[ind]
         t_m = e_vec @ np.diag(e_val) @ e_inv
         np.testing.assert_allclose(t_m, m, rtol=1e-7, atol=1e-7)
+
 
 def test_simdiag_x():
-    ps = [Pauli("XIIIII"), Pauli("IXIIII"), Pauli("IIXIII"), Pauli("IIIXII"), Pauli("IIIIXI"), Pauli("IIIIIX")]
+    ps = [
+        Pauli("XIIIII"),
+        Pauli("IXIIII"),
+        Pauli("IIXIII"),
+        Pauli("IIIXII"),
+        Pauli("IIIIXI"),
+        Pauli("IIIIIX"),
+    ]
     ms = [np.array(x.to_matrix()) for x in ps]
     e_vals, e_vec = simdiag(ms)
     e_inv = np.linalg.inv(e_vec)
@@ -39,8 +54,11 @@ def test_simdiag_x():
         np.testing.assert_allclose(t_m, m, rtol=1e-7, atol=1e-7)
 
 
-def pauli_matrix(eig_val:NDArray, eig_vec:NDArray, eig_inv:NDArray, time: float) -> NDArray:
+def pauli_matrix(
+    eig_val: NDArray, eig_vec: NDArray, eig_inv: NDArray, time: float
+) -> NDArray:
     return eig_vec @ np.diag(np.exp(complex(0, -1) * time * eig_val)) @ eig_inv
+
 
 def test_exp():
     t = 1.0

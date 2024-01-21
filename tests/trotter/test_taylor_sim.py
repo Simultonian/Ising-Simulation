@@ -2,17 +2,21 @@ import numpy as np
 from qiskit.quantum_info import Pauli
 from qiskit.circuit import Parameter
 from ising.simulation.trotter.taylor_old import (
-        get_small_k_probs, get_cap_k, 
-        normalize_ham_list, calculate_exp_pauli, Taylor, 
-        sum_decomposition, sample_decomposition_sum)
+    get_small_k_probs,
+    get_cap_k,
+    normalize_ham_list,
+    calculate_exp_pauli,
+    Taylor,
+    sum_decomposition,
+    sample_decomposition_sum,
+)
 from ising.hamiltonian import parametrized_ising
 
 
-
 def test_k_probs():
-    k_vals = get_small_k_probs(t_bar=1,r=1,cap_k=2)
+    k_vals = get_small_k_probs(t_bar=1, r=1, cap_k=2)
 
-    expected = np.array([ 1.41421356+0.j,  0.        +0.j, -0.52704628+0.j])
+    expected = np.array([1.41421356 + 0.0j, 0.0 + 0.0j, -0.52704628 + 0.0j])
     # expected /= np.sum(np.abs(expected))
     assert np.allclose(k_vals, expected)
 
@@ -24,7 +28,7 @@ def test_k_sum():
     error = 0.1
 
     t_bar = time * beta
-    r = t_bar ** 2
+    r = t_bar**2
     cap_k = get_cap_k(t_bar, obs_norm, error)
     alphas = np.abs(get_small_k_probs(t_bar=t_bar, r=r, cap_k=cap_k))
 
@@ -39,7 +43,7 @@ def test_normalize_ham_list():
     paulis, coeffs, beta = normalize_ham_list(pauli_map)
 
     exp_paulis = [Pauli("-X"), Pauli("Y"), Pauli("Z")]
-    exp_coeffs = [2/3, 0, 1/3]
+    exp_coeffs = [2 / 3, 0, 1 / 3]
 
     assert paulis == exp_paulis
     assert np.allclose(coeffs, exp_coeffs)
@@ -57,6 +61,7 @@ def test_sample_ham_list():
     for x in sampled_paulis:
         assert x in pauli_inds
 
+
 def test_exp_pauli_id():
     t_bar = 1
     r = 1
@@ -68,6 +73,7 @@ def test_exp_pauli_id():
 
     assert np.allclose(result, expected)
 
+
 def exp_ham(time, pauli):
     mat = pauli.to_matrix()
     eig_val, eig_vec = np.linalg.eig(mat)
@@ -75,8 +81,10 @@ def exp_ham(time, pauli):
 
     return eig_vec @ np.diag(np.exp(-1j * time * eig_val)) @ eig_inv
 
+
 def check_allclose(mat, mat_list):
     return any([np.allclose(mat, matx) for matx in mat_list])
+
 
 def rnd(mat):
     return np.round(mat, 2)
@@ -93,12 +101,12 @@ def test_taylor_sum_anlyt_zz():
     taylor = Taylor(parametrized_ham, h_para, error, delta)
 
     zz = Pauli("ZZ")
-    
+
     h_value = 0
     rl = [1, 2, 4, 10]
     kl = [1, 2, 5, 7]
     k_max = kl[-1]
-    time = 1.0 # Same as t_bar
+    time = 1.0  # Same as t_bar
 
     taylor.subsitute_h(h_value)
     taylor.construct_parametrized_circuit()
@@ -109,7 +117,6 @@ def test_taylor_sum_anlyt_zz():
 
     decomp = sum_decomposition(taylor.paulis, time, rl[-1], taylor.coeffs, kl[-1])
 
-
     def sample_sum(r, count=sample_count):
         alphas = taylor.get_alphas(time, r, k_max)
         final = taylor.sample_v(time, r, k_max)
@@ -117,12 +124,14 @@ def test_taylor_sum_anlyt_zz():
         for _ in range(count - 1):
             final += taylor.sample_v(time, r, k_max)
 
-        final *= (np.sum(np.abs(alphas) ** r).real / sample_count)
+        final *= np.sum(np.abs(alphas) ** r).real / sample_count
         return final
 
     for k in kl:
         for r in rl:
-            sample = sample_decomposition_sum(taylor.paulis, time, r, taylor.coeffs, k, sample_count)
+            sample = sample_decomposition_sum(
+                taylor.paulis, time, r, taylor.coeffs, k, sample_count
+            )
             ans = np.max(np.abs(sample - exact))
             print(k, r, ans)
             # np.testing.assert_allclose(sample, exact)
