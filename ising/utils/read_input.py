@@ -13,13 +13,16 @@ def read_input_file(file_name):
         "count_time",
         "qubit_count",
     }
-    STRING = {"method"}
+    STRING = {"method", "noise"}
+    ARRAYS = {"depolarization"}
 
     for key, value in data.items():
         if key in INTEGERS:
             data[key] = int(value)
         elif key in STRING:
             continue
+        elif key in ARRAYS:
+            data[key] = [float(x) for x in value]
         else:
             data[key] = float(value)
     return data
