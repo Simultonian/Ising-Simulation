@@ -86,6 +86,20 @@ def plot_combined(
                 alpha=0.0,
                 label=METHOD_NAMES[method],
             )
+            for noise, results in noisy_results.items():
+                if noise != "0.0":
+                    label = f"Noise = {noise}"
+                else:
+                    label = "Noiseless"
+
+                plot_method(
+                    paras,
+                    results,
+                    style=styles[ind],
+                    color=colors[ind],
+                    label=label,
+                )
+
         else:
             h_value = _get_point({0.0: noisy_results})
             sns.scatterplot(
@@ -94,17 +108,6 @@ def plot_combined(
                 alpha=0.0,
                 label=METHOD_NAMES[method],
             )
-
-        if method != "analytical":
-            for noise, results in noisy_results.items():
-                plot_method(
-                    paras,
-                    results,
-                    style=styles[ind],
-                    color=colors[ind],
-                    label=f"Noise={noise}",
-                )
-        else:
             plot_method(paras, noisy_results, style=styles[ind], color=colors[ind])
 
     # SETTING: AXIS VISIBILITY
