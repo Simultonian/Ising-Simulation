@@ -14,7 +14,7 @@ def read_input_file(file_name):
         "qubit_count",
     }
     STRING = {"method", "noise"}
-    ARRAYS = {"depolarization"}
+    ARRAYS = {"polarization"}
 
     for key, value in data.items():
         if key in INTEGERS:

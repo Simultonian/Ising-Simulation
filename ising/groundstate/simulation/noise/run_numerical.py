@@ -29,21 +29,42 @@ SYNTH_MAP = {
 }
 
 
+def transform_noisy_results(
+    init_results: dict[int, dict[float, list[float]]], parameters: list[float]
+) -> dict[float, dict[int, dict[float, float]]]:
+    """
+    Transforms the result dictionary from one form to the other.
+
+    Initial form: dict[qubit, dict[h_value, list[answer]]]
+    Here list[answers] is of the size parameters. Each answer corresponds to
+    a parameter value for given qubit and h_value.
+
+    Final form: dict[noise, dict[qubit, dict[h_value, answer]]]
+    Here we have moved the noise to the top level for easier evaluation when
+    plotting.
+    """
+    transformed_results = {}
+
+    # Iterate over each qubit
+    for qubit, h_value_dict in init_results.items():
+        # For each h_value, create a dictionary mapping noise to answer
+        for h_value, answers in h_value_dict.items():
+            # Iterate over each noise level
+            for i, noise in enumerate(parameters):
+                # Associate noise with a dictionary mapping qubit to h_value to answer
+                if noise not in transformed_results:
+                    transformed_results[noise] = {}
+                if qubit not in transformed_results[noise]:
+                    transformed_results[noise][qubit] = {}
+                transformed_results[noise][qubit][h_value] = answers[i]
+
+    return transformed_results
+
+
 def run_numerical(paras):
-    qubit_wise_answers = {}
     h_values = np.linspace(
         10 ** paras["start_h"], 10 ** paras["end_h"], paras["count_h"]
     )
-
-    noise = paras.get("noise", "identity")
-    if noise == "depolarization":
-        polarization_lst = paras.get("polarization", [0.0])
-        noise_fns = [lambda qubits: depolarization(polarization, qubits) for polarization in polarization_lst]
-    elif noise == "identity":
-        noise_fns = [lambda x: x]
-    else:
-        raise ValueError(f"Unknown noise channel: {noise}")
-
     qubits = map(
         int, np.linspace(paras["start_qubit"], paras["end_qubit"], paras["qubit_count"])
     )
@@ -52,12 +73,27 @@ def run_numerical(paras):
     if circuit_synthesis is None:
         raise ValueError(f"Incorrect synthesis method: {paras['method']}")
 
+    noise = paras.get("noise", "identity")
+    # Result: dict[dict[qubit, dict[h, [answer]]]]
+    if noise == "depolarization":
+        parameters = paras.get("polarization", [0.0])
+    else:
+        raise ValueError("Unknown noise parameter")
+
+    qubit_wise_answers = {}
     for num_qubit in qubits:
         observable = overall_magnetization(num_qubit)
         h_para = Parameter("h")
         parametrized_ham = parametrized_ising(num_qubit, h_para)
+
         circuit_manager = circuit_synthesis(parametrized_ham, h_para, paras["error"])
-        noise_lst = [noise_fn(num_qubit + 1) for noise_fn in noise_fns] # one ancilla qubit
+        if noise == "depolarization":
+            noise_fns = [
+                depolarization(polarization, num_qubit + 1)  # Ancilla qubit
+                for polarization in parameters
+            ]
+        else:
+            raise ValueError("Unknown noise parameter")
 
         h_wise_answers = {}
         for h in h_values:
@@ -70,16 +106,13 @@ def run_numerical(paras):
                 overlap=paras["overlap"],
                 error=paras["error"],
                 success=paras["success"],
-                noise=noise_lst
+                noise=noise_fns,
             )
-
-            h_noisy_answers = lcu_run.calculate_mu()
-
             h_wise_answers[h] = lcu_run.calculate_mu()
 
         qubit_wise_answers[num_qubit] = h_wise_answers
 
-    return qubit_wise_answers
+    return transform_noisy_results(qubit_wise_answers, parameters)
 
 
 def file_numerical(file_name):
@@ -87,7 +120,7 @@ def file_numerical(file_name):
 
     results = run_numerical(parameters)
 
-    file_name = f"data/groundstate/{parameters['method']}_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
+    file_name = f"data/groundstate/noisy_{parameters['method']}_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
 
     print(f"Saving results at: {file_name}")
     with open(file_name, "w") as file:
@@ -105,7 +138,7 @@ def main():
 
 
 def test_main():
-    file_numerical("data/input/groundstate.json")
+    file_numerical("data/input/noisy_groundstate.json")
 
 
 if __name__ == "__main__":

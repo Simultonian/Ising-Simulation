@@ -10,5 +10,5 @@
   "overlap": "0.7",
   "success": "0.1",
   "noise": "depolarization",
-  "polarization": ["0.001", "0.01", "0.1"]
+  "polarization": ["0.01", "0.1", "0.5"]
 }
