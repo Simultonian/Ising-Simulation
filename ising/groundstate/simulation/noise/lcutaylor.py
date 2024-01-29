@@ -17,7 +17,7 @@ from ising.groundstate.simulation.utils import (
 from tqdm import tqdm
 
 
-class LCUTaylor:
+class LCUNoisyTaylor:
     def __init__(self, synthesizer, observable: Hamiltonian, **kwargs):
         """
         Code for running single ancilla LCU simulation using given synthesizer.
@@ -31,6 +31,9 @@ class LCUTaylor:
             - error
             - success
         """
+        print("Running noisy")
+        self.noise_lst = kwargs.get("noise", [lambda x: x])
+        
         self.synth = synthesizer
 
         obs_x = SparsePauliOp(["X"], [1.0])
@@ -106,7 +109,7 @@ class LCUTaylor:
         count = self.ground_params["count"]
 
         print("Entering loop mu")
-        results = []
+        results = [[] for _ in self.noise_lst]
 
         with tqdm(total=count) as pbar:
             for _ in range(count):
@@ -115,8 +118,15 @@ class LCUTaylor:
                 psi_final = self.post_v1v2(sample[0], sample[1])
                 final_rho = np.outer(psi_final, psi_final.conj())
 
-                result = np.trace(np.abs(self.run_obs @ final_rho))
-                results.append(result)
+                for ind, noise in enumerate(self.noise_lst):
+                    final_rho = noise(final_rho)
+                    result = np.trace(np.abs(self.run_obs @ final_rho))
+                    results[ind].append(result)
+
                 pbar.update(1)
 
-        return calculate_mu(results, count, self.lcu_coeffs)
+        mus = []
+        for result in results:
+            mus.append(calculate_mu(result, count, self.lcu_coeffs))
+
+        return mus

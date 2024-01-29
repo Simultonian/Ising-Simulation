@@ -1,7 +1,6 @@
 from functools import lru_cache
 import numpy as np
 import numpy.testing as npt
-from numpy.typing import NDArray
 from collections import Counter
 
 from qiskit.quantum_info import SparsePauliOp

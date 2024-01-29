@@ -1,0 +1,11 @@
+{
+  "observable": "magnetization",
+  "methods": [
+    "analytical",
+    "taylor_single"
+  ],
+  "input_file": "data/input/noisy_groundstate_taylor.json",
+  "scale": [1.5, 1.7],
+  "colors": ["red", "black"],
+  "labels": ["L", "x"]
+}

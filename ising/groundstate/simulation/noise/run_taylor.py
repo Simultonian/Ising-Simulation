@@ -11,8 +11,9 @@ from ising.hamiltonian import parametrized_ising
 from ising.observables import overall_magnetization
 from ising.utils import read_input_file
 from ising.simulation.taylor import TaylorSample, Taylor
-from ising.groundstate.simulation import LCUTaylor
-
+from ising.groundstate.simulation.noise.lcutaylor import LCUNoisyTaylor
+from ising.groundstate.simulation.noise.transformer import transform_noisy_results
+from ising.noise import depolarization
 
 SYNTH_MAP = {
     "taylor_sample": TaylorSample,
@@ -21,7 +22,6 @@ SYNTH_MAP = {
 
 
 def run_numerical(paras):
-    qubit_wise_answers = {}
     h_values = np.linspace(
         10 ** paras["start_h"], 10 ** paras["end_h"], paras["count_h"]
     )
@@ -34,6 +34,14 @@ def run_numerical(paras):
     if circuit_synthesis is None:
         raise ValueError(f"Incorrect synthesis method: {paras['method']}")
 
+    noise = paras.get("noise", "identity")
+    # Result: dict[dict[qubit, dict[h, [answer]]]]
+    if noise == "depolarization":
+        parameters = paras.get("polarization", [0.0])
+    else:
+        raise ValueError("Unknown noise parameter")
+
+    qubit_wise_answers = {}
     for num_qubit in qubits:
         observable = overall_magnetization(num_qubit)
         h_para = Parameter("h")
@@ -41,24 +49,34 @@ def run_numerical(paras):
         circuit_manager = circuit_synthesis(parametrized_ham, h_para, paras["error"])
         circuit_manager.substitute_obs(observable)
 
+
+        if noise == "depolarization":
+            noise_fns = [
+                depolarization(polarization, num_qubit + 1)  # Ancilla qubit
+                for polarization in parameters
+            ]
+        else:
+            raise ValueError("Unknown noise parameter")
+
         h_wise_answers = {}
         for h in h_values:
             print(f"Running for {num_qubit} qubits and h:{h}")
             circuit_manager.subsitute_h(h)
 
-            lcu_run = LCUTaylor(
+            lcu_run = LCUNoisyTaylor(
                 circuit_manager,
                 observable,
                 overlap=paras["overlap"],
                 error=paras["error"],
                 success=paras["success"],
+                noise=noise_fns,
             )
 
             h_wise_answers[h] = lcu_run.calculate_mu()
 
         qubit_wise_answers[num_qubit] = h_wise_answers
 
-    return qubit_wise_answers
+    return transform_noisy_results(qubit_wise_answers, parameters)
 
 
 def file_numerical(file_name):
@@ -66,7 +84,7 @@ def file_numerical(file_name):
 
     results = run_numerical(parameters)
 
-    file_name = f"data/groundstate/{parameters['method']}_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
+    file_name = f"data/groundstate/noisy_{parameters['method']}_{parameters['start_qubit']}_to_{parameters['end_qubit']}.json"
 
     print(f"Saving results at: {file_name}")
     with open(file_name, "w") as file:
@@ -84,7 +102,7 @@ def main():
 
 
 def test_main():
-    file_numerical("data/input/groundstate_taylor.json")
+    file_numerical("data/input/noisy_groundstate_taylor.json")
 
 
 if __name__ == "__main__":

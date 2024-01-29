@@ -1,4 +1,4 @@
-from .lcutaylor import LCUTaylor
+from .lcutaylor import LCUNoisyTaylor
 from .lcusynth import LCUNoisySynthesizer
 
-__all__ = ["LCUTaylor", "LCUNoisySynthesizer"]
+__all__ = ["LCUNoisyTaylor", "LCUNoisySynthesizer"]
