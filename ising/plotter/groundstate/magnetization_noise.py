@@ -17,7 +17,7 @@ Result: TypeAlias = dict[float, dict[float, float]]
 METHOD_NAMES = {
     "analytical": "Exact Solution",
     "taylor": "Truncated Taylor Series",
-    "grouped_lie": "First Order Trotterization",
+    "grouped_lie": "First Order Trotter",
     "gs_qdrift": "qDRIFT Protocol",
     "exact": "Precise Unitaries",
     "taylor_sample": "Truncated Taylor Series Samples",

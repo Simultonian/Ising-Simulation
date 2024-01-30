@@ -2,10 +2,11 @@
   "observable": "magnetization",
   "methods": [
     "analytical",
-    "grouped_lie"
+    "grouped_lie",
+    "taylor_single"
   ],
   "input_file": "data/input/groundstate_noisy.json",
-  "scale": [1.5, 1.7],
+  "scale": [2.5, 1.7],
   "colors": ["red", "black"],
   "labels": ["L", "x"]
 }
