@@ -116,9 +116,9 @@ class LCUNoisyTaylor:
                 sample = np.random.choice(len(self.lcu_times), p=p, size=2)
 
                 psi_final = self.post_v1v2(sample[0], sample[1])
-                final_rho = np.outer(psi_final, psi_final.conj())
 
                 for ind, noise in enumerate(self.noise_lst):
+                    final_rho = np.outer(psi_final, psi_final.conj())
                     final_rho = noise(final_rho)
                     result = np.trace(np.abs(self.run_obs @ final_rho))
                     results[ind].append(result)
