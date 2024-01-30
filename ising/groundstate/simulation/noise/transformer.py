@@ -28,5 +28,3 @@ def transform_noisy_results(
                 transformed_results[noise][qubit][h_value] = answers[i]
 
     return transformed_results
-
-

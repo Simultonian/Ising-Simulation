@@ -25,17 +25,56 @@ METHOD_NAMES = {
 }
 
 
-def _get_point(res: NoisyResult) -> float:
-    for _, qubit_wise_results in res.items():
-        for _, h_wise_results in qubit_wise_results.items():
-            for _, result in h_wise_results.items():
-                return abs(result)
+def _get_point(res: dict[float, float]) -> tuple[float, float]:
+    for error, result in res.items():
+        return error, result
 
     raise ValueError("Empty Result provided")
 
 
 def log_label_maker(values: list[float]) -> list[str]:
     return ["{:.2f}".format(math.trunc(np.log(float(x)) * 100) / 100) for x in values]
+
+
+def calculate_method_error(
+    target: dict[float, dict[float, float]], result: NoisyResult
+) -> dict[float, float]:
+    """
+    Calculates just the difference for all points and takes the average.
+    # Noise -> Qubit -> h -> values
+    """
+    final = {}
+    for noise, qubit_wise in result.items():
+        count, sm = 0, 0.0
+        for qubit, h_wise in qubit_wise.items():
+            for hval, res in h_wise.items():
+                targ = target[qubit][hval]
+                sm += abs(res - targ)
+                count += 1
+
+        final[noise] = sm / count
+
+    return final
+
+
+def process_error(
+    method_wise_results: dict[str, NoisyResult]
+) -> dict[str, dict[float, float]]:
+    """
+    Converts the method wise results into the error for each parameter of
+    the noise for each method.
+    """
+    error_bounds = {}
+    target = method_wise_results.get("analytical", None)
+    if target is None:
+        raise ValueError("Can't find analytical in results.")
+
+    for method, result in method_wise_results.items():
+        if method == "analytical":
+            continue
+        error_bounds[method] = calculate_method_error(target, result)
+
+    return error_bounds
 
 
 def plot_method(paras, results: Result, **kwargs):
@@ -58,7 +97,7 @@ def plot_method(paras, results: Result, **kwargs):
             )
         else:
             ax = sns.lineplot(
-                x=x_values, y=y_values, label=f"Exact Solution", color=color
+                x=x_values, y=y_values, label=f"N={num_qubit}", color=color
             )
 
 
@@ -66,50 +105,36 @@ def plot_combined(
     paras, method_wise_results: dict[str, NoisyResult], diagram_name, **kwargs
 ):
     scale = kwargs.get("scale", (1, 1))
-    styles = kwargs.get("labels", ["L"] * len(method_wise_results))
-    colors = kwargs.get("colors", [None] * len(method_wise_results))
-
-    max_h = 10 ** paras.get("end_h")
-
     fig, ax = plt.subplots()
+
+    error_points = process_error(method_wise_results)
 
     # SETTING: FONT STYLE
     plt.rcParams.update({"font.size": 12})
     plt.rcParams.update({"font.family": "sans-serif"})
 
-    for ind, (method, noisy_results) in enumerate(method_wise_results.items()):
+    for ind, (method, noisy_results) in enumerate(error_points.items()):
         if method != "analytical":
-            h_value = _get_point(noisy_results)
-            sns.scatterplot(
-                x=[max_h * scale[0]],
-                y=[h_value * scale[1]],
-                alpha=0.0,
-                label=METHOD_NAMES[method],
+            err, res = _get_point(noisy_results)
+
+            noise_x = [float(x) for x in list(noisy_results.keys())]
+            error_y = list(noisy_results.values())
+
+            ax = sns.scatterplot(
+                x=noise_x,
+                y=error_y,
+                marker="x",
+                linewidth=3,
+                # color=color,
             )
-            for noise, results in noisy_results.items():
-                if noise != "0.0":
-                    label = f"Noise = {noise}"
-                else:
-                    label = "Noiseless"
-
-                # print(noise, results['6']['0.31622776601683794'])
-                plot_method(
-                    paras,
-                    results,
-                    style=styles[ind],
-                    color=colors[ind],
-                    label=label,
-                )
-
-        else:
-            # h_value = _get_point({0.0: noisy_results})
-            # sns.scatterplot(
-            #     x=[max_h * scale[0]],
-            #     y=[h_value * scale[1]],
-            #     alpha=0.0,
-            #     label=METHOD_NAMES[method],
-            # )
-            plot_method(paras, noisy_results, style=styles[ind], color=colors[ind])
+            ax = sns.lineplot(
+                x=noise_x,
+                y=error_y,
+                label=METHOD_NAMES[method],
+                linewidth=2,
+                alpha=0.8
+                # color=color,
+            )
 
     # SETTING: AXIS VISIBILITY
     ax.spines["top"].set_visible(False)
@@ -124,15 +149,19 @@ def plot_combined(
     # plt.locator_params(axis="y", nbins=6)
 
     # SETTING: AXIS LABELS
-    ax.set_xlabel("External Magnetic Field $h$", fontsize=14)
-    ax.set_ylabel("Magnetization M(h)", fontsize=14)
+    ax.set_xlabel("Depolarization Noise $(p)$", fontsize=14)
+    ax.set_ylabel("$|M_{E} - M_{S}|$", fontsize=14)
 
     # SETTING: TITLE PAD
-    ax.set_title("Phase Transition of Ising Model", pad=20)
+    ax.set_title("Error due to Noise", pad=20)
     ax.get_legend()
 
     # SETTING: LOG SCALE
-    # ax.set_xscale("log")
+    ax.set_xscale("log")
+    # ax.set_yscale("log")
+
+    # SETTING: INVERSION
+    ax.invert_xaxis()
 
     plt.savefig(diagram_name, dpi=300)
     print(f"Saving diagram at {diagram_name}")
@@ -160,9 +189,7 @@ def file_run(input_file):
         results = read_json(method_output_file)
         method_wise_results[method] = results
 
-    diagram_name = (
-        f"plots/groundstate/noisy_{method_combined}_{start_qubit}_to_{end_qubit}.png"
-    )
+    diagram_name = f"plots/groundstate/noise_gap_{method_combined}_{start_qubit}_to_{end_qubit}.png"
     plot_combined(input_paras, method_wise_results, diagram_name, **plotfig)
 
 
@@ -174,7 +201,7 @@ def main():
 
 
 def test_main():
-    file_run("data/plotfig/groundstate_noisy.json")
+    file_run("data/plotfig/noisy_groundstate_taylor.json")
 
 
 if __name__ == "__main__":

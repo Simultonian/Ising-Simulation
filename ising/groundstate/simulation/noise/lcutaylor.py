@@ -33,7 +33,7 @@ class LCUNoisyTaylor:
         """
         print("Running noisy")
         self.noise_lst = kwargs.get("noise", [lambda x: x])
-        
+
         self.synth = synthesizer
 
         obs_x = SparsePauliOp(["X"], [1.0])

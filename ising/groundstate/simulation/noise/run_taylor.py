@@ -49,7 +49,6 @@ def run_numerical(paras):
         circuit_manager = circuit_synthesis(parametrized_ham, h_para, paras["error"])
         circuit_manager.substitute_obs(observable)
 
-
         if noise == "depolarization":
             noise_fns = [
                 depolarization(polarization, num_qubit + 1)  # Ancilla qubit
