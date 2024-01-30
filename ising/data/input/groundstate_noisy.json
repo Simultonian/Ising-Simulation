@@ -1,6 +1,6 @@
 {
-  "start_qubit": "4",
-  "end_qubit": "4",
+  "start_qubit": "6",
+  "end_qubit": "6",
   "qubit_count": "1",
   "start_h": "-0.5",
   "end_h": "0.2",
@@ -10,5 +10,5 @@
   "overlap": "0.7",
   "success": "0.1",
   "noise": "depolarization",
-  "polarization": ["0", "0.01", "0.1", "0.5"]
+  "polarization": ["0", "0.9", "0.7", "0.5", "0.3", "0.1", "0.05", "0.01", "0.001"]
 }
