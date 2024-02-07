@@ -15,11 +15,12 @@ def parse(name) -> Hamiltonian:
     with open(f"data/molecules/{name}.json", "r") as json_file:
         data = json.load(json_file)
 
-    gap = abs(float(data["homo"]) - float(data["lumo"]))
+    # eV to Hartree
+    gap = abs(float(data["homo"]) - float(data["lumo"])) * 0.0367493
 
     coeffs = []
     for rl, im in zip(data["real"], data["imag"]):
         coeffs.append(rl + 1j * im)
 
     sparse_repr = SparsePauliOp(data=data["terms"], coeffs=coeffs)
-    return Hamiltonian(sparse_repr=sparse_repr, _spectral_gap=gap)
+    return Hamiltonian(sparse_repr=sparse_repr, _spectral_gap=gap, _approx_spectral_gap=gap)
