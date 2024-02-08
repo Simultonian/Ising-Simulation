@@ -38,15 +38,17 @@ def fixed_everything(
     for method, func in methods.items():
         depth[method] = func(molecule, eeta, eps, obs_norm)
 
-    print(depth)
+    for method, val in depth.items():
+        print(f"{method}:{val}")
 
 
 def main():
-    molecule = parse("methane")
+    molecule = parse("ethane")
     beta = np.sum(np.abs(molecule.coeffs))
     L = len(molecule.coeffs)
     gap = molecule.spectral_gap
-    print(f"Terms: {L} \n Sum: {beta} \n gap: {gap}")
+    num_qubits = molecule.num_qubits
+    print(f"Qubits: {num_qubits} \nTerms: {L} \nSum: {beta} \nGap: {gap}")
     obs_norm = 1
     eps = 1e-1
     eeta = 0.8
