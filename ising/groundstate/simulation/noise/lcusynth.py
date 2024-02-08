@@ -106,7 +106,7 @@ class LCUNoisySynthesizer:
         # npt.assert_allclose(np.sum(np.abs(psi_final) ** 2), 1, atol=1e-5)
 
         return psi_final
-
+    
     def calculate_mu(self):
         p = np.abs(self.lcu_coeffs) / np.linalg.norm(self.lcu_coeffs, ord=1)
         count = self.ground_params["count"]
@@ -134,7 +134,10 @@ class LCUNoisySynthesizer:
                 psi_final = self.post_v1v2(sample[0], sample[1])
                 for ind, noise in enumerate(self.noise_lst):
                     final_rho = np.outer(psi_final, psi_final.conj())
-                    final_rho = noise(final_rho)
+
+                    depth = self.synth.circuit_depth(self.lcu_times[sample[0]]) + self.synth.circuit_depth(self.lcu_times[sample[1]])
+                    final_rho = noise(final_rho, depth)
+                    # final_rho = noise(final_rho)
                     result = np.trace(np.abs(self.run_obs @ final_rho))
                     results[ind].append(result * s_count)
 

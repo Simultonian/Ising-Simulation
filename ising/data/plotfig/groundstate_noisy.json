@@ -2,8 +2,7 @@
   "observable": "magnetization",
   "methods": [
     "analytical",
-    "grouped_lie",
-    "taylor_single"
+    "grouped_lie"
   ],
   "input_file": "data/input/groundstate_noisy.json",
   "scale": [2.5, 1.7],

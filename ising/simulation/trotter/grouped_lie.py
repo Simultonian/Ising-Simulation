@@ -216,6 +216,9 @@ class GroupedLieCircuit:
             @ eig_inv
         )
 
+    def circuit_depth(self, time: float) -> int:
+        return trotter_reps(self.num_qubits, self.h_val, time, self.error)
+
     def matrix(self, time: float, reps: int = -1) -> NDArray:
         if self.ham_subbed is None:
             raise ValueError("h value has not been substituted.")
