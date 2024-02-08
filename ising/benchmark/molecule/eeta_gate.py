@@ -29,7 +29,7 @@ colors: dict[str, str] = {
 
 
 def plot_gate_error(
-    name, molecule, start_err_exp, end_err_exp, point_count, obs_norm, eeta
+    name, molecule, start_eeta_exp, end_eeta_exp, point_count, obs_norm, eps
 ):
     fig, ax = plt.subplots()
 
@@ -38,12 +38,12 @@ def plot_gate_error(
         "qdrift": {"color": "red", "label": "qDRIFT Protocol"},
     }
 
-    error_points = [
-        10**x for x in np.linspace(start_err_exp, end_err_exp, point_count)
+    eeta_points = [
+        10**x for x in np.linspace(start_eeta_exp, end_eeta_exp, point_count)
     ]
     taylor, qdrift = [], []
 
-    for eps in error_points:
+    for eeta in eeta_points:
         taylor.append(groundstate_depth.truncated_taylor(molecule, eeta, eps, obs_norm))
         qdrift.append(groundstate_depth.qdrift(molecule, eeta, eps, obs_norm))
 
@@ -53,25 +53,25 @@ def plot_gate_error(
         result = results[method]
         sns.lineplot(
             y=result,
-            x=error_points,
+            x=eeta_points,
             ax=ax,
             label=configs[method]["label"],
             color=config["color"],
         )
-        sns.scatterplot(y=result, x=error_points, ax=ax, color=config["color"])
+        sns.scatterplot(y=result, x=eeta_points, ax=ax, color=config["color"])
 
     ax.set_xscale("log")
     ax.set_yscale("log")
 
     ax.invert_xaxis()
 
-    ax.set_xlabel(r"$\log_{10}(\epsilon)$")
+    ax.set_xlabel(r"$\log_{10}(\eeta)$")
     ax.set_ylabel(r"$\log_{10}(\text{gate count})$")
 
     ax.set_title("Groundstate Preparation of Methane", pad=20)
 
     plt.legend()
-    diagram_name = f"plots/benchmark/molecule/eps_gate/{name}_qdrift_tts.png"
+    diagram_name = f"plots/benchmark/molecule/eeta_gate/{name}_qdrift_tts_eeta.png"
     print(f"Saving diagram at:{diagram_name}")
     plt.savefig(diagram_name, dpi=300)
 
