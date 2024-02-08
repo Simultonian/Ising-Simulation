@@ -43,11 +43,13 @@ def fixed_everything(
 
 
 def main():
-    molecule = parse("ethane")
+    name = "co2"
+    molecule = parse(name)
     beta = np.sum(np.abs(molecule.coeffs))
     L = len(molecule.coeffs)
     gap = molecule.spectral_gap
     num_qubits = molecule.num_qubits
+    print(name)
     print(f"Qubits: {num_qubits} \nTerms: {L} \nSum: {beta} \nGap: {gap}")
     obs_norm = 1
     eps = 1e-1
