@@ -214,7 +214,7 @@ class Taylor:
         npt.assert_almost_equal(np.sum(np.abs(final_psi) ** 2), 1)
         return final_psi
 
-    def circuit_depth(self, time:float) -> int:
+    def circuit_depth(self, time: float) -> int:
         t_bar = time * self.beta
         # For t_bar < 1, r is too small to get accurate results.
         return max(20, int(10 * np.ceil(t_bar) ** 2))

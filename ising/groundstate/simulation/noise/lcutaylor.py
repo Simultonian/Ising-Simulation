@@ -120,7 +120,9 @@ class LCUNoisyTaylor:
                 for ind, noise in enumerate(self.noise_lst):
                     final_rho = np.outer(psi_final, psi_final.conj())
 
-                    depth = self.synth.circuit_depth(self.lcu_times[sample[0]]) + self.synth.circuit_depth(self.lcu_times[sample[1]])
+                    depth = self.synth.circuit_depth(
+                        self.lcu_times[sample[0]]
+                    ) + self.synth.circuit_depth(self.lcu_times[sample[1]])
                     final_rho = noise(final_rho, depth)
                     # final_rho = noise(final_rho)
                     result = np.trace(np.abs(self.run_obs @ final_rho))

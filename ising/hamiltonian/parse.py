@@ -23,4 +23,6 @@ def parse(name) -> Hamiltonian:
         coeffs.append(rl + 1j * im)
 
     sparse_repr = SparsePauliOp(data=data["terms"], coeffs=coeffs)
-    return Hamiltonian(sparse_repr=sparse_repr, _spectral_gap=gap, _approx_spectral_gap=gap)
+    return Hamiltonian(
+        sparse_repr=sparse_repr, _spectral_gap=gap, _approx_spectral_gap=gap
+    )

@@ -32,7 +32,6 @@ def fixed_everything(
     eps: float,
     eeta: float,
 ):
-
     # ham: Hamiltonian, eeta: float, eps: float, obs_norm: float = 1
     depth = {}
     for method, func in methods.items():
