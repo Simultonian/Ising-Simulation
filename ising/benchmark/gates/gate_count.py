@@ -2,14 +2,13 @@ import numpy as np
 from ising.hamiltonian import Hamiltonian
 
 
-def trotter_gate_count(ham: Hamiltonian, time: float, err: float) -> int:
+def trotter_gates(ham: Hamiltonian, time: float, err: float) -> int:
     """
     First order trotterization gate count for given parameters.
     """
-    h = np.min(np.abs(ham.coeffs))
+    max_lambd = np.max(np.abs(ham.coeffs))
     l = len(ham.paulis)
-    r = np.ceil((h * ham.num_qubits * (time**2)) / err)
-    return l * r
+    return np.ceil((l**3) * ((max_lambd * time) ** 2) / err)
 
 
 def qdrift_gate_count(ham: Hamiltonian, time: float, err: float) -> int:

@@ -19,6 +19,9 @@ def calculate_mu(mu_samples, count, coeffs):
     mu = (norm_1_sq * mu_sum) / count
     return mu
 
+def ground_state_maximum_time(params) -> float:
+    return params["m"] * params["delta_t"] * np.sqrt(2 * params["t"])
+
 
 def ground_state_constants(spectral_gap, eeta, eps, prob, obs_norm):
     """
