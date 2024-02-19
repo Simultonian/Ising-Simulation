@@ -13,6 +13,8 @@ from qiskit.quantum_info import Pauli, SparsePauliOp
 
 from ising.benchmark.gates.counter import Counter
 
+from tqdm import tqdm
+
 
 def gates_for_pauli(
     decomposer: Decomposer, pauli: Union[Pauli, SparsePauliOp], time: float
@@ -55,7 +57,7 @@ class TrotterBenchmark:
 
         self.optimise = kwargs.get("optimise", False)
 
-    def simulation_gate_count(self, time: float):
+    def simulation_gate_count(self, time: float) -> dict[str, int]:
         """
         Calculates the gate depth for givin time
         """
@@ -64,11 +66,15 @@ class TrotterBenchmark:
         count = Counter()
         decomposer = Decomposer()
         if not self.optimise:
-            for pauli, coeff in zip(
-                self.ham.sparse_repr.paulis, self.ham.sparse_repr.coeffs
-            ):
-                gate_dict = gates_for_pauli(decomposer, pauli, coeff.real * time / reps)
-                count.add(gate_dict)
+
+            total_count = len(self.ham.sparse_repr.coeffs)
+            with tqdm(total=total_count) as pbar:
+                for pauli, coeff in zip(
+                    self.ham.sparse_repr.paulis, self.ham.sparse_repr.coeffs
+                ):
+                    gate_dict = gates_for_pauli(decomposer, pauli, coeff.real * time / reps)
+                    pbar.update(1)
+                    count.add(gate_dict)
 
             return count.times(reps)
 
@@ -76,7 +82,7 @@ class TrotterBenchmark:
         count.add(gate_dict)
         return count.times(reps)
 
-    def calculate_gates(self):
+    def calculate_gates(self) -> dict[str, int]:
         """
         Calculates the gate depth for GSP for given Hamiltonian
         """
