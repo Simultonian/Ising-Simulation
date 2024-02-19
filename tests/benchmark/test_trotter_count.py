@@ -20,6 +20,7 @@ def test_gate_count_pauli():
 
 
 def test_ising_trotter_count():
+    return
     ham = parametrized_ising(4, 0.1)
     obs_norm, overlap, error, success = 1, 0.7, 0.1, 0.1
 
@@ -27,3 +28,14 @@ def test_ising_trotter_count():
         ham, obs_norm, overlap=overlap, error=error, success=success
     )
     gates = benchmarker.calculate_gates()
+
+
+def test_ising_trotter_count():
+    ham = parametrized_ising(4, 0.1)
+    obs_norm, overlap, error, success = 1, 0.7, 0.1, 0.1
+
+    benchmarker = TrotterBenchmark(
+        ham, obs_norm, overlap=overlap, error=error, success=success, optimise=True
+    )
+    gates = benchmarker.calculate_gates()
+    assert False

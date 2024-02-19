@@ -1,3 +1,4 @@
+from typing import Union
 import numpy as np
 from ising.hamiltonian import Hamiltonian
 from ising.groundstate.simulation.utils import (
@@ -8,13 +9,13 @@ from ising.hamiltonian.ising_one import trotter_reps_general
 from ising.utils import Decomposer
 from qiskit.circuit.library import PauliEvolutionGate
 from qiskit import QuantumCircuit
-from qiskit.quantum_info import Pauli
+from qiskit.quantum_info import Pauli, SparsePauliOp
 
 from ising.benchmark.gates.counter import Counter
 
 
 def gates_for_pauli(
-    decomposer: Decomposer, pauli: Pauli, time: float
+    decomposer: Decomposer, pauli: Union[Pauli, SparsePauliOp], time: float
 ) -> dict[str, int]:
     evo = PauliEvolutionGate(pauli, time=time)
     circuit = QuantumCircuit(evo.num_qubits)
@@ -52,6 +53,8 @@ class TrotterBenchmark:
             self.obs_norm,
         )
 
+        self.optimise = kwargs.get("optimise", False)
+
     def simulation_gate_count(self, time: float):
         """
         Calculates the gate depth for givin time
@@ -60,12 +63,17 @@ class TrotterBenchmark:
 
         count = Counter()
         decomposer = Decomposer()
-        for pauli, coeff in zip(
-            self.ham.sparse_repr.paulis, self.ham.sparse_repr.coeffs
-        ):
-            gate_dict = gates_for_pauli(decomposer, pauli, coeff.real * time / reps)
-            count.add(gate_dict)
+        if not self.optimise:
+            for pauli, coeff in zip(
+                self.ham.sparse_repr.paulis, self.ham.sparse_repr.coeffs
+            ):
+                gate_dict = gates_for_pauli(decomposer, pauli, coeff.real * time / reps)
+                count.add(gate_dict)
 
+            return count.times(reps)
+
+        gate_dict = gates_for_pauli(decomposer, self.ham.sparse_repr, time / reps)
+        count.add(gate_dict)
         return count.times(reps)
 
     def calculate_gates(self):

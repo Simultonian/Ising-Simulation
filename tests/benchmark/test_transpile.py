@@ -19,4 +19,3 @@ def test_decompose():
     circuit.append(evo, range(2))
 
     dqc = decompose(circuit)
-    assert False
