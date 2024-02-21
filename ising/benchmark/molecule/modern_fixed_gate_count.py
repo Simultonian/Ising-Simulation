@@ -1,5 +1,7 @@
-from ising.hamiltonian import Hamiltonian, parse
+from ising.hamiltonian import Hamiltonian, parse, parametrized_ising
 from ising.benchmark.gates.trotter import TrotterBenchmark
+from ising.benchmark.gates.qdrift import qDRIFTBenchmark
+from ising.benchmark.gates.taylor import TaylorBenchmark
 
 from typing import Callable
 
@@ -9,17 +11,43 @@ colors: dict[str, str] = {
     "qDRIFT": "yellow",
 }
 
-def trotter_gates(ham: Hamiltonian, obs_norm: float, overlap: float, error: float, success: float) -> dict[str, int]:
-    benchmarker = TrotterBenchmark(ham, 
-            obs_norm, 
-            overlap=overlap,
-            error=error,
-            success=success)
+
+def trotter_gates(
+    ham: Hamiltonian, obs_norm: float, overlap: float, error: float, success: float
+) -> dict[str, int]:
+    benchmarker = TrotterBenchmark(
+        ham, obs_norm, overlap=overlap, error=error, success=success
+    )
 
     return benchmarker.calculate_gates()
 
-methods: dict[str, Callable[[Hamiltonian, float, float, float, float], dict[str, int]]] = {
+
+def qdrift_gates(
+    ham: Hamiltonian, obs_norm: float, overlap: float, error: float, success: float
+) -> dict[str, int]:
+    benchmarker = qDRIFTBenchmark(
+        ham, obs_norm, overlap=overlap, error=error, success=success
+    )
+
+    return benchmarker.calculate_gates()
+
+
+def taylor_gates(
+    ham: Hamiltonian, obs_norm: float, overlap: float, error: float, success: float
+) -> dict[str, int]:
+    benchmarker = TaylorBenchmark(
+        ham, obs_norm, overlap=overlap, error=error, success=success
+    )
+
+    return benchmarker.calculate_gates()
+
+
+methods: dict[
+    str, Callable[[Hamiltonian, float, float, float, float], dict[str, int]]
+] = {
     "First Order Trotter": trotter_gates,
+    "qDRIFT": qdrift_gates,
+    "taylor": taylor_gates,
 }
 
 
@@ -39,9 +67,10 @@ def fixed_everything(
 
 
 def main():
-    name = "methane"
-    molecule = parse(name)
-    print(name)
+    # name = "methane"
+    # molecule = parse(name)
+    # print(name)
+    molecule = parametrized_ising(5, 0.1)
     obs_norm = 1
     eps = 1e-1
     eeta = 0.8

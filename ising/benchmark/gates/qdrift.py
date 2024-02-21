@@ -5,7 +5,7 @@ from ising.groundstate.simulation.utils import (
     ground_state_constants,
     ground_state_maximum_time,
 )
-from ising.hamiltonian.ising_one import trotter_reps_general
+from ising.hamiltonian.ising_one import qdrift_count
 from ising.utils import Decomposer
 from qiskit.circuit.library import PauliEvolutionGate
 from qiskit import QuantumCircuit
@@ -26,10 +26,10 @@ def gates_for_pauli(
     return dict(dqc.count_ops())
 
 
-class TrotterBenchmark:
+class qDRIFTBenchmark:
     def __init__(self, ham: Hamiltonian, observable_norm: float, **kwargs):
         """
-        Benchmark calculator for Trotterization based groundstate preparation.
+        Benchmark calculator for qDRIFT based groundstate preparation.
 
         Inputs:
             - observable_norm: Norm of observable to run LCU simulation on.
@@ -61,22 +61,22 @@ class TrotterBenchmark:
         """
         Calculates the gate depth for givin time
         """
-        print("Running Trotter Gate Count")
-        reps = trotter_reps_general(self.ham.sparse_repr, time, self.error)
+        print("Running qDRIFT Gate Count")
+        lambd = np.sum(np.abs(self.ham.sparse_repr.coeffs))
+        reps = qdrift_count(lambd, time, self.error)
 
         count = Counter()
         decomposer = Decomposer()
+
         if not self.optimise:
             total_count = len(self.ham.sparse_repr.coeffs)
             with tqdm(total=total_count) as pbar:
                 for pauli, coeff in zip(
                     self.ham.sparse_repr.paulis, self.ham.sparse_repr.coeffs
                 ):
-                    gate_dict = gates_for_pauli(
-                        decomposer, pauli, coeff.real * time / reps
-                    )
+                    gate_dict = gates_for_pauli(decomposer, pauli, lambd * time / reps)
                     pbar.update(1)
-                    count.add(gate_dict)
+                    count.weighted_add(abs(coeff.real), gate_dict)
 
             return count.times(reps)
 
