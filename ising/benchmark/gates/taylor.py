@@ -131,3 +131,13 @@ class TaylorBenchmark:
         """
         max_time = ground_state_maximum_time(self.ground_params)
         return self.simulation_gate_count(max_time)
+
+
+def taylor_gates(
+    ham: Hamiltonian, obs_norm: float, overlap: float, error: float, success: float
+) -> dict[str, int]:
+    benchmarker = TaylorBenchmark(
+        ham, obs_norm, overlap=overlap, error=error, success=success
+    )
+
+    return benchmarker.calculate_gates()

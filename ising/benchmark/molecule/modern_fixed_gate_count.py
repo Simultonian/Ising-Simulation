@@ -1,57 +1,20 @@
 from ising.hamiltonian import Hamiltonian, parse, parametrized_ising
-from ising.benchmark.gates.trotter import TrotterBenchmark
-from ising.benchmark.gates.qdrift import qDRIFTBenchmark
-from ising.benchmark.gates.taylor import TaylorBenchmark
+from ising.benchmark.gates import trotter_gates, qdrift_gates, taylor_gates
+import json
 
 from typing import Callable
-
-colors: dict[str, str] = {
-    "Truncated Taylor Series": "blue",
-    "First Order Trotter": "purple",
-    "qDRIFT": "yellow",
-}
-
-
-def trotter_gates(
-    ham: Hamiltonian, obs_norm: float, overlap: float, error: float, success: float
-) -> dict[str, int]:
-    benchmarker = TrotterBenchmark(
-        ham, obs_norm, overlap=overlap, error=error, success=success
-    )
-
-    return benchmarker.calculate_gates()
-
-
-def qdrift_gates(
-    ham: Hamiltonian, obs_norm: float, overlap: float, error: float, success: float
-) -> dict[str, int]:
-    benchmarker = qDRIFTBenchmark(
-        ham, obs_norm, overlap=overlap, error=error, success=success
-    )
-
-    return benchmarker.calculate_gates()
-
-
-def taylor_gates(
-    ham: Hamiltonian, obs_norm: float, overlap: float, error: float, success: float
-) -> dict[str, int]:
-    benchmarker = TaylorBenchmark(
-        ham, obs_norm, overlap=overlap, error=error, success=success
-    )
-
-    return benchmarker.calculate_gates()
-
 
 methods: dict[
     str, Callable[[Hamiltonian, float, float, float, float], dict[str, int]]
 ] = {
     "First Order Trotter": trotter_gates,
     "qDRIFT": qdrift_gates,
-    "taylor": taylor_gates,
+    "Truncated Taylor Series": taylor_gates,
 }
 
 
 def fixed_everything(
+    name: str,
     molecule: Hamiltonian,
     obs_norm: float,
     eps: float,
@@ -62,12 +25,26 @@ def fixed_everything(
     for method, func in methods.items():
         depth[method] = func(molecule, eeta, eps, obs_norm, success)
 
+    gate_sets = set()
+    for _, count in depth.items():
+        for gate in count.keys():
+            gate_sets.add(gate)
+
+    for method, val in depth.items():
+        for gate in gate_sets:
+            depth[method][gate] = depth[method].get(gate, 0)
+
     for method, val in depth.items():
         print(f"{method}:{val}")
 
+    file_name = f"data/gatecount/{name}.json"
+    print(f"Saving at {file_name}")
+    with open(file_name, "w") as file:
+        json.dump(depth, file)
+
 
 def main():
-    # name = "methane"
+    name = "ising"
     # molecule = parse(name)
     # print(name)
     molecule = parametrized_ising(5, 0.1)
@@ -76,7 +53,7 @@ def main():
     eeta = 0.8
     success = 0.9
 
-    fixed_everything(molecule, obs_norm, eps, eeta, success)
+    fixed_everything(name, molecule, obs_norm, eps, eeta, success)
 
 
 def test_main():
