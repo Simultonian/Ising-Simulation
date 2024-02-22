@@ -3,7 +3,7 @@ from qiskit.providers.aer import AerSimulator
 from qiskit.transpiler.passes.synthesis import SolovayKitaev
 from qiskit.synthesis import generate_basic_approximations
 
-SINGLE_QUBIT_GATES = ["h", "t", "tdg", "s", "sdg"]
+SINGLE_QUBIT_GATES = ["h", "t", "tdg"]
 ALL_GATES = ["h", "t", "tdg", "s", "sdg", "cx", "rz"]
 
 

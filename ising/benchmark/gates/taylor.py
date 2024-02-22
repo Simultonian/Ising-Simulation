@@ -108,6 +108,19 @@ class TaylorBenchmark:
 
         return count.times(1)
 
+    def error_gate_count(self, err: float) -> dict[str, int]:
+        """
+        Calculates the gate depth for given error
+        """
+        self.ground_params = ground_state_constants(
+            self.ham._approx_spectral_gap,
+            self.overlap,
+            err,
+            self.success,
+            self.obs_norm,
+        )
+        return self.calculate_gates()
+
     def simulation_gate_count(self, time: float) -> dict[str, int]:
         """
         Calculates the gate depth for givin time

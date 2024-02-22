@@ -56,6 +56,20 @@ class TrotterBenchmark:
         )
 
         self.optimise = kwargs.get("optimise", False)
+        self.decomposer = Decomposer()
+
+    def error_gate_count(self, err: float) -> dict[str, int]:
+        """
+        Calculates the gate depth for given error
+        """
+        self.ground_params = ground_state_constants(
+            self.ham._approx_spectral_gap,
+            self.overlap,
+            err,
+            self.success,
+            self.obs_norm,
+        )
+        return self.calculate_gates()
 
     def simulation_gate_count(self, time: float) -> dict[str, int]:
         """
@@ -66,7 +80,6 @@ class TrotterBenchmark:
         print(f"time:{time} reps:{reps}")
 
         count = Counter()
-        decomposer = Decomposer()
         if not self.optimise:
             total_count = len(self.ham.sparse_repr.coeffs)
             with tqdm(total=total_count) as pbar:
@@ -74,14 +87,14 @@ class TrotterBenchmark:
                     self.ham.sparse_repr.paulis, self.ham.sparse_repr.coeffs
                 ):
                     gate_dict = gates_for_pauli(
-                        decomposer, pauli, coeff.real * time / reps
+                        self.decomposer, pauli, coeff.real * time / reps
                     )
                     pbar.update(1)
                     count.add(gate_dict)
 
             return count.times(reps)
 
-        gate_dict = gates_for_pauli(decomposer, self.ham.sparse_repr, time / reps)
+        gate_dict = gates_for_pauli(self.decomposer, self.ham.sparse_repr, time / reps)
         count.add(gate_dict)
         return count.times(reps)
 
