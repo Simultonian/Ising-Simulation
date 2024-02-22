@@ -43,7 +43,7 @@ def qdrift_count(lambd: float, time: float, eps: float) -> int:
     # while final > 10000:
     #     final = final // 10
 
-    final = int(final**0.8)
+    # final = int(final**0.8)
 
     final = max(final, 1)
     return final

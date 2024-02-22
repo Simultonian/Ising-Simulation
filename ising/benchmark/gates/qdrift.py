@@ -65,6 +65,8 @@ class qDRIFTBenchmark:
         lambd = np.sum(np.abs(self.ham.sparse_repr.coeffs))
         reps = qdrift_count(lambd, time, self.error)
 
+        print(f"time:{time} lambda:{lambd} reps:{reps}")
+
         count = Counter()
         decomposer = Decomposer()
 

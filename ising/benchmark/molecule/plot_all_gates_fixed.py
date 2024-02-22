@@ -19,6 +19,7 @@ def get_gate_count_gsp(molecule: str):
 
 
 def plot_dictionaries(name: str, dicts: dict[str, dict[str, int]]):
+    fig, ax = plt.subplots()
     gates = list(dicts["qDRIFT"].keys())
 
     x = np.arange(len(gates))
@@ -27,14 +28,14 @@ def plot_dictionaries(name: str, dicts: dict[str, dict[str, int]]):
     bar_width = 0.25
 
     # Plot each dictionary
-    rects1 = plt.bar(
+    plt.bar(
         x - bar_width,
         dicts["First Order Trotter"].values(),
         bar_width,
         label="First Order Trotter",
     )
-    rects2 = plt.bar(x, dicts["qDRIFT"].values(), bar_width, label="qDRIFT")
-    rects3 = plt.bar(
+    plt.bar(x, dicts["qDRIFT"].values(), bar_width, label="qDRIFT")
+    plt.bar(
         x + bar_width,
         dicts["Truncated Taylor Series"].values(),
         bar_width,
@@ -45,6 +46,7 @@ def plot_dictionaries(name: str, dicts: dict[str, dict[str, int]]):
     plt.xlabel("Gates")
     plt.ylabel("Gate Count")
     plt.title("Method-Wise Gate Count for GSP")
+    ax.set_yscale("log")
     plt.xticks(x, gates)
     plt.legend()
 

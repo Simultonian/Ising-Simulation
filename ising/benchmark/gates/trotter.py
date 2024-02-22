@@ -63,6 +63,7 @@ class TrotterBenchmark:
         """
         print("Running Trotter Gate Count")
         reps = trotter_reps_general(self.ham.sparse_repr, time, self.error)
+        print(f"time:{time} reps:{reps}")
 
         count = Counter()
         decomposer = Decomposer()
