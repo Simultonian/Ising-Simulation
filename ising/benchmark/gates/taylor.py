@@ -77,7 +77,6 @@ class TaylorBenchmark:
         self.beta = np.sum(np.array(self.coeffs))
         self.coeffs /= self.beta
         self.decomposer = Decomposer()
-        self.k = 5
 
     @cache
     def average_pauli_depth(self) -> dict[str, int]:
@@ -115,11 +114,12 @@ class TaylorBenchmark:
         """
         # r = (beta t) ^ 2
         reps = (self.beta * time) ** 2
-        print(f"Running TTS Gate Count, reps:{reps}")
+        k = np.floor(np.log(self.beta * time / self.error) / np.log(np.log(self.beta * time / self.error)))
+        print(f"Running TTS Gate Count, reps:{reps} k:{k}")
 
         count = Counter()
         pauli_depth = self.average_pauli_depth()
-        count.add(pauli_depth)
+        count.weighted_add(k, pauli_depth)
         rotation_depth = self.average_pauli_rotate_depth(time)
         count.add(rotation_depth)
 
