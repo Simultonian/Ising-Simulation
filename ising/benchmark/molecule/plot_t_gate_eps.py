@@ -39,7 +39,7 @@ def plot_dictionaries(name: str, depths: dict[str, dict[float, int]]):
     # Add labels for each group
     plt.xlabel("Error")
     plt.ylabel("Gate Count")
-    plt.title("Method-Wise T-Gate Count vs Error for GSP")
+    plt.title(f"Method-Wise T-Gate Count vs Error for GSP for {name}")
     ax.set_yscale("log")
     plt.legend()
 
@@ -49,7 +49,7 @@ def plot_dictionaries(name: str, depths: dict[str, dict[float, int]]):
 
 
 def main():
-    name = "ising"
+    name = "ethane"
     gate_dicts = get_gate_count_gsp(name)
     print(gate_dicts)
     plot_dictionaries(name, gate_dicts)

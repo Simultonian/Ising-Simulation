@@ -47,10 +47,9 @@ def fixed_everything(
 
 
 def main():
-    name = "ising"
-    # molecule = parse(name)
-    # print(name)
-    molecule = parametrized_ising(5, 0.1)
+    name = "ethane"
+    molecule = parse(name)
+    print(f"Running for {name}")
     obs_norm = 1
     eps_start, eps_end = -1, -4
     eps_count = 10
