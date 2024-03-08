@@ -32,12 +32,13 @@ def _get_point(res: Result) -> float:
 
 
 def log_label_maker(values: list[float]) -> list[str]:
-    return ["{:.2f}".format(math.trunc(np.log(float(x)) * 100) / 100) for x in values]
+    return ["{:.2f}".format(math.trunc(np.log10(float(x)) * 100) / 100) for x in values]
 
 
 def plot_method(paras, results: Result, **kwargs):
     style = kwargs.get("style")
     color = kwargs.get("color")
+    method = kwargs.get("method")
 
     for num_qubit, h_wise_results in results.items():
         # h_wise_results: h -> magn
@@ -47,14 +48,18 @@ def plot_method(paras, results: Result, **kwargs):
             ax = sns.scatterplot(
                 x=x_values,
                 y=y_values,
-                label=f"N={num_qubit}",
+                label=method,
+                # label=f"N={num_qubit}",
                 marker=style,
                 linewidth=3,
                 color=color,
             )
         else:
             ax = sns.lineplot(
-                x=x_values, y=y_values, label=f"N={num_qubit}", color=color
+                x=x_values, y=y_values, 
+                label=method,
+                # label=f"N={num_qubit}", 
+                color=color
             )
 
 
@@ -74,14 +79,14 @@ def plot_combined(
     plt.rcParams.update({"font.family": "sans-serif"})
 
     for ind, (method, results) in enumerate(method_wise_results.items()):
-        h_value = _get_point(results)
-        sns.scatterplot(
-            x=[max_h * scale[0]],
-            y=[h_value * scale[1]],
-            alpha=0.0,
-            label=METHOD_NAMES[method],
-        )
-        plot_method(paras, results, style=styles[ind], color=colors[ind])
+        # h_value = _get_point(results)
+        # sns.scatterplot(
+        #     x=[max_h * scale[0]],
+        #     y=[h_value * scale[1]],
+        #     alpha=0.0,
+        #     label=METHOD_NAMES[method],
+        # )
+        plot_method(paras, results, style=styles[ind], color=colors[ind], method=METHOD_NAMES[method])
 
     # SETTING: AXIS VISIBILITY
     ax.spines["top"].set_visible(False)
@@ -96,11 +101,11 @@ def plot_combined(
     # plt.locator_params(axis="y", nbins=6)
 
     # SETTING: AXIS LABELS
-    ax.set_xlabel("External Magnetic Field $h$", fontsize=14)
-    ax.set_ylabel("Magnetization M(h)", fontsize=14)
+    ax.set_xlabel("Logarithimic External Magnetic Field $\log(h)$", fontsize=14)
+    ax.set_ylabel("Overall Magnetization $M_z(h)$", fontsize=14)
 
     # SETTING: TITLE PAD
-    ax.set_title("Phase Transition of Ising Model", pad=20)
+    # ax.set_title("Phase Transition of Ising Model", pad=20)
     ax.get_legend()
 
     # SETTING: LOG SCALE
