@@ -25,7 +25,7 @@ def get_gate_count_gsp(molecule: str):
 
 def convert_to_tick(num: str) -> str:
     power = np.log10(float(num))
-    return f"$10^{{{power:.{2}f}}}$"
+    return f"${{{power:.{2}f}}}$"
 
 def plot_dictionaries(name: str, depths: dict[str, dict[float, int]]):
     fig, ax = plt.subplots()
@@ -47,7 +47,7 @@ def plot_dictionaries(name: str, depths: dict[str, dict[float, int]]):
     ax.spines['right'].set_visible(False)
 
     # Add labels for each group
-    plt.xlabel("Error")
+    plt.xlabel("$\log(error)$")
     plt.ylabel("T Gate Count")
     # plt.title(f"Method-Wise T-Gate Count vs Error for GSP for {name}")
     ax.set_yscale("log")
@@ -59,7 +59,7 @@ def plot_dictionaries(name: str, depths: dict[str, dict[float, int]]):
 
 
 def main():
-    name = "methane"
+    name = "co2"
     gate_dicts = get_gate_count_gsp(name)
     print(gate_dicts)
     plot_dictionaries(name, gate_dicts)
