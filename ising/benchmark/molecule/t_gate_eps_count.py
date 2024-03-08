@@ -47,7 +47,7 @@ def fixed_everything(
 
 
 def main():
-    name = "ethane"
+    name = "ozone"
     molecule = parse(name)
     print(f"Running for {name}")
     obs_norm = 1

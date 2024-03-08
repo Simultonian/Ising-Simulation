@@ -4,9 +4,15 @@ from matplotlib import pyplot as plt
 from ising.hamiltonian import Hamiltonian, parse, parametrized_ising
 
 colors: dict[str, str] = {
-    "Truncated Taylor Series": "blue",
-    "First Order Trotter": "purple",
-    "qDRIFT": "yellow",
+    "Truncated Taylor Series": "#E4080A",
+    "First Order Trotter": "#060171",
+    "qDRIFT": "#148301",
+}
+
+markers: dict[str, str] = {
+    "Truncated Taylor Series": "o",
+    "First Order Trotter": "^",
+    "qDRIFT": "x",
 }
 
 
@@ -27,8 +33,8 @@ def plot_dictionaries(name: str, depths: dict[str, dict[float, int]]):
     for method, data in depths.items():
         errors = list(data.keys())
         gates = list(data.values())
-        plt.plot(errors, gates, label=method, alpha=0.6)
-        plt.scatter(errors, gates)
+        plt.plot(errors, gates, color=colors[method], alpha=0.3)
+        plt.scatter(errors, gates, color=colors[method], label=method, marker=markers[method])
 
     ax.set_xticks(errors)
 
@@ -36,12 +42,16 @@ def plot_dictionaries(name: str, depths: dict[str, dict[float, int]]):
 
     ax.set_xticklabels(labels)
 
+    # Remove the top and right border
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+
     # Add labels for each group
     plt.xlabel("Error")
-    plt.ylabel("Gate Count")
-    plt.title(f"Method-Wise T-Gate Count vs Error for GSP for {name}")
+    plt.ylabel("T Gate Count")
+    # plt.title(f"Method-Wise T-Gate Count vs Error for GSP for {name}")
     ax.set_yscale("log")
-    plt.legend()
+    plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.10), ncol=3, fontsize=10)
 
     file_name = f"plots/benchmark/molecule/tgatecount/{name}.png"
     plt.savefig(file_name)
@@ -49,7 +59,7 @@ def plot_dictionaries(name: str, depths: dict[str, dict[float, int]]):
 
 
 def main():
-    name = "ethane"
+    name = "methane"
     gate_dicts = get_gate_count_gsp(name)
     print(gate_dicts)
     plot_dictionaries(name, gate_dicts)
