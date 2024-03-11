@@ -47,12 +47,17 @@ def plot_gate_error(
         )
         sns.scatterplot(x=result, y=error_points, ax=ax, color=config["color"])
 
+    # SETTING: AXIS VISIBILITY
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
     ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.set_ylabel(r"$\log_{10}(\epsilon)$")
-    ax.set_xlabel(r"$\log_{10}(\text{gate count})$")
+    ax.set_ylabel(r"Error ($\log$ scale)")
+    ax.set_xlabel(r"Gate Count ($\log$ scale)")
 
-    plt.legend()
+    plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.10), ncol=3, fontsize=10)
+    # plt.legend()
     diagram_name = "plots/benchmark/gate_count.png"
     print(f"Saving diagram at:{diagram_name}")
     plt.savefig(diagram_name, dpi=300)
