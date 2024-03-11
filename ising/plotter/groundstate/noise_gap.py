@@ -149,11 +149,11 @@ def plot_combined(
     # plt.locator_params(axis="y", nbins=6)
 
     # SETTING: AXIS LABELS
-    ax.set_xlabel("Depolarization Noise $(p)$", fontsize=14)
+    ax.set_xlabel(r"Depolarization Noise $p$ ($\log$ scale)", fontsize=14)
     ax.set_ylabel("$|M_{E} - M_{S}|$", fontsize=14)
 
     # SETTING: TITLE PAD
-    ax.set_title("Error due to Noise", pad=20)
+    # ax.set_title("Error due to Noise", pad=20)
     ax.get_legend()
 
     # SETTING: LOG SCALE
