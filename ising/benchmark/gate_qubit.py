@@ -44,15 +44,20 @@ def plot_gate_error(time, h_val, error, point_count, obs_norm, start_qubit, end_
 
         # ax.text(error_points[-1] * 2, results["taylor"][-1] * 1.6, f"t={time}")
 
+
+    # SETTING: AXIS VISIBILITY
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
     # ax.invert_xaxis()
     # ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_xlabel(r"$\text{qubits }(N)$")
-    ax.set_ylabel(r"$\log_{10}(\text{gate count})$")
+    ax.set_ylabel(r"Gate Count ($\log$ scale)")
 
-    ax.set_title("Depth vs Qubits for Simulation Techniques")
+    # ax.set_title("Depth vs Qubits for Simulation Techniques")
 
-    ax.legend(loc="upper left", framealpha=1)
+    plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.10), ncol=3, fontsize=10)
     # plt.legend()
     diagram_name = "plots/benchmark/gate_qubits.png"
     print(f"Saving diagram at:{diagram_name}")
@@ -62,7 +67,7 @@ def plot_gate_error(time, h_val, error, point_count, obs_norm, start_qubit, end_
 if __name__ == "__main__":
     time = 10
     h_val = 1
-    start_qubit, end_qubit = 4, 100
+    start_qubit, end_qubit = 4, 200
     point_count = 10
     obs_norm = 1
     error = 1e-3

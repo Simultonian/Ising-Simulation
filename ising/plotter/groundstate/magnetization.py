@@ -19,7 +19,7 @@ METHOD_NAMES = {
     "gs_qdrift": "qDRIFT Protocol",
     "exact": "Precise Unitaries",
     "taylor_sample": "Truncated Taylor Series Samples",
-    "taylor_single": "Truncated Taylor Series Optimized",
+    "taylor_single": "Truncated Taylor Series",
 }
 
 
