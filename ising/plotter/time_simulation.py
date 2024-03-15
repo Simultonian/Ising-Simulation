@@ -14,12 +14,16 @@ Result: TypeAlias = dict[str, dict[float, list[float]]]
 
 method_colors = {
         "exact": "black",
-        "taylor_single": "red"
+        "taylor_single": "blue",
+        "grouped_lie": "green",
+        "gs_qdrift": "red",
     }
 
 method_label = {
         "exact": "Exact Simulation",
-        "taylor_single": "Truncated Taylor Series"
+        "taylor_single": "Truncated Taylor Series",
+        "grouped_lie": "First Order Trotterization",
+        "gs_qdrift": "qDRIFT Protocol"
     }
 
 def _get_point(res: Result) -> float:
@@ -44,7 +48,9 @@ def plot_method(method, paras, results: Result, **kwargs):
                     y=result,
                     label=method_label[method],
                     marker=style,
-                    linewidth=3,
+                    s=70,
+                    alpha=0.8,
+                    # linewidth=3,
                     color=method_colors[method],
                 )
             else:
@@ -54,7 +60,7 @@ def plot_method(method, paras, results: Result, **kwargs):
                     marker="o",
                     s=20,
                     color=method_colors[method],
-                    label=method_label[method], 
+                    label=method_label[method],
                 )
                 sns.lineplot(
                     x=times, y=result, color=method_colors[method],
@@ -116,7 +122,7 @@ def plot_combined(
 
     # SETTING: TITLE PAD
     # ax.set_title("Truncated Taylor Series", pad=20)
-    plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.10), ncol=3, fontsize=10)
+    plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.10), ncol=2, fontsize=10)
 
     plt.savefig(diagram_name, dpi=300)
     print(f"Saving diagram at {diagram_name}")
