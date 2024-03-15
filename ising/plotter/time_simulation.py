@@ -12,6 +12,16 @@ from typing import TypeAlias
 Result: TypeAlias = dict[str, dict[float, list[float]]]
 
 
+method_colors = {
+        "exact": "black",
+        "taylor_single": "red"
+    }
+
+method_label = {
+        "exact": "Exact Simulation",
+        "taylor_single": "Truncated Taylor Series"
+    }
+
 def _get_point(res: Result) -> float:
     for _, h_wise_results in res.items():
         for _, result in h_wise_results.items():
@@ -20,30 +30,49 @@ def _get_point(res: Result) -> float:
     raise ValueError("Empty Result provided")
 
 
-def plot_method(paras, results: Result, **kwargs):
+def plot_method(method, paras, results: Result, **kwargs):
     times = np.linspace(0, paras["time"], paras["count_time"])
     h_value = _get_point(results)
     style = kwargs.get("style")
 
-    colors = {"6": "red", "8": "blue", "4": "red"}
-
     for num_qubit, h_wise_results in results.items():
-        sns.lineplot(x=[0], y=[h_value], alpha=0.0, label=f"N={num_qubit}")
         for h, result in h_wise_results.items():
             h_label = str(h)[:4]
             if style != "L":
                 sns.scatterplot(
                     x=times,
                     y=result,
-                    label=f"{h_label}",
+                    label=method_label[method],
                     marker=style,
                     linewidth=3,
-                    color=colors[num_qubit],
+                    color=method_colors[method],
                 )
             else:
-                sns.lineplot(
-                    x=times, y=result, label=f"{h_label}", color=colors[num_qubit]
+                sns.scatterplot(
+                    x=times,
+                    y=result,
+                    marker="o",
+                    s=20,
+                    color=method_colors[method],
+                    label=method_label[method], 
                 )
+                sns.lineplot(
+                    x=times, y=result, color=method_colors[method],
+                    alpha=0.7
+                )
+
+
+                error = [0.1 * x for x in result]
+                # ADDING ERROR BAR
+                plt.errorbar(
+                        x=times, 
+                        y=result, 
+                        yerr=error, 
+                        fmt='.', 
+                        alpha=0.8,
+                        color=method_colors[method],
+                        capsize=6,
+                        )
 
 
 def plot_combined(
@@ -61,14 +90,11 @@ def plot_combined(
     plt.rcParams.update({"font.family": "sans-serif"})
 
     # SETTING: AXIS LENGTH
-    ax.set_xlim(-1, max_time * scale[0])
+    # ax.set_xlim(-1, max_time * scale[0])
 
     for ind, (method, results) in enumerate(method_wise_results.items()):
         h_value = _get_point(results)
-        sns.scatterplot(
-            x=[max_time * scale[0]], y=[h_value * scale[1]], alpha=0.0, label=method
-        )
-        plot_method(paras, results, style=styles[ind])
+        plot_method(method, paras, results, style=styles[ind])
 
     # SETTING: AXIS VISIBILITY
     ax.spines["top"].set_visible(False)
@@ -79,16 +105,18 @@ def plot_combined(
     ax.spines["left"].set_linewidth(1.5)
 
     # SETTING: AXIS TICKS
+
+    ax.yaxis.set_ticks(np.arange(0.55, 0.81, 0.05))
     plt.locator_params(axis="x", nbins=10)
-    plt.locator_params(axis="y", nbins=6)
+    # plt.locator_params(axis="y", nbins=6)
 
     # SETTING: AXIS LABELS
-    ax.set_xlabel("Time", fontsize=14)
-    ax.set_ylabel("Magnetization M(h)", fontsize=14)
+    ax.set_xlabel("Time $t$", fontsize=14)
+    ax.set_ylabel("Magnetization $M_z$", fontsize=14)
 
     # SETTING: TITLE PAD
-    ax.set_title("Truncated Taylor Series", pad=20)
-    ax.get_legend().remove()
+    # ax.set_title("Truncated Taylor Series", pad=20)
+    plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.10), ncol=3, fontsize=10)
 
     plt.savefig(diagram_name, dpi=300)
     print(f"Saving diagram at {diagram_name}")
