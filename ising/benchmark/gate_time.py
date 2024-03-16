@@ -19,7 +19,7 @@ def plot_gate_error(qubit, h_val, error, point_count, obs_norm, start_time, end_
         "qdrift": {"color": "red", "label": "qDRIFT Protocol"},
     }
 
-    time_points = [10**x for x in np.linspace(start_time, end_time, point_count)]
+    time_points = [x for x in np.linspace(start_time, end_time, point_count)]
     ham = parametrized_ising(qubit, h_val)
 
     taylor, trotter, qdrift = [], [], []
@@ -42,17 +42,19 @@ def plot_gate_error(qubit, h_val, error, point_count, obs_norm, start_time, end_
 
         sns.scatterplot(y=result, x=time_points, ax=ax, color=config["color"])
 
-        # ax.text(error_points[-1] * 2, results["taylor"][-1] * 1.6, f"t={time}")
+    # SETTING: AXIS VISIBILITY
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
 
     # ax.invert_xaxis()
-    ax.set_xscale("log")
+    # ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.set_xlabel(r"$\log_{10}(time)$")
-    ax.set_ylabel(r"$\log_{10}(\text{gate count})$")
+    ax.set_xlabel(r"time ($t$)")
+    ax.set_ylabel(r"Logarithmic Gate Depth")
 
-    ax.set_title("Depth vs Time for Simulation Techniques")
+    # ax.set_title("Depth vs Time for Simulation Techniques")
 
-    ax.legend(loc="upper left", framealpha=1)
+    plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.10), ncol=3, fontsize=10)
     # plt.legend()
     diagram_name = "plots/benchmark/gate_time.png"
     print(f"Saving diagram at:{diagram_name}")
@@ -60,12 +62,12 @@ def plot_gate_error(qubit, h_val, error, point_count, obs_norm, start_time, end_
 
 
 if __name__ == "__main__":
-    qubit = 25
+    qubit = 6
     h_val = 0.1
-    start_time, end_time = 1, 10
+    start_time, end_time = 1, 20
     point_count = 10
     obs_norm = 1
-    error = 1e-3
+    error = 0.1
 
     plot_gate_error(
         qubit,
