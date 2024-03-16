@@ -43,17 +43,30 @@ def plot_method(method, paras, results: Result, **kwargs):
         for h, result in h_wise_results.items():
             h_label = str(h)[:4]
             if style != "L":
-                sns.scatterplot(
-                    x=times,
-                    y=result,
-                    label=method_label[method],
-                    marker=style,
-                    s=70,
-                    alpha=0.8,
-                    # linewidth=3,
-                    color=method_colors[method],
-                )
+                if style == "x":
+                    sns.scatterplot(
+                        x=times,
+                        y=result,
+                        label=method_label[method],
+                        marker=style,
+                        s=70,
+                        alpha=0.8,
+                        linewidth=3,
+                        color=method_colors[method],
+                    )
+                else:
+                    sns.scatterplot(
+                        x=times,
+                        y=result,
+                        label=method_label[method],
+                        marker=style,
+                        s=70,
+                        # alpha=0.8,
+                        # linewidth=3,
+                        color=method_colors[method],
+                    )
             else:
+                # For the exact line
                 sns.scatterplot(
                     x=times,
                     y=result,
@@ -64,21 +77,21 @@ def plot_method(method, paras, results: Result, **kwargs):
                 )
                 sns.lineplot(
                     x=times, y=result, color=method_colors[method],
-                    alpha=0.7
+                    alpha=1.0
                 )
 
 
-                error = [0.1 * x for x in result]
-                # ADDING ERROR BAR
-                plt.errorbar(
-                        x=times, 
-                        y=result, 
-                        yerr=error, 
-                        fmt='.', 
-                        alpha=0.8,
-                        color=method_colors[method],
-                        capsize=6,
-                        )
+                # error = [0.1 * x for x in result]
+                # # ADDING ERROR BAR
+                # plt.errorbar(
+                #         x=times, 
+                #         y=result, 
+                #         yerr=error, 
+                #         fmt='.', 
+                #         alpha=0.8,
+                #         color=method_colors[method],
+                #         capsize=6,
+                #         )
 
 
 def plot_combined(
@@ -112,7 +125,7 @@ def plot_combined(
 
     # SETTING: AXIS TICKS
 
-    ax.yaxis.set_ticks(np.arange(0.55, 0.81, 0.05))
+    ax.yaxis.set_ticks(np.arange(0.62, 0.71, 0.01))
     plt.locator_params(axis="x", nbins=10)
     # plt.locator_params(axis="y", nbins=6)
 
@@ -150,7 +163,7 @@ def main():
         method_wise_results[method] = results
 
     diagram_name = (
-        f"{plotfig['fig_folder']}/{method_combined}_{start_qubit}_to_{end_qubit}.png"
+        f"{plotfig['fig_folder']}/no_bar_{method_combined}_{start_qubit}_to_{end_qubit}.png"
     )
     plot_combined(input_paras, method_wise_results, diagram_name, **plotfig)
 
