@@ -2,11 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
-from ising.hamiltonian import parametrized_ising
+from ising.hamiltonian import parametrized_ising, trotter_reps, qdrift_count
 from ising.benchmark.sim_function import (
     taylor_gate_count,
-    trotter_gate_count,
-    qdrift_gate_count,
 )
 
 
@@ -21,12 +19,13 @@ def plot_gate_error(qubit, h_val, error, point_count, obs_norm, start_time, end_
 
     time_points = [x for x in np.linspace(start_time, end_time, point_count)]
     ham = parametrized_ising(qubit, h_val)
+    lambd = np.sum(np.abs(ham.coeffs))
 
     taylor, trotter, qdrift = [], [], []
     for time in time_points:
         taylor.append(taylor_gate_count(ham, time, error, obs_norm))
-        trotter.append(trotter_gate_count(ham, time, error))
-        qdrift.append(qdrift_gate_count(ham, time, error))
+        trotter.append(trotter_reps(qubit, h_val, time, error))
+        qdrift.append(qdrift_count(lambd, time, error))
 
     results = {"taylor": taylor, "trotter": trotter, "qdrift": qdrift}
 
