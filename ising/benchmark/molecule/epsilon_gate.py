@@ -36,18 +36,20 @@ def plot_gate_error(
     configs = {
         "taylor": {"color": "blue", "label": "Truncated Taylor"},
         "qdrift": {"color": "red", "label": "qDRIFT Protocol"},
+        "trotter": {"color": "black", "label": "First Order Trotter"},
     }
 
     error_points = [
         10**x for x in np.linspace(start_err_exp, end_err_exp, point_count)
     ]
-    taylor, qdrift = [], []
+    trotter, taylor, qdrift = [], [], []
 
     for eps in error_points:
         taylor.append(groundstate_depth.truncated_taylor(molecule, eeta, eps, obs_norm))
         qdrift.append(groundstate_depth.qdrift(molecule, eeta, eps, obs_norm))
+        trotter.append(groundstate_depth.first_order_trotter(molecule, eeta, eps, obs_norm))
 
-    results = {"taylor": taylor, "qdrift": qdrift}
+    results = {"taylor": taylor, "qdrift": qdrift, "trotter": trotter}
 
     for method, config in configs.items():
         result = results[method]
@@ -55,23 +57,32 @@ def plot_gate_error(
             y=result,
             x=error_points,
             ax=ax,
-            label=configs[method]["label"],
             color=config["color"],
+            alpha=0.5
         )
-        sns.scatterplot(y=result, x=error_points, ax=ax, color=config["color"])
+        sns.scatterplot(
+                y=result, 
+                x=error_points, 
+                ax=ax, 
+                color=config["color"],
+                label=configs[method]["label"],
+                )
 
     ax.set_xscale("log")
     ax.set_yscale("log")
 
     ax.invert_xaxis()
 
-    ax.set_xlabel(r"$\log_{10}(\epsilon)$")
-    ax.set_ylabel(r"$\log_{10}(\text{gate count})$")
+    ax.set_xlabel(r"Error ($\log_{10}$ Scale)")
+    ax.set_ylabel(r"Gate Depth ($\log_{10}$ Scale)")
 
-    ax.set_title("Groundstate Preparation of Methane", pad=20)
 
-    plt.legend()
-    diagram_name = f"plots/benchmark/molecule/eps_gate/{name}_qdrift_tts.png"
+    # SETTING: AXIS VISIBILITY
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.15), ncol=3, fontsize=10)
+    diagram_name = f"plots/benchmark/molecule/eps_gate/{name}_trotter_qdrift_tts.png"
     print(f"Saving diagram at:{diagram_name}")
     plt.savefig(diagram_name, dpi=300)
 
@@ -80,7 +91,7 @@ if __name__ == "__main__":
     name = "methane"
     molecule = parse(name)
     start_err_exp = -1
-    end_err_exp = -3
+    end_err_exp = -5
     eeta = 0.8
     point_count = 10
     obs_norm = 1

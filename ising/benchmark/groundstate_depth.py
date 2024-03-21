@@ -78,7 +78,7 @@ def truncated_taylor(
     beta = np.sum(np.abs(ham.coeffs))
     delta = ham.approx_spectral_gap
 
-    nmr = (beta**2) * np.log10(obs_norm / (eps * eeta))
+    nmr = (beta**2) * (np.log10(obs_norm / (eps * eeta)) ** 2)
     dr = delta**2
     return np.ceil(nmr / dr).astype(int)
 
@@ -93,9 +93,9 @@ def first_order_trotter(
     lambd = np.max(np.abs(ham.coeffs))
     delta = ham.approx_spectral_gap
 
-    nmr = obs_norm * (lambd**2) * (l**3) * np.log10(obs_norm / (eeta * eps))
+    nmr = obs_norm * (lambd**2) * (l**3) * (np.log10(obs_norm / (eeta * eps)) ** 2)
     dr = eps * eeta**2 * delta**2
-    return np.ceil(nmr / dr).astype(int)
+    return np.ceil(nmr / dr)
 
 
 def qdrift(ham: Hamiltonian, eeta: float, eps: float, obs_norm: float = 1) -> int:
@@ -105,6 +105,6 @@ def qdrift(ham: Hamiltonian, eeta: float, eps: float, obs_norm: float = 1) -> in
     beta = np.sum(np.abs(ham.coeffs))
     delta = ham.approx_spectral_gap
 
-    nmr = obs_norm * (beta**2) * np.log10(obs_norm / (eeta * eps))
+    nmr = obs_norm * (beta**2) * (np.log10(obs_norm / (eeta * eps)) ** 2)
     dr = eps * eeta**2 * delta**2
     return np.ceil(nmr / dr).astype(int)
