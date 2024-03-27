@@ -162,6 +162,9 @@ def theta_m(t_bar, r, k):
     return np.arccos(((1 + (t_bar/r)**2) / (k+1))**(-1/2))
 
 
+SPLIT_SIZE = 100
+
+
 class TaylorBenchmarkTime:
     def __init__(self, ham: Hamiltonian):
         """
@@ -196,14 +199,11 @@ class TaylorBenchmarkTime:
         self.indices = list(range(len(self.paulis)))
 
 
-    def simulation_circuit(self, time: float, k_max: int) -> QuantumCircuit:
+    def simulation_circuit(self, t_bar: float, reps:int, k_max: int) -> QuantumCircuit:
         """
         Calculates the gate depth for given time
         """
         circuit = QuantumCircuit(self.ham.num_qubits)
-
-        t_bar = time * self.lambd
-        reps = max(20, int(10 * np.ceil(t_bar) ** 2))
 
         alphas = get_alphas(t_bar, k_max, reps)
         k_probs = np.abs(alphas)
@@ -211,7 +211,7 @@ class TaylorBenchmarkTime:
 
         # Could be heavy operation for large reps.
         print(f"reps:{reps}, k_max:{k_max}")
-        for _ in range(100):
+        for _ in range(SPLIT_SIZE):
             k = np.random.choice(k_max + 1, p=k_probs)
 
             samples = np.random.choice(self.indices, p=self.coeffs, size=k+1)
@@ -223,30 +223,34 @@ class TaylorBenchmarkTime:
             evo = PauliEvolutionGate(self.paulis[samples[-1]], time=theta_m(t_bar, reps, k))
             circuit.append(evo, range(evo.num_qubits))
 
-        print("Done")
-        return circuit.repeat(reps // 100)
+        return circuit
 
     def simulation_gate_count(self, time: float, k: int) -> dict[str, int]:
         print(f"Running gate count for time: {time}")
+        t_bar = time * self.lambd
+        reps = max(20, int(10 * np.ceil(t_bar) ** 2))
 
-        circuit = self.simulation_circuit(time, k)
+
+        circuit = self.simulation_circuit(t_bar, reps, k)
         dqc = self.decomposer.decompose(circuit)
 
         counter = Counter()
         counter.add(dict(dqc.count_ops()))
-        return counter.times(1)
+        return counter.times(reps // SPLIT_SIZE)
 
     def controlled_gate_count(self, time: float, k: int) -> dict[str, int]:
         print(f"Running controlled gate count for time: {time}")
+        t_bar = time * self.lambd
+        reps = max(20, int(10 * np.ceil(t_bar) ** 2))
 
         big_circ = QuantumCircuit(self.ham.num_qubits + 1)
-        controlled_gate = self.simulation_circuit(time, k).to_gate().control(1)
+        controlled_gate = self.simulation_circuit(time, reps, k).to_gate().control(1)
         big_circ.append(controlled_gate, range(self.ham.num_qubits + 1))
         dqc = self.decomposer.decompose(big_circ)
 
         counter = Counter()
         counter.add(dict(dqc.count_ops()))
-        return counter.times(1)
+        return counter.times(reps // SPLIT_SIZE)
 
 
 

@@ -116,6 +116,7 @@ def qdrift_gates(
 
     return benchmarker.calculate_gates()
 
+SPLIT_SIZE = 100
 
 class QDriftBenchmarkTime:
     def __init__(self, ham: Hamiltonian):
@@ -168,24 +169,24 @@ class QDriftBenchmarkTime:
     def simulation_gate_count(self, time: float, reps: int) -> dict[str, int]:
         print(f"Running gate count for time: {time}")
 
-        circuit = self.simulation_circuit(time, 100)
+        circuit = self.simulation_circuit(time, SPLIT_SIZE)
         dqc = self.decomposer.decompose(circuit)
 
         counter = Counter()
         counter.add(dict(dqc.count_ops()))
-        return counter.times(reps // 100)
+        return counter.times(reps // SPLIT_SIZE)
 
     def controlled_gate_count(self, time: float, reps: int) -> dict[str, int]:
         print(f"Running controlled gate count for time: {time}")
 
         big_circ = QuantumCircuit(self.ham.num_qubits + 1)
-        controlled_gate = self.simulation_circuit(time, 100).to_gate().control(1)
+        controlled_gate = self.simulation_circuit(time, SPLIT_SIZE).to_gate().control(1)
         big_circ.append(controlled_gate, range(self.ham.num_qubits + 1))
         dqc = self.decomposer.decompose(big_circ)
 
         counter = Counter()
         counter.add(dict(dqc.count_ops()))
-        return counter.times(reps // 100)
+        return counter.times(reps // SPLIT_SIZE)
 
 
 

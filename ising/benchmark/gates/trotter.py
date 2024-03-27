@@ -115,6 +115,7 @@ def trotter_gates(
 
     return benchmarker.calculate_gates()
 
+SPLIT_SIZE = 100
 
 class TrotterBenchmarkTime:
     def __init__(self, ham: Hamiltonian):
@@ -146,24 +147,24 @@ class TrotterBenchmarkTime:
     def simulation_gate_count(self, time: float, reps: int) -> QuantumCircuit:
         print(f"Running gate count for time: {time}")
 
-        circuit = self.simulation_circuit(time, reps // 100)
+        circuit = self.simulation_circuit(time, reps // SPLIT_SIZE)
         dqc = self.decomposer.decompose(circuit)
 
         counter = Counter()
         counter.add(dict(dqc.count_ops()))
-        return counter.times(100)
+        return counter.times(SPLIT_SIZE)
 
     def controlled_gate_count(self, time: float, reps: int) -> QuantumCircuit:
         print(f"Running controlled gate count for time: {time}")
 
         big_circ = QuantumCircuit(self.ham.num_qubits + 1)
-        controlled_gate = self.simulation_circuit(time, reps // 100).to_gate().control(1)
+        controlled_gate = self.simulation_circuit(time, reps // SPLIT_SIZE).to_gate().control(1)
         big_circ.append(controlled_gate, range(self.ham.num_qubits + 1))
         dqc = self.decomposer.decompose(big_circ)
 
         counter = Counter()
         counter.add(dict(dqc.count_ops()))
-        return counter.times(100)
+        return counter.times(SPLIT_SIZE)
 
 
 
