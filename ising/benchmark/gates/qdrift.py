@@ -115,3 +115,97 @@ def qdrift_gates(
     )
 
     return benchmarker.calculate_gates()
+
+
+class QDriftBenchmarkTime:
+    def __init__(self, ham: Hamiltonian):
+        """
+        Benchmark calculator for Trotterization based groundstate preparation.
+
+        Inputs:
+            - ham: Hamitlonian
+        """
+
+        self.ham = ham
+        self.decomposer = Decomposer()
+
+        coeffs = []
+        paulis = []
+        sign_map = {}
+        for op, coeff in self.ham.sparse_repr.to_list():
+            if coeff.real < 0:
+                sign_map[Pauli(op)] = -1
+                coeff = -coeff
+            else:
+                sign_map[Pauli(op)] = 1
+
+            coeffs.append(coeff.real)
+            paulis.append(Pauli(op))
+
+        self.coeffs = np.abs(np.array(coeffs))
+        self.lambd = sum(self.coeffs)
+        self.paulis = paulis
+        self.sign_map = sign_map
+        self.indices = list(range(len(self.paulis)))
+
+
+    def simulation_circuit(self, time: float, reps: int) -> QuantumCircuit:
+        """
+        Calculates the gate depth for given time
+        """
+        evolution_time = self.lambd * time / reps
+        circuit = QuantumCircuit(self.ham.num_qubits)
+
+        samples = np.random.choice(self.indices, p=self.coeffs / self.lambd, size=reps)
+        # Could be heavy operation for large reps.
+        for sample in samples:
+            pauli = self.paulis[sample]
+            evo = PauliEvolutionGate(pauli, time=evolution_time)
+            circuit.append(evo, range(evo.num_qubits))
+
+        return circuit
+
+    def simulation_gate_count(self, time: float, reps: int) -> dict[str, int]:
+        print(f"Running gate count for time: {time}")
+
+        circuit = self.simulation_circuit(time, 100)
+        dqc = self.decomposer.decompose(circuit)
+
+        counter = Counter()
+        counter.add(dict(dqc.count_ops()))
+        return counter.times(reps // 100)
+
+    def controlled_gate_count(self, time: float, reps: int) -> dict[str, int]:
+        print(f"Running controlled gate count for time: {time}")
+
+        big_circ = QuantumCircuit(self.ham.num_qubits + 1)
+        controlled_gate = self.simulation_circuit(time, 100).to_gate().control(1)
+        big_circ.append(controlled_gate, range(self.ham.num_qubits + 1))
+        dqc = self.decomposer.decompose(big_circ)
+
+        counter = Counter()
+        counter.add(dict(dqc.count_ops()))
+        return counter.times(reps // 100)
+
+
+
+from ising.hamiltonian.ising_one import parametrized_ising
+
+def main():
+    num_qubits, h = 10, 0.125
+    eps = 0.1
+    time = 20
+    hamiltonian = parametrized_ising(num_qubits, h)
+    lambd = np.sum(np.abs(hamiltonian.coeffs))
+    reps = qdrift_count(lambd, time, eps)
+
+    print(f"reps:{reps}")
+
+    benchmarker = QDriftBenchmarkTime(hamiltonian)
+
+    print(benchmarker.simulation_gate_count(time, reps))
+    print(benchmarker.controlled_gate_count(time, reps))
+    
+
+if __name__ == "__main__":
+    main()

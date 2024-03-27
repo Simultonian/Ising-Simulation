@@ -6,7 +6,8 @@ from qiskit.synthesis import generate_basic_approximations
 from qiskit.providers.fake_provider import FakeBackendV2
 
 SINGLE_QUBIT_GATES = ["h", "t", "tdg"]
-ALL_GATES = ["h", "t", "tdg", "s", "sdg", "cx", "rz"]
+# ALL_GATES = ["h", "t", "tdg", "s", "sdg", "cx", "rz"]
+ALL_GATES = ["cx", "u3"]
 
 
 class Decomposer:
@@ -29,4 +30,5 @@ class Decomposer:
         tqc = transpile(
             circuit, None, optimization_level=3, basis_gates=ALL_GATES
         )
+        return tqc
         return self.skd(tqc)

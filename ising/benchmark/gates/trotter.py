@@ -5,7 +5,7 @@ from ising.groundstate.simulation.utils import (
     ground_state_constants,
     ground_state_maximum_time,
 )
-from ising.hamiltonian.ising_one import trotter_reps_general
+from ising.hamiltonian.ising_one import trotter_reps_general, trotter_reps
 from ising.utils import Decomposer
 from qiskit.circuit.library import PauliEvolutionGate
 from qiskit import QuantumCircuit
@@ -114,3 +114,71 @@ def trotter_gates(
     )
 
     return benchmarker.calculate_gates()
+
+
+class TrotterBenchmarkTime:
+    def __init__(self, ham: Hamiltonian):
+        """
+        Benchmark calculator for Trotterization based groundstate preparation.
+
+        Inputs:
+            - ham: Hamitlonian
+        """
+
+        self.ham = ham
+        self.decomposer = Decomposer()
+
+    def simulation_circuit(self, time: float, reps: int) -> QuantumCircuit:
+        """
+        Calculates the gate depth for given time
+        """
+        circuit = QuantumCircuit(self.ham.num_qubits)
+
+        for pauli, _coeff in zip(self.ham.paulis, self.ham.coeffs):
+            coeff = abs(_coeff)
+            evo = PauliEvolutionGate(pauli, time= coeff * time / reps)
+            circuit.append(evo, range(evo.num_qubits))
+
+        # Could be heavy operation for large reps.
+        circuit = circuit.repeat(reps)
+        return circuit
+
+    def simulation_gate_count(self, time: float, reps: int) -> QuantumCircuit:
+        print(f"Running gate count for time: {time}")
+
+        circuit = self.simulation_circuit(time, reps // 100)
+        dqc = self.decomposer.decompose(circuit)
+
+        counter = Counter()
+        counter.add(dict(dqc.count_ops()))
+        return counter.times(100)
+
+    def controlled_gate_count(self, time: float, reps: int) -> QuantumCircuit:
+        print(f"Running controlled gate count for time: {time}")
+
+        big_circ = QuantumCircuit(self.ham.num_qubits + 1)
+        controlled_gate = self.simulation_circuit(time, reps // 100).to_gate().control(1)
+        big_circ.append(controlled_gate, range(self.ham.num_qubits + 1))
+        dqc = self.decomposer.decompose(big_circ)
+
+        counter = Counter()
+        counter.add(dict(dqc.count_ops()))
+        return counter.times(100)
+
+
+
+from ising.hamiltonian.ising_one import parametrized_ising
+def main():
+    num_qubits, h = 10, 0.125
+    eps = 0.1
+    time = 20
+    reps = trotter_reps(num_qubits, h, time, eps)
+    print(f"reps:{reps}")
+    hamiltonian = parametrized_ising(num_qubits, h)
+    benchmarker = TrotterBenchmarkTime(hamiltonian)
+    print(benchmarker.simulation_gate_count(time, reps))
+    print(benchmarker.controlled_gate_count(time, reps))
+    
+
+if __name__ == "__main__":
+    main()

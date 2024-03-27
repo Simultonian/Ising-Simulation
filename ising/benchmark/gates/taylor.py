@@ -10,6 +10,9 @@ from ising.utils import Decomposer
 from qiskit.circuit.library import PauliEvolutionGate, PauliGate
 from qiskit import QuantumCircuit
 from qiskit.quantum_info import Pauli, SparsePauliOp, PauliList
+from ising.simulation.taylor.utils import (
+    get_alphas,
+)
 
 from ising.benchmark.gates.counter import Counter
 
@@ -154,3 +157,114 @@ def taylor_gates(
     )
 
     return benchmarker.calculate_gates()
+
+def theta_m(t_bar, r, k):
+    return np.arccos(((1 + (t_bar/r)**2) / (k+1))**(-1/2))
+
+
+class TaylorBenchmarkTime:
+    def __init__(self, ham: Hamiltonian):
+        """
+        Benchmark calculator for Trotterization based groundstate preparation.
+
+        Inputs:
+            - ham: Hamitlonian
+        """
+
+        self.ham = ham
+        self.num_qubits = ham.num_qubits
+        self.decomposer = Decomposer()
+
+        coeffs = []
+        paulis = []
+        sign_map = {}
+        for op, coeff in self.ham.sparse_repr.to_list():
+            if coeff.real < 0:
+                sign_map[Pauli(op)] = -1
+                coeff = -coeff
+            else:
+                sign_map[Pauli(op)] = 1
+
+            coeffs.append(coeff.real)
+            paulis.append(Pauli(op))
+
+        self.coeffs = np.abs(np.array(coeffs))
+        self.lambd = sum(self.coeffs)
+        self.coeffs = self.coeffs / self.lambd
+        self.paulis = paulis
+        self.sign_map = sign_map
+        self.indices = list(range(len(self.paulis)))
+
+
+    def simulation_circuit(self, time: float, k_max: int) -> QuantumCircuit:
+        """
+        Calculates the gate depth for given time
+        """
+        circuit = QuantumCircuit(self.ham.num_qubits)
+
+        t_bar = time * self.lambd
+        reps = max(20, int(10 * np.ceil(t_bar) ** 2))
+
+        alphas = get_alphas(t_bar, k_max, reps)
+        k_probs = np.abs(alphas)
+        k_probs /= np.sum(k_probs)
+
+        # Could be heavy operation for large reps.
+        print(f"reps:{reps}, k_max:{k_max}")
+        for _ in range(100):
+            k = np.random.choice(k_max + 1, p=k_probs)
+
+            samples = np.random.choice(self.indices, p=self.coeffs, size=k+1)
+
+            for sample in samples[:-1]:
+                pauli = self.paulis[sample]
+                circuit.append(pauli.to_gate(), range(self.num_qubits))
+
+            evo = PauliEvolutionGate(self.paulis[samples[-1]], time=theta_m(t_bar, reps, k))
+            circuit.append(evo, range(evo.num_qubits))
+
+        print("Done")
+        return circuit.repeat(reps // 100)
+
+    def simulation_gate_count(self, time: float, k: int) -> dict[str, int]:
+        print(f"Running gate count for time: {time}")
+
+        circuit = self.simulation_circuit(time, k)
+        dqc = self.decomposer.decompose(circuit)
+
+        counter = Counter()
+        counter.add(dict(dqc.count_ops()))
+        return counter.times(1)
+
+    def controlled_gate_count(self, time: float, k: int) -> dict[str, int]:
+        print(f"Running controlled gate count for time: {time}")
+
+        big_circ = QuantumCircuit(self.ham.num_qubits + 1)
+        controlled_gate = self.simulation_circuit(time, k).to_gate().control(1)
+        big_circ.append(controlled_gate, range(self.ham.num_qubits + 1))
+        dqc = self.decomposer.decompose(big_circ)
+
+        counter = Counter()
+        counter.add(dict(dqc.count_ops()))
+        return counter.times(1)
+
+
+
+from ising.hamiltonian.ising_one import parametrized_ising
+
+def main():
+    num_qubits, h = 10, 0.125
+    eps = 0.1
+    time = 10
+    hamiltonian = parametrized_ising(num_qubits, h)
+    lambd = np.sum(np.abs(hamiltonian.coeffs))
+    k = int(np.floor(np.log(lambd * time / eps) / np.log(np.log(lambd * time / eps))))
+
+    benchmarker = TaylorBenchmarkTime(hamiltonian)
+
+    print(benchmarker.simulation_gate_count(time, k))
+    print(benchmarker.controlled_gate_count(time, k))
+    
+
+if __name__ == "__main__":
+    main()
