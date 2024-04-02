@@ -10,6 +10,7 @@ from ising.utils import Decomposer
 from qiskit.circuit.library import PauliEvolutionGate, PauliGate
 from qiskit import QuantumCircuit
 from qiskit.quantum_info import Pauli, SparsePauliOp, PauliList
+from qiskit.circuit.library import PauliGate
 from ising.simulation.taylor.utils import (
     get_alphas,
 )
@@ -159,7 +160,8 @@ def taylor_gates(
     return benchmarker.calculate_gates()
 
 def theta_m(t_bar, r, k):
-    return np.arccos(((1 + (t_bar/r)**2) / (k+1))**(-1/2))
+    val = np.arccos(((1 + (t_bar/r)**2) / (k+1))**(-1/2))
+    return val
 
 
 SPLIT_SIZE = 100
@@ -199,7 +201,7 @@ class TaylorBenchmarkTime:
         self.indices = list(range(len(self.paulis)))
 
 
-    def simulation_circuit(self, t_bar: float, reps:int, k_max: int) -> QuantumCircuit:
+    def simulation_circuit(self, t_bar: float, reps:int, k_max: int, split:int) -> QuantumCircuit:
         """
         Calculates the gate depth for given time
         """
@@ -211,14 +213,14 @@ class TaylorBenchmarkTime:
 
         # Could be heavy operation for large reps.
         print(f"reps:{reps}, k_max:{k_max}")
-        for _ in range(SPLIT_SIZE):
+        for _ in range(split):
             k = np.random.choice(k_max + 1, p=k_probs)
 
             samples = np.random.choice(self.indices, p=self.coeffs, size=k+1)
 
             for sample in samples[:-1]:
                 pauli = self.paulis[sample]
-                circuit.append(pauli.to_gate(), range(self.num_qubits))
+                circuit.append(PauliGate(pauli.to_label()), range(self.num_qubits))
 
             evo = PauliEvolutionGate(self.paulis[samples[-1]], time=theta_m(t_bar, reps, k))
             circuit.append(evo, range(evo.num_qubits))
@@ -226,31 +228,40 @@ class TaylorBenchmarkTime:
         return circuit
 
     def simulation_gate_count(self, time: float, k: int) -> dict[str, int]:
-        print(f"Running gate count for time: {time}")
+        print(f"Taylor: Running gate count for time: {time}")
         t_bar = time * self.lambd
         reps = max(20, int(10 * np.ceil(t_bar) ** 2))
 
+        if reps < SPLIT_SIZE:
+            split = 1
+        else:
+            split = SPLIT_SIZE
 
-        circuit = self.simulation_circuit(t_bar, reps, k)
+        circuit = self.simulation_circuit(t_bar, reps, k, split)
         dqc = self.decomposer.decompose(circuit)
 
         counter = Counter()
         counter.add(dict(dqc.count_ops()))
-        return counter.times(reps // SPLIT_SIZE)
+        return counter.times(reps // split)
 
     def controlled_gate_count(self, time: float, k: int) -> dict[str, int]:
-        print(f"Running controlled gate count for time: {time}")
+        print(f"Taylor: Running controlled gate count for time: {time}")
         t_bar = time * self.lambd
         reps = max(20, int(10 * np.ceil(t_bar) ** 2))
 
+        if reps < SPLIT_SIZE:
+            split = 1
+        else:
+            split = SPLIT_SIZE
+
         big_circ = QuantumCircuit(self.ham.num_qubits + 1)
-        controlled_gate = self.simulation_circuit(time, reps, k).to_gate().control(1)
+        controlled_gate = self.simulation_circuit(time, split, k, split).to_gate().control(1)
         big_circ.append(controlled_gate, range(self.ham.num_qubits + 1))
         dqc = self.decomposer.decompose(big_circ)
 
         counter = Counter()
         counter.add(dict(dqc.count_ops()))
-        return counter.times(reps // SPLIT_SIZE)
+        return counter.times(reps // split)
 
 
 

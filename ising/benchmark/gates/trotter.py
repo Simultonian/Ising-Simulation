@@ -5,7 +5,7 @@ from ising.groundstate.simulation.utils import (
     ground_state_constants,
     ground_state_maximum_time,
 )
-from ising.hamiltonian.ising_one import trotter_reps_general, trotter_reps
+from ising.hamiltonian.ising_one import trotter_reps_general
 from ising.utils import Decomposer
 from qiskit.circuit.library import PauliEvolutionGate
 from qiskit import QuantumCircuit
@@ -144,31 +144,42 @@ class TrotterBenchmarkTime:
         circuit = circuit.repeat(reps)
         return circuit
 
-    def simulation_gate_count(self, time: float, reps: int) -> QuantumCircuit:
-        print(f"Running gate count for time: {time}")
+    def simulation_gate_count(self, time: float, reps: int) -> dict[str, int]:
+        print(f"Trotter: Running gate count for time: {time}")
 
-        circuit = self.simulation_circuit(time, reps // SPLIT_SIZE)
+        if reps < SPLIT_SIZE:
+            split = 1
+        else:
+            split = SPLIT_SIZE
+
+        circuit = self.simulation_circuit(time, split)
         dqc = self.decomposer.decompose(circuit)
 
         counter = Counter()
         counter.add(dict(dqc.count_ops()))
-        return counter.times(SPLIT_SIZE)
+        return counter.times(reps // split)
 
-    def controlled_gate_count(self, time: float, reps: int) -> QuantumCircuit:
-        print(f"Running controlled gate count for time: {time}")
+    def controlled_gate_count(self, time: float, reps: int) -> dict[str, int]:
+        print(f"Trotter: Running controlled gate count for time: {time}")
 
         big_circ = QuantumCircuit(self.ham.num_qubits + 1)
-        controlled_gate = self.simulation_circuit(time, reps // SPLIT_SIZE).to_gate().control(1)
+        if reps < SPLIT_SIZE:
+            split = 1
+        else:
+            split = SPLIT_SIZE
+
+        controlled_gate = self.simulation_circuit(time, split).to_gate().control(1)
         big_circ.append(controlled_gate, range(self.ham.num_qubits + 1))
         dqc = self.decomposer.decompose(big_circ)
 
         counter = Counter()
         counter.add(dict(dqc.count_ops()))
-        return counter.times(SPLIT_SIZE)
+        return counter.times(reps // split)
 
 
 
 from ising.hamiltonian.ising_one import parametrized_ising
+from ising.hamiltonian.ising_one import trotter_reps
 def main():
     num_qubits, h = 10, 0.125
     eps = 0.1

@@ -167,26 +167,34 @@ class QDriftBenchmarkTime:
         return circuit
 
     def simulation_gate_count(self, time: float, reps: int) -> dict[str, int]:
-        print(f"Running gate count for time: {time}")
+        print(f"QDrift: Running gate count for time: {time}")
+        if reps < SPLIT_SIZE:
+            split = 1
+        else:
+            split = SPLIT_SIZE
 
-        circuit = self.simulation_circuit(time, SPLIT_SIZE)
+        circuit = self.simulation_circuit(time, split)
         dqc = self.decomposer.decompose(circuit)
 
         counter = Counter()
         counter.add(dict(dqc.count_ops()))
-        return counter.times(reps // SPLIT_SIZE)
+        return counter.times(reps // split)
 
     def controlled_gate_count(self, time: float, reps: int) -> dict[str, int]:
-        print(f"Running controlled gate count for time: {time}")
+        print(f"QDrift: Running controlled gate count for time: {time}")
+        if reps < SPLIT_SIZE:
+            split = 1
+        else:
+            split = SPLIT_SIZE
 
         big_circ = QuantumCircuit(self.ham.num_qubits + 1)
-        controlled_gate = self.simulation_circuit(time, SPLIT_SIZE).to_gate().control(1)
+        controlled_gate = self.simulation_circuit(time, split).to_gate().control(1)
         big_circ.append(controlled_gate, range(self.ham.num_qubits + 1))
         dqc = self.decomposer.decompose(big_circ)
 
         counter = Counter()
         counter.add(dict(dqc.count_ops()))
-        return counter.times(reps // SPLIT_SIZE)
+        return counter.times(reps // split)
 
 
 
