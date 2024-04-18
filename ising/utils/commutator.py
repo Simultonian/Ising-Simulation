@@ -3,33 +3,42 @@ from itertools import product
 from collections import defaultdict
 from qiskit.quantum_info import SparsePauliOp, Pauli
 
-def _commute(terms) -> dict[Pauli, float]:
+def balance_prod(t1: tuple[Pauli, float], t2: tuple[Pauli, float]):
+    pa, ca = t1
+    pb, cb = t2
+
+    coeff = ca * cb
+    pauli = pa @ pb
+
+    if pauli.to_label()[0] == "-":
+        coeff *= -1
+        pauli = pauli * -1
+
+    print(t1, t2, pauli, coeff)
+    return (pauli, coeff)
+
+def _commute(terms: list[tuple[Pauli, float]]) -> dict[Pauli, float]:
     if len(terms) == 2:
         a, b = terms
-        pa, ca = a
-        pb, cb = b
         tail = defaultdict(float)
-        if ca * cb < 0:
-            tail[-pa @ pb] += -ca * cb
-            tail[pb @ pa] += -ca * cb
-        else:
-            tail[pa @ pb] += ca * cb
-            tail[-pb @ pa] += ca * cb
 
+        p, c = balance_prod(a, b)
+        tail[p] += c
+
+        p, c = balance_prod(b, a)
+        tail[p] -= c
         return tail
 
     first, rem = terms[0], terms[1:]
     tail = _commute(rem)
     new_tail = defaultdict(float)
 
-    pa, ca = first
-    for pb, cb in tail.items():
-        if ca * cb > 0:
-            new_tail[pa @ pb] += ca * cb
-            new_tail[-pb @ pa] += ca * cb
-        else:
-            new_tail[-pa @ pb] += -ca * cb
-            new_tail[pb @ pa] += -ca * cb
+    for second in tail.items():
+        p, c = balance_prod(first, second)
+        new_tail[p] += c
+
+        p, c = balance_prod(second, first)
+        new_tail[p] -= c
 
     return new_tail
 
@@ -39,14 +48,12 @@ def commute(terms: list[tuple[Pauli, float]]) -> float:
     Calculates [H_1, ... [H_k-1, H_k]] and returns the norm
     """
     res = _commute(terms)
-    paulis = list(res.keys())
-    coeffs = [res[pauli] for pauli in paulis]
-
-    ham = SparsePauliOp(paulis, coeffs)
+    coeffs = np.array(list(res.values()))
+    return np.sum(np.abs(coeffs))
 
     
 
-def alpha_commutator(ham: SparsePauliOp, order: int, time:float, error: float) -> int:
+def alpha_commutator(ham: SparsePauliOp, order: int) -> int:
     """
     Calculates the commutator bound for kth order Trotter using the bounds 
     defined in "Theory of Trotter Error".
@@ -56,26 +63,33 @@ def alpha_commutator(ham: SparsePauliOp, order: int, time:float, error: float) -
 
     # Temporary
     if order > 2:
-        raise ValueError("Not defined for ")
+        raise ValueError("Not defined for higher orders")
 
     paulis, coeffs = ham.paulis, ham.coeffs
     inds = np.array(list(range(len(paulis))))
 
     ind_prods = product(inds, repeat=order+1)
 
-    # for ind in ind_prods:
-        # 
+    alpha_comm = 0.0
+    for cur_term_ind in ind_prods:
+        terms = [(paulis[ind], coeffs[ind]) for ind in cur_term_ind]
+        val = commute(terms)
+        print(terms, val)
+        print("-------------")
+        alpha_comm += val
+
+    return np.ceil(alpha_comm)
+
 
 def main():
     x, y = Pauli("X"), Pauli("Y")
+    ham = SparsePauliOp([x, y], [1.0, 2.0])
     terms = [(x, 1), (y, 1), (x, 1)]
     res = _commute(terms)
-    paulis = list(res.keys())
-    coeffs = [res[pauli] for pauli in paulis]
-
-    print(paulis, coeffs)
-    ham = SparsePauliOp(paulis, coeffs)
-    print(ham)
+    print(res)
+    print(commute(terms))
+    alpha_comm = alpha_commutator(ham, 1)
+    print(alpha_comm)
 
 
 
