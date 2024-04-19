@@ -17,7 +17,7 @@ from qiskit.synthesis import SuzukiTrotter
 SPLIT_SIZE = 100
 
 class TrotterBenchmarkTime:
-    def __init__(self, ham: Hamiltonian):
+    def __init__(self, ham: Hamiltonian, order: int = 1):
         """
         Benchmark calculator for Trotterization based groundstate preparation.
 
@@ -27,7 +27,8 @@ class TrotterBenchmarkTime:
 
         self.ham = ham
         self.decomposer = Decomposer()
-        self.synth = SuzukiTrotter()
+        self.order = order
+        self.synth = SuzukiTrotter(order=order)
 
 
     def simulation_circuit(self, time: float, reps: int) -> QuantumCircuit:
@@ -83,16 +84,24 @@ class TrotterBenchmarkTime:
 
 from ising.hamiltonian.ising_one import parametrized_ising
 from ising.hamiltonian.ising_one import trotter_reps
+from ising.utils.commutator import commutator_r
 def main():
-    num_qubits, h = 3, 0.125
+    num_qubits, h = 7, 0.125
     eps = 0.1
     time = 20
-    reps = trotter_reps(num_qubits, h, time, eps)
-    print(f"reps:{reps}")
-    hamiltonian = parametrized_ising(num_qubits, h)
-    benchmarker = TrotterBenchmarkTime(hamiltonian)
-    print(benchmarker.simulation_gate_count(time, reps))
-    print(benchmarker.controlled_gate_count(time, reps))
+    
+    first_ord = trotter_reps(num_qubits, h, time, eps)
+    print(f"First Order: {first_ord}")
+
+    for order in range(2, 5, 2):
+        hamiltonian = parametrized_ising(num_qubits, h)
+
+        reps = commutator_r(hamiltonian.sparse_repr, order, time, eps)
+        print(f"order: {order} reps:{reps}")
+        benchmarker = TrotterBenchmarkTime(hamiltonian, order)
+
+        print(benchmarker.simulation_gate_count(time, reps))
+        # print(benchmarker.controlled_gate_count(time, reps))
     
 
 if __name__ == "__main__":

@@ -14,7 +14,6 @@ def balance_prod(t1: tuple[Pauli, float], t2: tuple[Pauli, float]):
         coeff *= -1
         pauli = pauli * -1
 
-    print(t1, t2, pauli, coeff)
     return (pauli, coeff)
 
 def _commute(terms: list[tuple[Pauli, float]]) -> dict[Pauli, float]:
@@ -52,7 +51,7 @@ def commute(terms: list[tuple[Pauli, float]]) -> float:
     return np.sum(np.abs(coeffs))
 
     
-
+from tqdm import tqdm
 def alpha_commutator(ham: SparsePauliOp, order: int) -> int:
     """
     Calculates the commutator bound for kth order Trotter using the bounds 
@@ -61,36 +60,154 @@ def alpha_commutator(ham: SparsePauliOp, order: int) -> int:
     if order != 1 and order % 2 == 1:
         raise ValueError("Not well defined for odd orders")
 
-    # Temporary
-    if order > 2:
-        raise ValueError("Not defined for higher orders")
-
     paulis, coeffs = ham.paulis, ham.coeffs
     inds = np.array(list(range(len(paulis))))
 
     ind_prods = product(inds, repeat=order+1)
 
+    total_count = len(inds) ** (order + 1)
     alpha_comm = 0.0
-    for cur_term_ind in ind_prods:
-        terms = [(paulis[ind], coeffs[ind]) for ind in cur_term_ind]
-        val = commute(terms)
-        print(terms, val)
-        print("-------------")
-        alpha_comm += val
+
+    with tqdm(total=total_count) as pbar:
+        for cur_term_ind in ind_prods:
+            terms = [(paulis[ind], coeffs[ind]) for ind in cur_term_ind]
+            val = commute(terms)
+            alpha_comm += val
+            pbar.update(1)
 
     return np.ceil(alpha_comm)
 
+def alpha_commutator_second_order(ham: SparsePauliOp) -> int:
+    """
+    We use three explicit loops for calculating the commutator bound, to avoid
+    miscalculations. Any higher trotter bound can not be calculated.
+    """
+    paulis, coeffs = ham.paulis, ham.coeffs
+    inds = np.array(list(range(len(paulis))))
 
+    total_count = len(inds) ** 3
+
+    alpha_comm = 0.0
+    with tqdm(total=total_count) as pbar:
+        for ia in inds:
+            for ib in inds:
+                for ic in inds:
+                    tail = defaultdict(float)
+                    # abc - acb - bca + cba
+                    pbar.update(1)
+
+                    a, b, c = (paulis[ia], coeffs[ia]), (paulis[ib], coeffs[ib]), (paulis[ic], coeffs[ic])
+
+                    # abc
+                    p, ce = balance_prod(a, balance_prod(b, c))
+                    tail[p] += ce
+
+                    # -acb
+                    p, ce = balance_prod(a, balance_prod(c, b))
+                    tail[p] -= ce
+
+                    # -bca
+                    p, ce = balance_prod(b, balance_prod(c, a))
+                    tail[p] -= ce
+
+                    # cba
+                    p, ce = balance_prod(c, balance_prod(b, a))
+                    tail[p] += ce
+                    cur_coeffs = np.array(list(tail.values()))
+                    alpha_comm += np.sum(np.abs(cur_coeffs))
+                
+
+    return alpha_comm
+
+def alpha_commutator_first_order(ham: SparsePauliOp) -> int:
+    """
+    We use three explicit loops for calculating the commutator bound, to avoid
+    miscalculations. Any higher trotter bound can not be calculated.
+    """
+    paulis, coeffs = ham.paulis, ham.coeffs
+    inds = np.array(list(range(len(paulis))))
+
+    total_count = len(inds) ** 2
+
+    alpha_comm = 0.0
+    with tqdm(total=total_count) as pbar:
+        for ia in inds:
+            for ib in inds:
+                    tail = defaultdict(float)
+                    # ab - ba
+                    pbar.update(1)
+
+                    a, b = (paulis[ia], coeffs[ia]), (paulis[ib], coeffs[ib])
+
+                    # ab
+                    p, ce = balance_prod(a, b)
+                    tail[p] += ce
+
+                    # -ba
+                    p, ce = balance_prod(b, a)
+                    tail[p] -= ce
+
+                    cur_coeffs = np.array(list(tail.values()))
+                    alpha_comm += np.sum(np.abs(cur_coeffs))
+                
+
+    return alpha_comm
+
+def commutator_r(ham: SparsePauliOp, order: int, time: float, error: float) -> int:
+    """
+    Calculates a tighter bound for higher order trotter using the alpha
+    commutator from "Theory of Trotter Error" results.
+    """
+    alpha_com = alpha_commutator(ham, order)
+    nr = (alpha_com ** (1 / order)) * (time ** (1 + 1/order))
+    dr = error ** (1 / order)
+    return np.ceil(nr / dr)
+
+def commutator_r_first_order(ham: SparsePauliOp, time: float, error: float) -> int:
+    """
+    Same as `commutator_r` but it is hard-coded with two for loops
+    """
+    alpha_com = alpha_commutator_first_order(ham)
+    nr = alpha_com * (time ** 2)
+    dr = error
+    return np.ceil(nr / dr)
+
+def commutator_r_second_order(ham: SparsePauliOp, time: float, error: float) -> int:
+    """
+    Same as `commutator_r` but it is hard-coded with three for loops
+    """
+    alpha_com = alpha_commutator_second_order(ham)
+    nr = (alpha_com ** (1 / 2)) * (time ** (1 + 1/2))
+    dr = error ** (1 / 2)
+    return np.ceil(nr / dr)
+
+
+from ising.hamiltonian.ising_one import parametrized_ising
+from ising.hamiltonian.ising_one import trotter_reps, trotter_reps_general
+
+# def trotter_reps_general(ham: SparsePauliOp, time: float, eps: float) -> int:
 def main():
-    x, y = Pauli("X"), Pauli("Y")
-    ham = SparsePauliOp([x, y], [1.0, 2.0])
-    terms = [(x, 1), (y, 1), (x, 1)]
-    res = _commute(terms)
-    print(res)
-    print(commute(terms))
-    alpha_comm = alpha_commutator(ham, 1)
-    print(alpha_comm)
+    num_qubits, h = 7, 0.125
+    eps = 0.1
+    time = 20
+    
+    hamiltonian = parametrized_ising(num_qubits, h)
 
+    norm_first_ord = trotter_reps(num_qubits, h, time, eps)
+    print(f"First Order Non-Commutator: {norm_first_ord}")
+
+    norm_first_ord = trotter_reps_general(hamiltonian.sparse_repr, time, eps)
+    print(f"First Order General: {norm_first_ord}")
+
+    first_ord = commutator_r_first_order(hamiltonian.sparse_repr, time, eps)
+    print(f"First Order: {first_ord}")
+
+    second_ord = commutator_r_second_order(hamiltonian.sparse_repr, time, eps)
+    print(f"Second Order: {second_ord}")
+
+    for order in range(2, 5, 2):
+        reps = commutator_r(hamiltonian.sparse_repr, order, time, eps)
+        print(f"Order: {order} reps:{reps}")
 
 
 if __name__ == "__main__":
