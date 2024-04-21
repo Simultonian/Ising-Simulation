@@ -88,33 +88,33 @@ def alpha_commutator_second_order(ham: SparsePauliOp) -> int:
     total_count = len(inds) ** 3
 
     alpha_comm = 0.0
-    with tqdm(total=total_count) as pbar:
-        for ia in inds:
-            for ib in inds:
-                for ic in inds:
-                    tail = defaultdict(float)
-                    # abc - acb - bca + cba
-                    pbar.update(1)
+    # with tqdm(total=total_count) as pbar:
+    for ia in inds:
+        for ib in inds:
+            for ic in inds:
+                tail = defaultdict(float)
+                # abc - acb - bca + cba
+                # pbar.update(1)
 
-                    a, b, c = (paulis[ia], coeffs[ia]), (paulis[ib], coeffs[ib]), (paulis[ic], coeffs[ic])
+                a, b, c = (paulis[ia], coeffs[ia]), (paulis[ib], coeffs[ib]), (paulis[ic], coeffs[ic])
 
-                    # abc
-                    p, ce = balance_prod(a, balance_prod(b, c))
-                    tail[p] += ce
+                # abc
+                p, ce = balance_prod(a, balance_prod(b, c))
+                tail[p] += ce
 
-                    # -acb
-                    p, ce = balance_prod(a, balance_prod(c, b))
-                    tail[p] -= ce
+                # -acb
+                p, ce = balance_prod(a, balance_prod(c, b))
+                tail[p] -= ce
 
-                    # -bca
-                    p, ce = balance_prod(b, balance_prod(c, a))
-                    tail[p] -= ce
+                # -bca
+                p, ce = balance_prod(b, balance_prod(c, a))
+                tail[p] -= ce
 
-                    # cba
-                    p, ce = balance_prod(c, balance_prod(b, a))
-                    tail[p] += ce
-                    cur_coeffs = np.array(list(tail.values()))
-                    alpha_comm += np.sum(np.abs(cur_coeffs))
+                # cba
+                p, ce = balance_prod(c, balance_prod(b, a))
+                tail[p] += ce
+                cur_coeffs = np.array(list(tail.values()))
+                alpha_comm += np.sum(np.abs(cur_coeffs))
                 
 
     return alpha_comm

@@ -16,7 +16,7 @@ from qiskit.synthesis import SuzukiTrotter
 
 SPLIT_SIZE = 100
 
-class TrotterBenchmarkTime:
+class KTrotterBenchmarkTime:
     def __init__(self, ham: Hamiltonian, order: int = 1):
         """
         Benchmark calculator for Trotterization based groundstate preparation.
