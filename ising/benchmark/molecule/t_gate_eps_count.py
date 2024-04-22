@@ -7,6 +7,7 @@ methods = {
     "First Order Trotter": TrotterBenchmark,
     "qDRIFT": qDRIFTBenchmark,
     "Truncated Taylor Series": TaylorBenchmark,
+    "Kth Order Trotter": 
 }
 
 

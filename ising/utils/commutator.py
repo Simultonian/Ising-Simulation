@@ -184,14 +184,15 @@ def commutator_r_second_order(ham: SparsePauliOp, time: float, error: float) -> 
 
 from ising.hamiltonian.ising_one import parametrized_ising
 from ising.hamiltonian.ising_one import trotter_reps, trotter_reps_general
+from ising.hamiltonian import parse
 
-# def trotter_reps_general(ham: SparsePauliOp, time: float, eps: float) -> int:
 def main():
     num_qubits, h = 7, 0.125
     eps = 0.1
     time = 20
     
-    hamiltonian = parametrized_ising(num_qubits, h)
+    name = "methane"
+    hamiltonian = parse(name)
 
     norm_first_ord = trotter_reps(num_qubits, h, time, eps)
     print(f"First Order Non-Commutator: {norm_first_ord}")
@@ -204,11 +205,6 @@ def main():
 
     second_ord = commutator_r_second_order(hamiltonian.sparse_repr, time, eps)
     print(f"Second Order: {second_ord}")
-
-    for order in range(2, 5, 2):
-        reps = commutator_r(hamiltonian.sparse_repr, order, time, eps)
-        print(f"Order: {order} reps:{reps}")
-
 
 if __name__ == "__main__":
     main()

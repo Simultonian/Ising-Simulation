@@ -21,6 +21,25 @@ def trotter_reps_general(ham: SparsePauliOp, time: float, eps: float) -> int:
     final = max(final, 1)
     return final
 
+def ktrotter_reps_general(ham: SparsePauliOp, time: float, eps: float, order: int) -> int:
+    """
+    Calculate the Trotter error for general Hamiltonian
+    """
+    if order % 2 == 1:
+        raise ValueError("kTrotter calculates for odd powers")
+
+    l = len(ham.coeffs)
+    coeff_sum = sum(ham.coeffs)
+
+    numr = np.abs((l ** (2 + (1 / order))) * (coeff_sum * time) ** (1 + 1 / order))
+    dr = np.abs(eps ** (1 / order))
+    final = int(np.ceil(numr / dr))
+    if final < 0:
+        raise ValueError("Incorrect calculation")
+
+    final = max(final, 1)
+    return final
+
 
 def trotter_reps(num_qubits, h, time: float, eps: float) -> int:
     """
@@ -40,10 +59,6 @@ def qdrift_count(lambd: float, time: float, eps: float) -> int:
     numr = np.abs(2 * (lambd * time) ** 2)
     dr = eps
     final = np.ceil(numr / dr).astype(int)
-    # while final > 10000:
-    #     final = final // 10
-
-    # final = int(final**0.8)
 
     final = max(final, 1)
     return final
