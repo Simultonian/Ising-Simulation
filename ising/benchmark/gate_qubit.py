@@ -44,7 +44,6 @@ def plot_gate_error(time, h_val, error, point_count, obs_norm, start_qubit, end_
 
         # ax.text(error_points[-1] * 2, results["taylor"][-1] * 1.6, f"t={time}")
 
-
     # SETTING: AXIS VISIBILITY
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)

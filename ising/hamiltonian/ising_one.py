@@ -21,7 +21,10 @@ def trotter_reps_general(ham: SparsePauliOp, time: float, eps: float) -> int:
     final = max(final, 1)
     return final
 
-def ktrotter_reps_general(ham: SparsePauliOp, time: float, eps: float, order: int) -> int:
+
+def ktrotter_reps_general(
+    ham: SparsePauliOp, time: float, eps: float, order: int
+) -> int:
     """
     Calculate the Trotter error for general Hamiltonian
     """

@@ -47,26 +47,22 @@ def plot_gate_error(
     for eps in error_points:
         taylor.append(groundstate_depth.truncated_taylor(molecule, eeta, eps, obs_norm))
         qdrift.append(groundstate_depth.qdrift(molecule, eeta, eps, obs_norm))
-        trotter.append(groundstate_depth.first_order_trotter(molecule, eeta, eps, obs_norm))
+        trotter.append(
+            groundstate_depth.first_order_trotter(molecule, eeta, eps, obs_norm)
+        )
 
     results = {"taylor": taylor, "qdrift": qdrift, "trotter": trotter}
 
     for method, config in configs.items():
         result = results[method]
-        sns.lineplot(
+        sns.lineplot(y=result, x=error_points, ax=ax, color=config["color"], alpha=0.5)
+        sns.scatterplot(
             y=result,
             x=error_points,
             ax=ax,
             color=config["color"],
-            alpha=0.5
+            label=configs[method]["label"],
         )
-        sns.scatterplot(
-                y=result, 
-                x=error_points, 
-                ax=ax, 
-                color=config["color"],
-                label=configs[method]["label"],
-                )
 
     ax.set_xscale("log")
     ax.set_yscale("log")
@@ -75,7 +71,6 @@ def plot_gate_error(
 
     ax.set_xlabel(r"Error ($\log_{10}$ Scale)")
     ax.set_ylabel(r"Gate Depth ($\log_{10}$ Scale)")
-
 
     # SETTING: AXIS VISIBILITY
     ax.spines["top"].set_visible(False)

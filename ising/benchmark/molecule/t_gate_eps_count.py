@@ -7,7 +7,6 @@ methods = {
     "First Order Trotter": TrotterBenchmark,
     "qDRIFT": qDRIFTBenchmark,
     "Truncated Taylor Series": TaylorBenchmark,
-    "Kth Order Trotter": 
 }
 
 
@@ -22,12 +21,14 @@ def fixed_everything(
     success: float,
 ):
     error_points = [10**x for x in np.linspace(eps_start, eps_end, eps_count)]
-    
+
     synths = {}
 
     # __init__(ham: Hamiltonian, observable_norm: float, **kwargs):
     for method, synth in methods.items():
-        synths[method] = synth(molecule, obs_norm, success=success, overlap=eeta, error = error_points[0])
+        synths[method] = synth(
+            molecule, obs_norm, success=success, overlap=eeta, error=error_points[0]
+        )
 
     # dict[str, dict[float, int]]
     err_depth = {method: {} for method in methods.keys()}
@@ -36,7 +37,6 @@ def fixed_everything(
         for err in error_points:
             gate_count = synth.error_gate_count(err)
             err_depth[method][err] = gate_count["t"]
-
 
     for method, err_count in err_depth.items():
         print(f"{method}:{err_count}")
@@ -58,7 +58,9 @@ def main():
     eeta = 0.8
     success = 0.9
 
-    fixed_everything(name, molecule, obs_norm, eps_start, eps_end, eps_count, eeta, success)
+    fixed_everything(
+        name, molecule, obs_norm, eps_start, eps_end, eps_count, eeta, success
+    )
 
 
 def test_main():

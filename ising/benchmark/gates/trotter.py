@@ -115,7 +115,9 @@ def trotter_gates(
 
     return benchmarker.calculate_gates()
 
+
 SPLIT_SIZE = 100
+
 
 class TrotterBenchmarkTime:
     def __init__(self, ham: Hamiltonian):
@@ -137,7 +139,7 @@ class TrotterBenchmarkTime:
 
         for pauli, _coeff in zip(self.ham.paulis, self.ham.coeffs):
             coeff = abs(_coeff)
-            evo = PauliEvolutionGate(pauli, time= coeff * time / reps)
+            evo = PauliEvolutionGate(pauli, time=coeff * time / reps)
             circuit.append(evo, range(evo.num_qubits))
 
         # Could be heavy operation for large reps.
@@ -177,9 +179,10 @@ class TrotterBenchmarkTime:
         return counter.times(reps // split)
 
 
-
 from ising.hamiltonian.ising_one import parametrized_ising
 from ising.hamiltonian.ising_one import trotter_reps
+
+
 def main():
     num_qubits, h = 10, 0.125
     eps = 0.1
@@ -190,7 +193,7 @@ def main():
     benchmarker = TrotterBenchmarkTime(hamiltonian)
     print(benchmarker.simulation_gate_count(time, reps))
     print(benchmarker.controlled_gate_count(time, reps))
-    
+
 
 if __name__ == "__main__":
     main()

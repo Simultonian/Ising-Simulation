@@ -6,7 +6,11 @@ import numpy as np
 
 
 def parametrized_ising_power(
-        qubits: int, h: Union[Parameter, float], J: float = -1, power: float = 1, normalize: bool = True
+    qubits: int,
+    h: Union[Parameter, float],
+    J: float = -1,
+    power: float = 1,
+    normalize: bool = True,
 ) -> Hamiltonian:
     """
     One dimensional Transverse-field Ising model parameterized by external

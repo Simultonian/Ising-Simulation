@@ -1,6 +1,7 @@
 import numpy as np
 from ising.hamiltonian import Hamiltonian
 
+
 def trotter_gate_count_ising(ham: Hamiltonian, time: float, err: float) -> int:
     """
     First order trotterization gate count for given parameters.
@@ -8,6 +9,7 @@ def trotter_gate_count_ising(ham: Hamiltonian, time: float, err: float) -> int:
     max_lambd = np.max(np.abs(ham.coeffs))
     l = len(ham.paulis)
     return np.ceil((l**2) * ((max_lambd * time) ** 2) / err)
+
 
 def trotter_gate_count(ham: Hamiltonian, time: float, err: float) -> int:
     """

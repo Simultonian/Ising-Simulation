@@ -56,10 +56,11 @@ def plot_method(paras, results: Result, **kwargs):
             )
         else:
             ax = sns.lineplot(
-                x=x_values, y=y_values, 
+                x=x_values,
+                y=y_values,
                 label=method,
-                # label=f"N={num_qubit}", 
-                color=color
+                # label=f"N={num_qubit}",
+                color=color,
             )
 
 
@@ -86,7 +87,13 @@ def plot_combined(
         #     alpha=0.0,
         #     label=METHOD_NAMES[method],
         # )
-        plot_method(paras, results, style=styles[ind], color=colors[ind], method=METHOD_NAMES[method])
+        plot_method(
+            paras,
+            results,
+            style=styles[ind],
+            color=colors[ind],
+            method=METHOD_NAMES[method],
+        )
 
     # SETTING: AXIS VISIBILITY
     ax.spines["top"].set_visible(False)

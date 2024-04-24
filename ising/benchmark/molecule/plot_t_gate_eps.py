@@ -9,6 +9,7 @@ colors: dict[str, str] = {
     "qDRIFT": "red",
 }
 
+
 def get_gate_count_gsp(molecule: str):
     file_name = f"data/tgatecount/{molecule}.json"
     with open(file_name, "r") as file:
@@ -16,9 +17,11 @@ def get_gate_count_gsp(molecule: str):
 
     return depth
 
+
 def convert_to_tick(num: str) -> str:
     power = np.log10(float(num))
     return f"${{{power:.{2}f}}}$"
+
 
 def plot_dictionaries(name: str, depths: dict[str, dict[float, int]]):
     fig, ax = plt.subplots()
@@ -35,8 +38,8 @@ def plot_dictionaries(name: str, depths: dict[str, dict[float, int]]):
     # ax.set_xticklabels(labels)
 
     # Remove the top and right border
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
 
     # Add labels for each group
     plt.xlabel(r"Error ($\log_{10}$ scale)")
@@ -44,9 +47,8 @@ def plot_dictionaries(name: str, depths: dict[str, dict[float, int]]):
     # plt.title(f"Method-Wise T-Gate Count vs Error for GSP for {name}")
     ax.set_yscale("log")
     ax.set_xscale("log")
-    
-    ax.invert_xaxis()
 
+    ax.invert_xaxis()
 
     plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.10), ncol=3, fontsize=10)
 

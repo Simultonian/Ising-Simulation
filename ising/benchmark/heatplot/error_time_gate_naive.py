@@ -7,11 +7,14 @@ from ising.benchmark.gates.taylor import TaylorBenchmarkTime
 from ising.benchmark.gates.trotter import TrotterBenchmarkTime
 from ising.benchmark.gates.qdrift import QDriftBenchmarkTime
 from ising.benchmark.gates.ktrotter import KTrotterBenchmarkTime
-from ising.hamiltonian.ising_one import trotter_reps_general, qdrift_count, ktrotter_reps_general
+from ising.hamiltonian.ising_one import (
+    trotter_reps_general,
+    qdrift_count,
+    ktrotter_reps_general,
+)
 
-def plot_gate_error(
-    qubit, h_val, err_pair, point_count_pair, obs_norm, time_pair
-):
+
+def plot_gate_error(qubit, h_val, err_pair, point_count_pair, obs_norm, time_pair):
     fig, ax = plt.subplots()
 
     # One col is fixed error
@@ -41,7 +44,11 @@ def plot_gate_error(
         ktrotter.append([])
 
         for error in error_points:
-            k = int(np.floor(np.log(lambd * time / error) / np.log(np.log(lambd * time / error))))
+            k = int(
+                np.floor(
+                    np.log(lambd * time / error) / np.log(np.log(lambd * time / error))
+                )
+            )
 
             taylor_counts = taylor_bench.simulation_gate_count(time, k)
             print(f"Taylor:{taylor_counts}")
@@ -93,12 +100,11 @@ def plot_gate_error(
     mask = np.array(nrows * [ncols * [True, True, True, False]], dtype=bool)
     yellow = np.ma.masked_where(mask, np.repeat(ktrotter, 4, axis=1))
 
-
     # SETTING THE LIMITS AND PLOTTING
-    redmesh = ax.pcolormesh(red, cmap='Blues', vmax=max_lim, vmin=min_lim)
-    bluemesh = ax.pcolormesh(blue, cmap='Blues', vmax=max_lim, vmin=min_lim)
-    greenmesh = ax.pcolormesh(green, cmap='Blues', vmax=max_lim, vmin=min_lim)
-    yellowmesh = ax.pcolormesh(yellow, cmap='Blues', vmax=max_lim, vmin=min_lim)
+    redmesh = ax.pcolormesh(red, cmap="Blues", vmax=max_lim, vmin=min_lim)
+    bluemesh = ax.pcolormesh(blue, cmap="Blues", vmax=max_lim, vmin=min_lim)
+    greenmesh = ax.pcolormesh(green, cmap="Blues", vmax=max_lim, vmin=min_lim)
+    yellowmesh = ax.pcolormesh(yellow, cmap="Blues", vmax=max_lim, vmin=min_lim)
 
     fig.subplots_adjust(left=0.08, bottom=0.05, right=0.86, top=0.88)
 
@@ -106,36 +112,66 @@ def plot_gate_error(
     cbar = fig.colorbar(redmesh, cax=fig.add_axes([0.88, 0.05, 0.04, 0.83]))
 
     # TEXT ON THE COLORBAR
-    cbar.ax.text(0.55, 0.22, r'CNOT Count ($\log_{10}$ scale)', rotation=90, ha='center', va='center',
-                 transform=cbar.ax.transAxes, color='black')
+    cbar.ax.text(
+        0.55,
+        0.22,
+        r"CNOT Count ($\log_{10}$ scale)",
+        rotation=90,
+        ha="center",
+        va="center",
+        transform=cbar.ax.transAxes,
+        color="black",
+    )
 
     ax.set_ylabel(r"Time ($t$)")
-    ax.yaxis.set_label_coords(-0.05, 0.51) 
+    ax.yaxis.set_label_coords(-0.05, 0.51)
     ax.set_xlabel(r"Error ($\log_{10}$ scale)")
     ax.xaxis.tick_top()
     ax.yaxis.tick_left()
 
     # SETTING THE TICK MARKS
-    x_ticks = [x*4 for x in list(range(1, point_count[0] + 1))]
+    x_ticks = [x * 4 for x in list(range(1, point_count[0] + 1))]
     ax.set_xticks(x_ticks)
     ax.set_yticks(list(range(point_count[1])))
-    ax.tick_params(direction='out')
+    ax.tick_params(direction="out")
 
     # SETTING THE LABELS
     error_marks = [np.log10(x) for x in error_points]
-    ax.set_xticklabels(['{}'.format(i) for i in error_marks])
-    ax.set_yticklabels(['{}'.format(i) for i in time_points])
-
+    ax.set_xticklabels(["{}".format(i) for i in error_marks])
+    ax.set_yticklabels(["{}".format(i) for i in time_points])
 
     # LABELLING the BARS
-    ax.text(0.5, 0.35, 'qDRIFT', rotation=90, ha='center', va='center', color='black')
-    ax.text(1.5, 1.09, 'First Order Trotterization', rotation=90, ha='center', va='center', color='black')
-    ax.text(2.5, 1.05, 'Truncated Taylor Series', rotation=90, ha='center', va='center', color='black')
-    ax.text(3.5, 0.89, 'Second Order Trotter', rotation=90, ha='center', va='center', color='black')
+    ax.text(0.5, 0.35, "qDRIFT", rotation=90, ha="center", va="center", color="black")
+    ax.text(
+        1.5,
+        1.09,
+        "First Order Trotterization",
+        rotation=90,
+        ha="center",
+        va="center",
+        color="black",
+    )
+    ax.text(
+        2.5,
+        1.05,
+        "Truncated Taylor Series",
+        rotation=90,
+        ha="center",
+        va="center",
+        color="black",
+    )
+    ax.text(
+        3.5,
+        0.89,
+        "Second Order Trotter",
+        rotation=90,
+        ha="center",
+        va="center",
+        color="black",
+    )
 
     for x_stamp in x_ticks:
-        ax.axvline(x=x_stamp, color='black', linestyle='-')
-
+        ax.axvline(x=x_stamp, color="black", linestyle="-")
 
     diagram_name = "plots/benchmark/heat/ising_cx_naive.png"
     print(f"Saving diagram at:{diagram_name}")
@@ -151,6 +187,4 @@ if __name__ == "__main__":
     point_count = (3, 10)
     obs_norm = 1
     time_pair = (1, 20)
-    plot_gate_error(
-        qubit, h_val, err_pair, point_count, obs_norm, time_pair
-    )
+    plot_gate_error(qubit, h_val, err_pair, point_count, obs_norm, time_pair)

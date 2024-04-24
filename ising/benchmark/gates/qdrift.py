@@ -89,7 +89,9 @@ class qDRIFTBenchmark:
                 for pauli, coeff in zip(
                     self.ham.sparse_repr.paulis, self.ham.sparse_repr.coeffs
                 ):
-                    gate_dict = gates_for_pauli(self.decomposer, pauli, lambd * time / reps)
+                    gate_dict = gates_for_pauli(
+                        self.decomposer, pauli, lambd * time / reps
+                    )
                     pbar.update(1)
                     count.weighted_add(abs(coeff.real), gate_dict)
 
@@ -116,7 +118,9 @@ def qdrift_gates(
 
     return benchmarker.calculate_gates()
 
+
 SPLIT_SIZE = 100
+
 
 class QDriftBenchmarkTime:
     def __init__(self, ham: Hamiltonian):
@@ -148,7 +152,6 @@ class QDriftBenchmarkTime:
         self.paulis = paulis
         self.sign_map = sign_map
         self.indices = list(range(len(self.paulis)))
-
 
     def simulation_circuit(self, time: float, reps: int) -> QuantumCircuit:
         """
@@ -197,8 +200,8 @@ class QDriftBenchmarkTime:
         return counter.times(reps // split)
 
 
-
 from ising.hamiltonian.ising_one import parametrized_ising
+
 
 def main():
     num_qubits, h = 10, 0.125
@@ -214,7 +217,7 @@ def main():
 
     print(benchmarker.simulation_gate_count(time, reps))
     print(benchmarker.controlled_gate_count(time, reps))
-    
+
 
 if __name__ == "__main__":
     main()

@@ -131,7 +131,10 @@ class TaylorBenchmark:
         """
         # r = (beta t) ^ 2
         reps = (self.beta * time) ** 2
-        k = np.floor(np.log(self.beta * time / self.error) / np.log(np.log(self.beta * time / self.error)))
+        k = np.floor(
+            np.log(self.beta * time / self.error)
+            / np.log(np.log(self.beta * time / self.error))
+        )
         print(f"Running TTS Gate Count, reps:{reps} k:{k}")
 
         count = Counter()
@@ -159,8 +162,9 @@ def taylor_gates(
 
     return benchmarker.calculate_gates()
 
+
 def theta_m(t_bar, r, k):
-    val = np.arccos(((1 + (t_bar/r)**2) / (k+1))**(-1/2))
+    val = np.arccos(((1 + (t_bar / r) ** 2) / (k + 1)) ** (-1 / 2))
     return val
 
 
@@ -200,8 +204,9 @@ class TaylorBenchmarkTime:
         self.sign_map = sign_map
         self.indices = list(range(len(self.paulis)))
 
-
-    def simulation_circuit(self, t_bar: float, reps:int, k_max: int, split:int) -> QuantumCircuit:
+    def simulation_circuit(
+        self, t_bar: float, reps: int, k_max: int, split: int
+    ) -> QuantumCircuit:
         """
         Calculates the gate depth for given time
         """
@@ -216,13 +221,15 @@ class TaylorBenchmarkTime:
         for _ in range(split):
             k = np.random.choice(k_max + 1, p=k_probs)
 
-            samples = np.random.choice(self.indices, p=self.coeffs, size=k+1)
+            samples = np.random.choice(self.indices, p=self.coeffs, size=k + 1)
 
             for sample in samples[:-1]:
                 pauli = self.paulis[sample]
                 circuit.append(PauliGate(pauli.to_label()), range(self.num_qubits))
 
-            evo = PauliEvolutionGate(self.paulis[samples[-1]], time=theta_m(t_bar, reps, k))
+            evo = PauliEvolutionGate(
+                self.paulis[samples[-1]], time=theta_m(t_bar, reps, k)
+            )
             circuit.append(evo, range(evo.num_qubits))
 
         return circuit
@@ -255,7 +262,9 @@ class TaylorBenchmarkTime:
             split = SPLIT_SIZE
 
         big_circ = QuantumCircuit(self.ham.num_qubits + 1)
-        controlled_gate = self.simulation_circuit(time, split, k, split).to_gate().control(1)
+        controlled_gate = (
+            self.simulation_circuit(time, split, k, split).to_gate().control(1)
+        )
         big_circ.append(controlled_gate, range(self.ham.num_qubits + 1))
         dqc = self.decomposer.decompose(big_circ)
 
@@ -264,8 +273,8 @@ class TaylorBenchmarkTime:
         return counter.times(reps // split)
 
 
-
 from ising.hamiltonian.ising_one import parametrized_ising
+
 
 def main():
     num_qubits, h = 10, 0.125
@@ -279,7 +288,7 @@ def main():
 
     print(benchmarker.simulation_gate_count(time, k))
     print(benchmarker.controlled_gate_count(time, k))
-    
+
 
 if __name__ == "__main__":
     main()

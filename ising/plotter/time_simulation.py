@@ -13,18 +13,19 @@ Result: TypeAlias = dict[str, dict[float, list[float]]]
 
 
 method_colors = {
-        "exact": "black",
-        "taylor_single": "blue",
-        "grouped_lie": "green",
-        "gs_qdrift": "red",
-    }
+    "exact": "black",
+    "taylor_single": "blue",
+    "grouped_lie": "green",
+    "gs_qdrift": "red",
+}
 
 method_label = {
-        "exact": "Exact Simulation",
-        "taylor_single": "Truncated Taylor Series",
-        "grouped_lie": "First Order Trotterization",
-        "gs_qdrift": "qDRIFT Protocol"
-    }
+    "exact": "Exact Simulation",
+    "taylor_single": "Truncated Taylor Series",
+    "grouped_lie": "First Order Trotterization",
+    "gs_qdrift": "qDRIFT Protocol",
+}
+
 
 def _get_point(res: Result) -> float:
     for _, h_wise_results in res.items():
@@ -75,19 +76,15 @@ def plot_method(method, paras, results: Result, **kwargs):
                     color=method_colors[method],
                     label=method_label[method],
                 )
-                sns.lineplot(
-                    x=times, y=result, color=method_colors[method],
-                    alpha=1.0
-                )
-
+                sns.lineplot(x=times, y=result, color=method_colors[method], alpha=1.0)
 
                 # error = [0.1 * x for x in result]
                 # # ADDING ERROR BAR
                 # plt.errorbar(
-                #         x=times, 
-                #         y=result, 
-                #         yerr=error, 
-                #         fmt='.', 
+                #         x=times,
+                #         y=result,
+                #         yerr=error,
+                #         fmt='.',
                 #         alpha=0.8,
                 #         color=method_colors[method],
                 #         capsize=6,
@@ -162,9 +159,7 @@ def main():
         results = read_json(method_output_file)
         method_wise_results[method] = results
 
-    diagram_name = (
-        f"{plotfig['fig_folder']}/no_bar_{method_combined}_{start_qubit}_to_{end_qubit}.png"
-    )
+    diagram_name = f"{plotfig['fig_folder']}/no_bar_{method_combined}_{start_qubit}_to_{end_qubit}.png"
     plot_combined(input_paras, method_wise_results, diagram_name, **plotfig)
 
 

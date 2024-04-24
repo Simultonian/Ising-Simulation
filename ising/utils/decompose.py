@@ -19,7 +19,7 @@ class Decomposer:
             self.all_gates = ALL_GATES
 
         # self.backend = AerSimulator()
- 
+
         self.backend = FakeBackendV2()
         # self.backend = Aer.get_backend('aer_simulator')
 
@@ -27,8 +27,6 @@ class Decomposer:
         self.skd = SolovayKitaev(recursion_degree=3, basic_approximations=approx)
 
     def decompose(self, circuit):
-        tqc = transpile(
-            circuit, None, optimization_level=3, basis_gates=ALL_GATES
-        )
+        tqc = transpile(circuit, None, optimization_level=3, basis_gates=ALL_GATES)
         return tqc
         return self.skd(tqc)

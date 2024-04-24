@@ -16,6 +16,7 @@ from qiskit.synthesis import SuzukiTrotter
 
 SPLIT_SIZE = 100
 
+
 class KTrotterBenchmarkTime:
     def __init__(self, ham: Hamiltonian, order: int = 1):
         """
@@ -30,7 +31,6 @@ class KTrotterBenchmarkTime:
         self.order = order
         self.synth = SuzukiTrotter(order=order)
 
-
     def simulation_circuit(self, time: float, reps: int) -> QuantumCircuit:
         """
         Calculates the gate depth for given time
@@ -38,10 +38,8 @@ class KTrotterBenchmarkTime:
         circuit = QuantumCircuit(self.ham.num_qubits)
 
         evo = PauliEvolutionGate(
-                self.ham.sparse_repr, 
-                time = time / reps,
-                synthesis=self.synth
-                )
+            self.ham.sparse_repr, time=time / reps, synthesis=self.synth
+        )
         circuit.append(evo, range(evo.num_qubits))
 
         # Could be heavy operation for large reps.
@@ -81,15 +79,16 @@ class KTrotterBenchmarkTime:
         return counter.times(reps // split)
 
 
-
 from ising.hamiltonian.ising_one import parametrized_ising
 from ising.hamiltonian.ising_one import trotter_reps
 from ising.utils.commutator import commutator_r
+
+
 def main():
     num_qubits, h = 7, 0.125
     eps = 0.1
     time = 20
-    
+
     first_ord = trotter_reps(num_qubits, h, time, eps)
     print(f"First Order: {first_ord}")
 
@@ -102,7 +101,7 @@ def main():
 
         print(benchmarker.simulation_gate_count(time, reps))
         # print(benchmarker.controlled_gate_count(time, reps))
-    
+
 
 if __name__ == "__main__":
     main()
