@@ -163,20 +163,22 @@ def commutator_r(ham: SparsePauliOp, order: int, time: float, error: float) -> i
     dr = error ** (1 / order)
     return np.ceil(nr / dr)
 
-def commutator_r_first_order(ham: SparsePauliOp, time: float, error: float) -> int:
+def commutator_r_first_order(ham: SparsePauliOp, time: float, error: float, alpha_com: float = -1) -> int:
     """
     Same as `commutator_r` but it is hard-coded with two for loops
     """
-    alpha_com = alpha_commutator_first_order(ham)
+    if alpha_com == -1:
+        alpha_com = alpha_commutator_first_order(ham)
     nr = alpha_com * (time ** 2)
     dr = error
     return np.ceil(nr / dr)
 
-def commutator_r_second_order(ham: SparsePauliOp, time: float, error: float) -> int:
+def commutator_r_second_order(ham: SparsePauliOp, time: float, error: float, alpha_com: float = -1) -> int:
     """
     Same as `commutator_r` but it is hard-coded with three for loops
     """
-    alpha_com = alpha_commutator_second_order(ham)
+    if alpha_com == -1:
+        alpha_com = alpha_commutator_second_order(ham)
     nr = (alpha_com ** (1 / 2)) * (time ** (1 + 1/2))
     dr = error ** (1 / 2)
     return np.ceil(nr / dr)

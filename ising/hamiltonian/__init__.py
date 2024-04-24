@@ -1,5 +1,6 @@
 from .ising_one import parametrized_ising, trotter_reps, qdrift_count, general_grouping
 from .ising_two import parametrized_ising_two
+from .ising_power_law import parametrized_ising_power
 from .hamiltonian import Hamiltonian, substitute_parameter
 from .parse import parse
 

@@ -89,5 +89,4 @@ def parametrized_ising_two(
         ),
         normalized=normalize,
     )
-    ham._approx_spectral_gap = ham.spectral_gap
     return ham
