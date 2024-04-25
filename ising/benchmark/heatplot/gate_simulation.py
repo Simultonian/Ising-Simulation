@@ -2,12 +2,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
-from ising.hamiltonian import parametrized_ising_two
-from ising.benchmark.gates.taylor import TaylorBenchmarkTime
-from ising.benchmark.gates.trotter import TrotterBenchmarkTime
-from ising.benchmark.gates.qdrift import QDriftBenchmarkTime
-from ising.benchmark.gates.ktrotter import KTrotterBenchmarkTime
-from ising.hamiltonian.ising_one import trotter_reps, qdrift_count
+from ising.hamiltonian import parametrized_ising_power
+from ising.benchmark.gates import (
+    TaylorBenchmarkTime,
+    TrotterBenchmarkTime,
+    QDriftBenchmarkTime,
+    KTrotterBenchmarkTime,
+)
+from ising.hamiltonian.ising_one import qdrift_count
 from ising.utils.commutator import (
     commutator_r_second_order,
     alpha_commutator_second_order,
@@ -33,7 +35,8 @@ def plot_gate_error(
 
     # 2D Arrays where the first dim is time and second is error
     taylor, trotter, qdrift, ktrotter = [], [], [], []
-    ham = parametrized_ising_two(side=qubit, h=h_val)
+
+    ham = parametrized_ising_power(qubits=qubit, h=h_val)
     lambd = np.sum(np.abs(ham.coeffs))
 
     taylor_bench = TaylorBenchmarkTime(ham)
@@ -112,5 +115,5 @@ if __name__ == "__main__":
     point_count = (3, 10)
     obs_norm = 1
     time_pair = (1, 10)
-    file_name = f"ising_two_{qubit}"
+    file_name = f"ising_power_{qubit}"
     plot_gate_error(qubit, h_val, err_pair, point_count, obs_norm, time_pair, file_name)

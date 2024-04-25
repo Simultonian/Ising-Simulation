@@ -72,12 +72,12 @@ def alpha_commutator(ham: SparsePauliOp, order: int) -> int:
     total_count = len(inds) ** (order + 1)
     alpha_comm = 0.0
 
-    with tqdm(total=total_count) as pbar:
-        for cur_term_ind in ind_prods:
-            terms = [(paulis[ind], coeffs[ind]) for ind in cur_term_ind]
-            val = commute(terms)
-            alpha_comm += val
-            pbar.update(1)
+    # with tqdm(total=total_count) as pbar:
+    for cur_term_ind in ind_prods:
+        terms = [(paulis[ind], coeffs[ind]) for ind in cur_term_ind]
+        val = commute(terms)
+        alpha_comm += val
+            # pbar.update(1)
 
     return np.ceil(alpha_comm)
 
@@ -139,25 +139,25 @@ def alpha_commutator_first_order(ham: SparsePauliOp) -> int:
     total_count = len(inds) ** 2
 
     alpha_comm = 0.0
-    with tqdm(total=total_count) as pbar:
-        for ia in inds:
-            for ib in inds:
-                tail = defaultdict(float)
-                # ab - ba
-                pbar.update(1)
+    # with tqdm(total=total_count) as pbar:
+    for ia in inds:
+        for ib in inds:
+            tail = defaultdict(float)
+            # ab - ba
+            # pbar.update(1)
 
-                a, b = (paulis[ia], coeffs[ia]), (paulis[ib], coeffs[ib])
+            a, b = (paulis[ia], coeffs[ia]), (paulis[ib], coeffs[ib])
 
-                # ab
-                p, ce = balance_prod(a, b)
-                tail[p] += ce
+            # ab
+            p, ce = balance_prod(a, b)
+            tail[p] += ce
 
-                # -ba
-                p, ce = balance_prod(b, a)
-                tail[p] -= ce
+            # -ba
+            p, ce = balance_prod(b, a)
+            tail[p] -= ce
 
-                cur_coeffs = np.array(list(tail.values()))
-                alpha_comm += np.sum(np.abs(cur_coeffs))
+            cur_coeffs = np.array(list(tail.values()))
+            alpha_comm += np.sum(np.abs(cur_coeffs))
 
     return alpha_comm
 
