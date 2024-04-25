@@ -14,16 +14,16 @@ from ising.utils.commutator import (
 )
 import json
 
-QUBITS = 5
+QUBITS = 15
 TIME = 2.0
 ORDER = 2
 
 # THE BELOW ARE LOGARITHMIC WRT 10
-H_RANGE = (-3, 1)
-H_COUNT = 5
+H_RANGE = (-3, 2)
+H_COUNT = 10
 
-ERROR_RANGE = (-1, -2)
-ERROR_COUNT = 5
+ERROR_RANGE = (-1, -3)
+ERROR_COUNT = 10
 GATE = "cx"
 FILE_NAME = "ising_one"
 
