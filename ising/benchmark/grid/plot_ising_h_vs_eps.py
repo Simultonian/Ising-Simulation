@@ -5,7 +5,7 @@ import seaborn as sns
 import json
 
 QUBITS = 15
-TIME = 2.0
+TIME = 1.0
 ORDER = 2
 
 # THE BELOW ARE LOGARITHMIC WRT 10
@@ -31,7 +31,7 @@ MAP = {
     "trotter2": "Second Order Trotterization",
 }
 
-COLORS = ["red", "blue", "green", "black"]
+COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A"]
 METHODS = [
     "Truncated Taylor Series",
     "QDrift Protocol",
@@ -119,8 +119,11 @@ def main():
     plt.xlabel("Error")
     plt.ylabel("h")
 
-    plt.xticks(np.arange(0.5, 10.5), error_points, rotation=0)
-    plt.yticks(np.arange(0.5, 10.5), h_points, rotation=0)
+    error_labels = [_truncate(x, 3) for x in error_points]
+    h_labels = [_truncate(x, 3) for x in h_points]
+
+    plt.xticks(np.arange(0.5, 10.5), error_labels, rotation=0)
+    plt.yticks(np.arange(0.5, 10.5), h_labels, rotation=0)
 
     legend_elements = [
         plt.Line2D(

@@ -15,7 +15,7 @@ from ising.utils.commutator import (
 import json
 
 QUBITS = 15
-TIME = 2.0
+TIME = 1.0
 ORDER = 2
 
 # THE BELOW ARE LOGARITHMIC WRT 10
