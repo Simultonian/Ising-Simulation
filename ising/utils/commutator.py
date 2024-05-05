@@ -77,12 +77,12 @@ def alpha_commutator(ham: SparsePauliOp, order: int) -> int:
         terms = [(paulis[ind], coeffs[ind]) for ind in cur_term_ind]
         val = commute(terms)
         alpha_comm += val
-            # pbar.update(1)
+        # pbar.update(1)
 
     return np.ceil(alpha_comm)
 
 
-def alpha_commutator_second_order(ham: SparsePauliOp) -> int:
+def alpha_commutator_second_order(ham: SparsePauliOp, cutoff: float = 0) -> int:
     """
     We use three explicit loops for calculating the commutator bound, to avoid
     miscalculations. Any higher trotter bound can not be calculated.
@@ -92,43 +92,59 @@ def alpha_commutator_second_order(ham: SparsePauliOp) -> int:
 
     total_count = len(inds) ** 3
 
+    sorted_pairs = list(sorted(zip(paulis, coeffs), key=lambda x: abs(x[1])))
     alpha_comm = 0.0
-    # with tqdm(total=total_count) as pbar:
-    for ia in inds:
-        for ib in inds:
-            for ic in inds:
-                tail = defaultdict(float)
-                # abc - acb - bca + cba
-                # pbar.update(1)
+    with tqdm(total=total_count) as pbar:
+        for ia in inds:
+            for ib in inds:
+                for ic in inds:
+                    tail = defaultdict(float)
+                    # abc - acb - bca + cba
+                    pbar.update(1)
 
-                a, b, c = (
-                    (paulis[ia], coeffs[ia]),
-                    (paulis[ib], coeffs[ib]),
-                    (paulis[ic], coeffs[ic]),
-                )
+                    a, b, c = sorted_pairs[ia], sorted_pairs[ib], sorted_pairs[ic]
 
-                # abc
-                p, ce = balance_prod(a, balance_prod(b, c))
-                tail[p] += ce
+                    # abc
+                    p, ce = balance_prod(a, balance_prod(b, c))
+                    if abs(ce) < cutoff:
+                        break
 
-                # -acb
-                p, ce = balance_prod(a, balance_prod(c, b))
-                tail[p] -= ce
+                    tail[p] += ce
 
-                # -bca
-                p, ce = balance_prod(b, balance_prod(c, a))
-                tail[p] -= ce
+                    # -acb
+                    p, ce = balance_prod(a, balance_prod(c, b))
+                    tail[p] -= ce
+                    if abs(ce) < cutoff:
+                        break
 
-                # cba
-                p, ce = balance_prod(c, balance_prod(b, a))
-                tail[p] += ce
-                cur_coeffs = np.array(list(tail.values()))
-                alpha_comm += np.sum(np.abs(cur_coeffs))
+                    # -bca
+                    p, ce = balance_prod(b, balance_prod(c, a))
+                    tail[p] -= ce
+                    if abs(ce) < cutoff:
+                        break
+
+                    # cba
+                    p, ce = balance_prod(c, balance_prod(b, a))
+                    tail[p] += ce
+                    if abs(ce) < cutoff:
+                        break
+
+                    cur_coeffs = np.array(list(tail.values()))
+                    alpha_comm += np.sum(np.abs(cur_coeffs))
 
     return alpha_comm
 
 
-def alpha_commutator_first_order(ham: SparsePauliOp) -> int:
+def _pauli_commute(a: Pauli, b: Pauli):
+    x1, z1 = a._x, a._z
+
+    a_dot_b = np.mod((x1 & b._z).sum(axis=1), 2)
+    b_dot_a = np.mod((b._x & z1).sum(axis=1), 2)
+
+    return a_dot_b == b_dot_a
+
+
+def alpha_commutator_first_order(ham: SparsePauliOp, cutoff: float = 0) -> int:
     """
     We use three explicit loops for calculating the commutator bound, to avoid
     miscalculations. Any higher trotter bound can not be calculated.
@@ -138,27 +154,27 @@ def alpha_commutator_first_order(ham: SparsePauliOp) -> int:
 
     total_count = len(inds) ** 2
 
+    sorted_pairs = list(
+        sorted(zip(paulis, coeffs), key=lambda x: abs(x[1]), reverse=True)
+    )
+
     alpha_comm = 0.0
-    # with tqdm(total=total_count) as pbar:
-    for ia in inds:
-        for ib in inds:
-            tail = defaultdict(float)
-            # ab - ba
-            # pbar.update(1)
+    with tqdm(total=total_count) as pbar:
+        for ia in inds:
+            for ib in inds:
+                # ab - ba
+                pbar.update(1)
 
-            a, b = (paulis[ia], coeffs[ia]), (paulis[ib], coeffs[ib])
+                a, b = sorted_pairs[ia], sorted_pairs[ib]
+                ce = abs(b[1] * a[1])
 
-            # ab
-            p, ce = balance_prod(a, b)
-            tail[p] += ce
+                if abs(ce) < cutoff:
+                    break
 
-            # -ba
-            p, ce = balance_prod(b, a)
-            tail[p] -= ce
+                if _pauli_commute(a[0], b[0]):
+                    alpha_comm += ce
 
-            cur_coeffs = np.array(list(tail.values()))
-            alpha_comm += np.sum(np.abs(cur_coeffs))
-
+    print("returning")
     return alpha_comm
 
 
@@ -174,26 +190,30 @@ def commutator_r(ham: SparsePauliOp, order: int, time: float, error: float) -> i
 
 
 def commutator_r_first_order(
-    ham: SparsePauliOp, time: float, error: float, alpha_com: float = -1
+    ham: SparsePauliOp, time: float, error: float, **kwargs
 ) -> int:
     """
     Same as `commutator_r` but it is hard-coded with two for loops
     """
+    alpha_com = kwargs.get("alpha_com", -1)
+    cutoff = kwargs.get("cutoff", 0)
     if alpha_com == -1:
-        alpha_com = alpha_commutator_first_order(ham)
+        alpha_com = alpha_commutator_first_order(ham, cutoff)
     nr = alpha_com * (time**2)
     dr = error
     return np.ceil(nr / dr)
 
 
 def commutator_r_second_order(
-    ham: SparsePauliOp, time: float, error: float, alpha_com: float = -1
+    ham: SparsePauliOp, time: float, error: float, **kwargs
 ) -> int:
     """
     Same as `commutator_r` but it is hard-coded with three for loops
     """
+    alpha_com = kwargs.get("alpha_com", -1)
+    cutoff = kwargs.get("cutoff", 0)
     if alpha_com == -1:
-        alpha_com = alpha_commutator_second_order(ham)
+        alpha_com = alpha_commutator_second_order(ham, cutoff)
     nr = (alpha_com ** (1 / 2)) * (time ** (1 + 1 / 2))
     dr = error ** (1 / 2)
     return np.ceil(nr / dr)
@@ -212,16 +232,16 @@ def main():
     name = "methane"
     hamiltonian = parse(name)
 
-    norm_first_ord = trotter_reps(num_qubits, h, time, eps)
-    print(f"First Order Non-Commutator: {norm_first_ord}")
+    # norm_first_ord = trotter_reps(num_qubits, h, time, eps)
+    # print(f"First Order Non-Commutator: {norm_first_ord}")
 
     norm_first_ord = trotter_reps_general(hamiltonian.sparse_repr, time, eps)
     print(f"First Order General: {norm_first_ord}")
 
-    first_ord = commutator_r_first_order(hamiltonian.sparse_repr, time, eps)
+    first_ord = commutator_r_first_order(hamiltonian.sparse_repr, time, eps, cutoff=1)
     print(f"First Order: {first_ord}")
 
-    second_ord = commutator_r_second_order(hamiltonian.sparse_repr, time, eps)
+    second_ord = commutator_r_second_order(hamiltonian.sparse_repr, time, eps, cutoff=1)
     print(f"Second Order: {second_ord}")
 
 
