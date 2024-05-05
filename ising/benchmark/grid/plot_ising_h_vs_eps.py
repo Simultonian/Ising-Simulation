@@ -30,7 +30,7 @@ MAP = {
     "trotter2": "Second Order Trotterization",
 }
 
-COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A"]
+COLORS = ["#DC5B5A", "#EAEAEB", "#94E574", "#2A2A2A"]
 METHODS = [
     "Truncated Taylor Series",
     "QDrift Protocol",
