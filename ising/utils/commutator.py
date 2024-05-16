@@ -92,11 +92,26 @@ def alpha_commutator_second_order(ham: SparsePauliOp, cutoff: float = 0) -> int:
 
     total_count = len(inds) ** 3
 
-    sorted_pairs = list(sorted(zip(paulis, coeffs), key=lambda x: abs(x[1])))
+    sorted_pairs = list(sorted(zip(paulis, coeffs), key=lambda x: abs(x[1]), reverse=True))
     alpha_comm = 0.0
+
+    max_term = sorted_pairs[0][1]
+
+    norm = 0.0
+    for x, y in sorted_pairs:
+        norm += abs(y)
+
     with tqdm(total=total_count) as pbar:
         for ia in inds:
+            ta = sorted_pairs[ia][1]
+            if abs(ta * (max_term ** 2)) < cutoff:
+                break
+
             for ib in inds:
+                tb = sorted_pairs[ib][1]
+                if abs(ta * tb * max_term) < cutoff:
+                    break
+
                 for ic in inds:
                     tail = defaultdict(float)
                     # abc - acb - bca + cba
@@ -174,7 +189,6 @@ def alpha_commutator_first_order(ham: SparsePauliOp, cutoff: float = 0) -> int:
                 if _pauli_commute(a[0], b[0]):
                     alpha_comm += ce
 
-    print("returning")
     return alpha_comm
 
 
@@ -227,7 +241,7 @@ from ising.hamiltonian import parse
 def main():
     num_qubits, h = 7, 0.125
     eps = 0.1
-    time = 20
+    time = 1.0
 
     name = "methane"
     hamiltonian = parse(name)
@@ -238,10 +252,10 @@ def main():
     norm_first_ord = trotter_reps_general(hamiltonian.sparse_repr, time, eps)
     print(f"First Order General: {norm_first_ord}")
 
-    first_ord = commutator_r_first_order(hamiltonian.sparse_repr, time, eps, cutoff=1)
+    first_ord = commutator_r_first_order(hamiltonian.sparse_repr, time, eps, cutoff=time)
     print(f"First Order: {first_ord}")
 
-    second_ord = commutator_r_second_order(hamiltonian.sparse_repr, time, eps, cutoff=1)
+    second_ord = commutator_r_second_order(hamiltonian.sparse_repr, time, eps, cutoff=time)
     print(f"Second Order: {second_ord}")
 
 
