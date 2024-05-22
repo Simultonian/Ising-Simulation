@@ -154,6 +154,6 @@ if __name__ == "__main__":
     point_count = (3, 10)
     obs_norm = 1
     time_pair = (1, 10)
-    file_name = f"ising_{qubit}"
+    file_name = f"ethane"
 
     plot_gate_error(qubit, h_val, err_pair, point_count, obs_norm, time_pair, file_name)

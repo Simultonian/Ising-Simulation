@@ -5,6 +5,8 @@ from ising.groundstate.simulation.utils import (
     ground_state_constants,
     ground_state_maximum_time,
 )
+from ising.utils.gate_count import count_non_trivial
+
 from ising.hamiltonian.ising_one import trotter_reps_general
 from ising.utils import Decomposer
 from qiskit.circuit.library import PauliEvolutionGate
@@ -47,6 +49,27 @@ class KTrotterBenchmarkTime:
         print("created circuit")
         circuit = circuit.repeat(reps)
         return circuit
+
+    def circuit_gate_count(self, gate:str, reps: int) -> int:
+        """
+        Counts the gates analytically rather than via decomposition.
+        """
+        if gate == "cx":
+            print(f"Trotter: Counting cx for reps:{reps}")
+            total = 0
+            # Moving ahead with terms
+            for pauli in self.ham.paulis:
+                count = count_non_trivial(pauli)
+                total += 2 * (count - 1)
+
+            # Moving backwards with terms
+            for pauli in self.ham.paulis[::-1]:
+                count = count_non_trivial(pauli)
+                total += 2 * (count - 1)
+
+            return total * reps
+        else:
+            return 0
 
     def simulation_gate_count(self, time: float, reps: int) -> dict[str, int]:
         print(f"KTrotter: Running gate count for time: {time}")
@@ -99,7 +122,7 @@ def main():
 
         reps = commutator_r(hamiltonian.sparse_repr, order, time, eps)
         print(f"order: {order} reps:{reps}")
-        benchmarker = TrotterBenchmarkTime(hamiltonian, order)
+        benchmarker = KTrotterBenchmarkTime(hamiltonian, order)
 
         print(benchmarker.simulation_gate_count(time, reps))
         # print(benchmarker.controlled_gate_count(time, reps))

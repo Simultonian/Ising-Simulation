@@ -67,13 +67,13 @@ def plot_gate_error(
                 )
             )
 
-            # taylor_counts = taylor_bench.simulation_gate_count(time, k)
-            # print(f"Taylor:{taylor_counts}")
+            taylor_counts = taylor_bench.simulation_gate_count(time, k)
+            print(f"Taylor:{taylor_counts}")
 
             trotter_rep = commutator_r_first_order(
                 ham.sparse_repr, time, error, alpha_com=alpha_com_first
             )
-            trotter_counts = trotter_bench.simulation_gate_count(time, trotter_rep)
+            trotter_counts = trotter_bench.circuit_gate_count("cx", trotter_rep)
             print(f"Trotter:{trotter_counts}")
 
             qdrift_rep = qdrift_count(lambd, time, error)
@@ -83,13 +83,13 @@ def plot_gate_error(
             ktrotter_reps = commutator_r_second_order(
                 ham.sparse_repr, time, error, alpha_com=alpha_com_second
             )
-            ktrotter_counts = ktrotter_bench.simulation_gate_count(time, ktrotter_reps)
+            ktrotter_counts = ktrotter_bench.circuit_gate_count("cx", ktrotter_reps)
             print(f"kTrotter:{ktrotter_counts}")
 
             taylor[-1].append(np.log2(taylor_counts["cx"]))
-            trotter[-1].append(np.log2(trotter_counts["cx"]))
+            trotter[-1].append(np.log2(trotter_counts))
             qdrift[-1].append(np.log2(qdrift_counts["cx"]))
-            ktrotter[-1].append(np.log2(ktrotter_counts["cx"]))
+            ktrotter[-1].append(np.log2(ktrotter_counts))
 
             print("-----------------")
 
@@ -117,5 +117,5 @@ if __name__ == "__main__":
     point_count = (3, 10)
     obs_norm = 1
     time_pair = (1, 10)
-    file_name = f"methane"
+    file_name = f"ethane"
     plot_gate_error(qubit, h_val, err_pair, point_count, obs_norm, time_pair, file_name)
