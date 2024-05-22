@@ -37,12 +37,14 @@ class KTrotterBenchmarkTime:
         """
         circuit = QuantumCircuit(self.ham.num_qubits)
 
+        print("creating circuit")
         evo = PauliEvolutionGate(
             self.ham.sparse_repr, time=time / reps, synthesis=self.synth
         )
         circuit.append(evo, range(evo.num_qubits))
 
         # Could be heavy operation for large reps.
+        print("created circuit")
         circuit = circuit.repeat(reps)
         return circuit
 

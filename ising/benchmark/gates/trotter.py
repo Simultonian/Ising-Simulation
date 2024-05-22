@@ -116,7 +116,7 @@ def trotter_gates(
     return benchmarker.calculate_gates()
 
 
-SPLIT_SIZE = 100
+SPLIT_SIZE = 1
 
 
 class TrotterBenchmarkTime:
@@ -137,12 +137,14 @@ class TrotterBenchmarkTime:
         """
         circuit = QuantumCircuit(self.ham.num_qubits)
 
+        print("starting circuit")
         for pauli, _coeff in zip(self.ham.paulis, self.ham.coeffs):
             coeff = abs(_coeff)
             evo = PauliEvolutionGate(pauli, time=coeff * time / reps)
             circuit.append(evo, range(evo.num_qubits))
 
         # Could be heavy operation for large reps.
+        print(f"repeating circuit for {reps}")
         circuit = circuit.repeat(reps)
         return circuit
 
@@ -155,7 +157,10 @@ class TrotterBenchmarkTime:
             split = SPLIT_SIZE
 
         circuit = self.simulation_circuit(time, split)
+        print("decomposing")
         dqc = self.decomposer.decompose(circuit)
+        print("decomposed")
+        print(dqc.count_ops())
 
         counter = Counter()
         counter.add(dict(dqc.count_ops()))

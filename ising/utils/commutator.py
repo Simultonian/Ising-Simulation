@@ -92,7 +92,9 @@ def alpha_commutator_second_order(ham: SparsePauliOp, cutoff: float = 0) -> int:
 
     total_count = len(inds) ** 3
 
-    sorted_pairs = list(sorted(zip(paulis, coeffs), key=lambda x: abs(x[1]), reverse=True))
+    sorted_pairs = list(
+        sorted(zip(paulis, coeffs), key=lambda x: abs(x[1]), reverse=True)
+    )
     alpha_comm = 0.0
 
     max_term = sorted_pairs[0][1]
@@ -104,7 +106,7 @@ def alpha_commutator_second_order(ham: SparsePauliOp, cutoff: float = 0) -> int:
     with tqdm(total=total_count) as pbar:
         for ia in inds:
             ta = sorted_pairs[ia][1]
-            if abs(ta * (max_term ** 2)) < cutoff:
+            if abs(ta * (max_term**2)) < cutoff:
                 break
 
             for ib in inds:
@@ -252,10 +254,14 @@ def main():
     norm_first_ord = trotter_reps_general(hamiltonian.sparse_repr, time, eps)
     print(f"First Order General: {norm_first_ord}")
 
-    first_ord = commutator_r_first_order(hamiltonian.sparse_repr, time, eps, cutoff=time)
+    first_ord = commutator_r_first_order(
+        hamiltonian.sparse_repr, time, eps, cutoff=time
+    )
     print(f"First Order: {first_ord}")
 
-    second_ord = commutator_r_second_order(hamiltonian.sparse_repr, time, eps, cutoff=time)
+    second_ord = commutator_r_second_order(
+        hamiltonian.sparse_repr, time, eps, cutoff=time
+    )
     print(f"Second Order: {second_ord}")
 
 

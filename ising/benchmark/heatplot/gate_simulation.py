@@ -17,6 +17,7 @@ from ising.utils.commutator import (
     commutator_r_first_order,
 )
 import json
+from ising.hamiltonian import parse
 
 
 def plot_gate_error(
@@ -36,7 +37,7 @@ def plot_gate_error(
     # 2D Arrays where the first dim is time and second is error
     taylor, trotter, qdrift, ktrotter = [], [], [], []
 
-    ham = parametrized_ising_power(qubits=qubit, h=h_val)
+    ham = parse(file_name)
     lambd = np.sum(np.abs(ham.coeffs))
 
     taylor_bench = TaylorBenchmarkTime(ham)
@@ -46,9 +47,10 @@ def plot_gate_error(
 
     # Calculate the alpha commutators for both first and second order
 
+    max_time = max(time_points)
     print("Calculating the alpha commutators")
-    alpha_com_second = alpha_commutator_second_order(ham.sparse_repr)
-    alpha_com_first = alpha_commutator_first_order(ham.sparse_repr)
+    alpha_com_second = alpha_commutator_second_order(ham.sparse_repr, cutoff=max_time)
+    alpha_com_first = alpha_commutator_first_order(ham.sparse_repr, cutoff=max_time)
     print("Completed the calculation")
 
     nrows, ncols = len(time_points), len(error_points)
@@ -65,11 +67,11 @@ def plot_gate_error(
                 )
             )
 
-            taylor_counts = taylor_bench.simulation_gate_count(time, k)
-            print(f"Taylor:{taylor_counts}")
+            # taylor_counts = taylor_bench.simulation_gate_count(time, k)
+            # print(f"Taylor:{taylor_counts}")
 
             trotter_rep = commutator_r_first_order(
-                ham.sparse_repr, time, error, alpha_com_first
+                ham.sparse_repr, time, error, alpha_com=alpha_com_first
             )
             trotter_counts = trotter_bench.simulation_gate_count(time, trotter_rep)
             print(f"Trotter:{trotter_counts}")
@@ -79,7 +81,7 @@ def plot_gate_error(
             print(f"qDRIFT:{qdrift_counts}")
 
             ktrotter_reps = commutator_r_second_order(
-                ham.sparse_repr, time, error, alpha_com_second
+                ham.sparse_repr, time, error, alpha_com=alpha_com_second
             )
             ktrotter_counts = ktrotter_bench.simulation_gate_count(time, ktrotter_reps)
             print(f"kTrotter:{ktrotter_counts}")
@@ -115,5 +117,5 @@ if __name__ == "__main__":
     point_count = (3, 10)
     obs_norm = 1
     time_pair = (1, 10)
-    file_name = f"ising_{qubit}"
+    file_name = f"methane"
     plot_gate_error(qubit, h_val, err_pair, point_count, obs_norm, time_pair, file_name)
