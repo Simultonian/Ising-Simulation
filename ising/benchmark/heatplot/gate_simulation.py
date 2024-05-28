@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
-from ising.hamiltonian import parametrized_ising_power
+from ising.hamiltonian import parametrized_ising_power, parametrized_ising
 from ising.benchmark.gates import (
     TaylorBenchmarkTime,
     TrotterBenchmarkTime,
@@ -37,7 +37,8 @@ def plot_gate_error(
     # 2D Arrays where the first dim is time and second is error
     taylor, trotter, qdrift, ktrotter = [], [], [], []
 
-    ham = parse(file_name)
+    # ham = parse(file_name)
+    ham = parametrized_ising(qubit, h_val)
     lambd = np.sum(np.abs(ham.coeffs))
 
     taylor_bench = TaylorBenchmarkTime(ham)
@@ -47,11 +48,11 @@ def plot_gate_error(
 
     # Calculate the alpha commutators for both first and second order
 
-    max_time = max(time_points)
+    min_time = min(time_points)
     print("Calculating the alpha commutators")
-    alpha_com_second = alpha_commutator_second_order(ham.sparse_repr, cutoff=max_time)
-    alpha_com_first = alpha_commutator_first_order(ham.sparse_repr, cutoff=max_time)
-    print("Completed the calculation")
+    alpha_com_second = alpha_commutator_second_order(ham.sparse_repr)
+    alpha_com_first = alpha_commutator_first_order(ham.sparse_repr)
+    print(f"com1:{alpha_com_first} \n com2:{alpha_com_second}")
 
     nrows, ncols = len(time_points), len(error_points)
     for time in time_points:
@@ -109,7 +110,7 @@ def plot_gate_error(
 
 
 if __name__ == "__main__":
-    qubit = 15
+    qubit = 20
     h_val = 0.1
     err_pair = (-1, -5)
 
@@ -117,5 +118,5 @@ if __name__ == "__main__":
     point_count = (3, 10)
     obs_norm = 1
     time_pair = (1, 10)
-    file_name = f"ethane"
+    file_name = f"ising_{qubit}"
     plot_gate_error(qubit, h_val, err_pair, point_count, obs_norm, time_pair, file_name)

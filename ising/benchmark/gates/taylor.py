@@ -1,12 +1,17 @@
 from typing import Union
 from functools import cache
 import numpy as np
+from tqdm import tqdm
+
 from ising.hamiltonian import Hamiltonian
 from ising.groundstate.simulation.utils import (
     ground_state_constants,
     ground_state_maximum_time,
 )
 from ising.utils import Decomposer
+from ising.utils.gate_count import count_non_trivial
+from ising.benchmark.gates.counter import Counter
+
 from qiskit.circuit.library import PauliEvolutionGate, PauliGate
 from qiskit import QuantumCircuit
 from qiskit.quantum_info import Pauli, SparsePauliOp, PauliList
@@ -14,10 +19,6 @@ from qiskit.circuit.library import PauliGate
 from ising.simulation.taylor.utils import (
     get_alphas,
 )
-
-from ising.benchmark.gates.counter import Counter
-
-from tqdm import tqdm
 
 
 def gates_for_pauli(
@@ -233,6 +234,20 @@ class TaylorBenchmarkTime:
             circuit.append(evo, range(evo.num_qubits))
 
         return circuit
+
+    def circuit_gate_count(self, gate: str, reps: int) -> int:
+        """
+        Counts the gates analytically rather than via decomposition.
+        """
+        if gate == "cx":
+            print(f"Trotter: Counting cx for reps:{reps}")
+            total = 0
+            for pauli in self.ham.paulis:
+                count = count_non_trivial(pauli)
+                total += 2 * (count - 1)
+            return total * reps
+        else:
+            return 0
 
     def simulation_gate_count(self, time: float, k: int) -> dict[str, int]:
         print(f"Taylor: Running gate count for time: {time}")

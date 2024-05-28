@@ -50,7 +50,7 @@ class KTrotterBenchmarkTime:
         circuit = circuit.repeat(reps)
         return circuit
 
-    def circuit_gate_count(self, gate:str, reps: int) -> int:
+    def circuit_gate_count(self, gate: str, reps: int) -> int:
         """
         Counts the gates analytically rather than via decomposition.
         """
@@ -69,7 +69,7 @@ class KTrotterBenchmarkTime:
 
             return total * reps
         else:
-            return 0
+            return 1
 
     def simulation_gate_count(self, time: float, reps: int) -> dict[str, int]:
         print(f"KTrotter: Running gate count for time: {time}")

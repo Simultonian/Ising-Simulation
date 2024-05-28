@@ -18,7 +18,6 @@ from ising.hamiltonian.ising_one import trotter_reps_general
 from ising.utils import Decomposer
 
 
-
 def gates_for_pauli(
     decomposer: Decomposer, pauli: Union[Pauli, SparsePauliOp], time: float
 ) -> dict[str, int]:
@@ -151,7 +150,7 @@ class TrotterBenchmarkTime:
         circuit = circuit.repeat(reps)
         return circuit
 
-    def circuit_gate_count(self, gate:str, reps: int) -> int:
+    def circuit_gate_count(self, gate: str, reps: int) -> int:
         """
         Counts the gates analytically rather than via decomposition.
         """

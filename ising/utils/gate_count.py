@@ -14,6 +14,7 @@ def count_non_trivial(pauli: Pauli) -> int:
 
     return count
 
+
 def cx_count(pauli: Pauli) -> int:
     """
     Counts the number of non-Identity operators in the multi-qubit Pauli

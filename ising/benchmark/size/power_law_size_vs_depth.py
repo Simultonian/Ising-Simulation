@@ -1,8 +1,6 @@
 import numpy as np
 from ising.benchmark.gates import (
     TaylorBenchmarkTime,
-    TrotterBenchmarkTime,
-    QDriftBenchmarkTime,
     KTrotterBenchmarkTime,
 )
 from ising.hamiltonian.ising_one import qdrift_count
@@ -17,6 +15,7 @@ import json
 QUBITS = 8
 POWER_RANGE = (1, 6)
 POWER_COUNT = 5
+ERROR = 0.1
 
 ## logarithmic range
 ERR_RANGE = (-1, -3)
@@ -46,10 +45,8 @@ def main():
             "GATE": str(GATE),
         },
         "taylor": {},
-        "trotter2": {},
+        "ktrotter": {},
     }
-
-    err_points = [10**x for x in np.linspace(ERR_RANGE[0], ERR_RANGE[1], ERR_COUNT)]
 
     power_points = [
         int(x) for x in np.linspace(POWER_RANGE[0], POWER_RANGE[1], POWER_COUNT)
@@ -66,30 +63,24 @@ def main():
         print(f"Calculating the alpha commutators for power:{power}")
         alpha_com_second = alpha_commutator_second_order(hamiltonian.sparse_repr)
 
-        answers["taylor"][power_str] = {}
-        answers["trotter2"][power_str] = {}
-
-        for error in err_points:
-            err_str = _truncate(error)
-            k = int(
-                np.floor(
-                    np.log(lambd * TIME / error) / np.log(np.log(lambd * TIME / error))
-                )
+        k = int(
+            np.floor(
+                np.log(lambd * TIME / ERROR) / np.log(np.log(lambd * TIME / ERROR))
             )
+        )
 
-            print(f"Error:{error}")
-            count = taylor_bench.simulation_gate_count(TIME, k)
-            print(f"Taylor:{count}")
-            answers["taylor"][power_str][err_str] = _truncate(count.get(GATE, 0))
+        count = taylor_bench.simulation_gate_count(TIME, k)
+        print(f"Taylor:{count}")
+        answers["taylor"][power_str] = _truncate(count.get(GATE, 0))
 
-            ktrotter_reps = commutator_r_second_order(
-                hamiltonian.sparse_repr, TIME, error, alpha_com=alpha_com_second
-            )
-            count = ktrotter_bench.simulation_gate_count(TIME, ktrotter_reps)
-            print(f"kTrotter:{count}")
-            answers["trotter2"][power_str][err_str] = _truncate(count.get(GATE, 0))
+        ktrotter_reps = commutator_r_second_order(
+            hamiltonian.sparse_repr, TIME, ERROR, alpha_com=alpha_com_second
+        )
+        count = ktrotter_bench.simulation_gate_count(TIME, ktrotter_reps)
+        print(f"kTrotter:{count}")
+        answers["ktrotter"][power_str] = _truncate(count.get(GATE, 0))
 
-            print("-----------------")
+        print("-----------------")
 
     json_name = f"data/benchmark/size/{FILE_NAME}_{GATE}_power_err.json"
 
