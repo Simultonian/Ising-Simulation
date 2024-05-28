@@ -1,3 +1,4 @@
+from tqdm import tqdm
 import numpy as np
 from itertools import product
 from collections import defaultdict
@@ -51,9 +52,6 @@ def commute(terms: list[tuple[Pauli, float]]) -> float:
     res = _commute(terms)
     coeffs = np.array(list(res.values()))
     return np.sum(np.abs(coeffs))
-
-
-from tqdm import tqdm
 
 
 def alpha_commutator(ham: SparsePauliOp, order: int) -> int:
@@ -235,12 +233,11 @@ def commutator_r_second_order(
     return np.ceil(nr / dr)
 
 
-from ising.hamiltonian.ising_one import parametrized_ising
-from ising.hamiltonian.ising_one import trotter_reps, trotter_reps_general
-from ising.hamiltonian import parse
-
-
 def main():
+    from ising.hamiltonian.ising_one import parametrized_ising
+    from ising.hamiltonian.ising_one import trotter_reps, trotter_reps_general
+    from ising.hamiltonian import parse
+
     num_qubits, h = 7, 0.125
     eps = 0.1
     time = 1.0
