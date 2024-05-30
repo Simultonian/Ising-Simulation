@@ -1,0 +1,306 @@
+Running first order total:47499664 alpha_u:26515030383.36673
+100%|█████████████████████████▉| 47366851/47499664 [09:45<00:01, 80907.66it/s]
+com1:7413.82512819008 
+ com2:26377.42415801203
+Taylor: Running gate count for time: 1.0
+reps:81000, k_max:3
+Taylor:{'u3': 3496770, 'cx': 2612250}
+Trotter: Counting cx for reps:74139.0
+Trotter:7970239056.0
+QDrift: Running gate count for time: 1.0
+qDRIFT:{'cx': 1235475, 'u3': 458660}
+Trotter: Counting cx for reps:514.0
+kTrotter:110514112.0
+-----------------
+Taylor: Running gate count for time: 1.0
+reps:81000, k_max:4
+Taylor:{'u3': 3747060, 'cx': 2796120}
+Trotter: Counting cx for reps:7413826.0
+Trotter:797015950304.0
+QDrift: Running gate count for time: 1.0
+qDRIFT:{'cx': 89310053, 'u3': 40052248}
+Trotter: Counting cx for reps:5136.0
+kTrotter:1104281088.0
+-----------------
+Taylor: Running gate count for time: 1.0
+reps:81000, k_max:5
+Taylor:{'u3': 2421090, 'cx': 1788480}
+Trotter: Counting cx for reps:741382513.0
+Trotter:79701585677552.0
+QDrift: Running gate count for time: 1.0
+qDRIFT:{'cx': 8575739739, 'u3': 3456136166}
+Trotter: Counting cx for reps:51359.0
+kTrotter:11042595872.0
+-----------------
+Taylor: Running gate count for time: 2.0
+reps:324000, k_max:3
+Taylor:{'u3': 16034760, 'cx': 11975040}
+Trotter: Counting cx for reps:296554.0
+Trotter:31880741216.0
+QDrift: Running gate count for time: 2.0
+qDRIFT:{'cx': 2571080, 'u3': 1337220}
+Trotter: Counting cx for reps:1453.0
+kTrotter:312406624.0
+-----------------
+Taylor: Running gate count for time: 2.0
+reps:324000, k_max:4
+Taylor:{'u3': 17395560, 'cx': 13002120}
+Trotter: Counting cx for reps:29655301.0
+Trotter:3188063478704.0
+QDrift: Running gate count for time: 2.0
+qDRIFT:{'cx': 333339096, 'u3': 142767326}
+Trotter: Counting cx for reps:14527.0
+kTrotter:3123421216.0
+-----------------
+Taylor: Running gate count for time: 2.0
+reps:324000, k_max:5
+Taylor:{'u3': 13118760, 'cx': 9765360}
+Trotter: Counting cx for reps:2965530052.0
+Trotter:318806342710208.0
+QDrift: Running gate count for time: 2.0
+qDRIFT:{'cx': 40246221148, 'u3': 16085568324}
+Trotter: Counting cx for reps:145266.0
+kTrotter:31233352128.0
+-----------------
+Taylor: Running gate count for time: 3.0
+reps:729000, k_max:3
+Taylor:{'u3': 33905790, 'cx': 25289010}
+Trotter: Counting cx for reps:667245.0
+Trotter:71731506480.0
+QDrift: Running gate count for time: 3.0
+qDRIFT:{'cx': 7965180, 'u3': 3808170}
+Trotter: Counting cx for reps:2669.0
+kTrotter:573856352.0
+-----------------
+Taylor: Running gate count for time: 3.0
+reps:729000, k_max:4
+Taylor:{'u3': 33045570, 'cx': 24618330}
+Trotter: Counting cx for reps:66724427.0
+Trotter:7173142800208.0
+QDrift: Running gate count for time: 3.0
+qDRIFT:{'cx': 953505840, 'u3': 376460385}
+Trotter: Counting cx for reps:26687.0
+kTrotter:5737918496.0
+-----------------
+Taylor: Running gate count for time: 3.0
+reps:729000, k_max:6
+Taylor:{'u3': 34897230, 'cx': 26280450}
+Trotter: Counting cx for reps:6672442616.0
+Trotter:717314270990464.0
+QDrift: Running gate count for time: 3.0
+qDRIFT:{'cx': 54506821125, 'u3': 26453977186}
+Trotter: Counting cx for reps:266869.0
+kTrotter:57378969952.0
+-----------------
+Taylor: Running gate count for time: 4.0
+reps:1296000, k_max:3
+Taylor:{'u3': 49157280, 'cx': 36482400}
+Trotter: Counting cx for reps:1186213.0
+Trotter:127522642352.0
+QDrift: Running gate count for time: 4.0
+qDRIFT:{'cx': 14651280, 'u3': 6046560}
+Trotter: Counting cx for reps:4109.0
+kTrotter:883467872.0
+-----------------
+Taylor: Running gate count for time: 4.0
+reps:1296000, k_max:5
+Taylor:{'u3': 55831680, 'cx': 41925600}
+Trotter: Counting cx for reps:118621203.0
+Trotter:12752253807312.0
+QDrift: Running gate count for time: 4.0
+qDRIFT:{'cx': 1465143309, 'u3': 718359506}
+Trotter: Counting cx for reps:41088.0
+kTrotter:8834248704.0
+-----------------
+Taylor: Running gate count for time: 4.0
+reps:1296000, k_max:6
+Taylor:{'u3': 64398240, 'cx': 48263040}
+Trotter: Counting cx for reps:11862120206.0
+Trotter:1275225370625824.0
+QDrift: Running gate count for time: 4.0
+qDRIFT:{'cx': 116539620857, 'u3': 50905333279}
+Trotter: Counting cx for reps:410872.0
+kTrotter:88340766976.0
+-----------------
+Taylor: Running gate count for time: 5.0
+reps:2025000, k_max:3
+Taylor:{'u3': 94041000, 'cx': 70227000}
+Trotter: Counting cx for reps:1853457.0
+Trotter:199254041328.0
+QDrift: Running gate count for time: 5.0
+qDRIFT:{'cx': 19097375, 'u3': 9124750}
+Trotter: Counting cx for reps:5743.0
+kTrotter:1234790944.0
+-----------------
+Taylor: Running gate count for time: 5.0
+reps:2025000, k_max:5
+Taylor:{'u3': 104712750, 'cx': 78630750}
+Trotter: Counting cx for reps:185345629.0
+Trotter:19925396500016.0
+QDrift: Running gate count for time: 5.0
+qDRIFT:{'cx': 2240835810, 'u3': 896334324}
+Trotter: Counting cx for reps:57422.0
+kTrotter:12346189376.0
+-----------------
+Taylor: Running gate count for time: 5.0
+reps:2025000, k_max:6
+Taylor:{'u3': 94709250, 'cx': 70753500}
+Trotter: Counting cx for reps:18534562821.0
+Trotter:1992539641508784.0
+QDrift: Running gate count for time: 5.0
+qDRIFT:{'cx': 233773699749, 'u3': 90844701975}
+Trotter: Counting cx for reps:574211.0
+kTrotter:123459958688.0
+-----------------
+Taylor: Running gate count for time: 6.0
+reps:2916000, k_max:3
+Taylor:{'u3': 145974960, 'cx': 108358560}
+Trotter: Counting cx for reps:2668978.0
+Trotter:286925810912.0
+QDrift: Running gate count for time: 6.0
+qDRIFT:{'cx': 32500260, 'u3': 14302440}
+Trotter: Counting cx for reps:7549.0
+kTrotter:1623095392.0
+-----------------
+Taylor: Running gate count for time: 6.0
+reps:2916000, k_max:5
+Taylor:{'u3': 143263080, 'cx': 107687880}
+Trotter: Counting cx for reps:266897705.0
+Trotter:28692570878320.0
+QDrift: Running gate count for time: 6.0
+qDRIFT:{'cx': 2761678500, 'u3': 1337233800}
+Trotter: Counting cx for reps:75482.0
+kTrotter:16229233856.0
+-----------------
+Taylor: Running gate count for time: 6.0
+reps:2916000, k_max:6
+Taylor:{'u3': 134515080, 'cx': 99377280}
+Trotter: Counting cx for reps:26689770462.0
+Trotter:2869257083746848.0
+QDrift: Running gate count for time: 6.0
+qDRIFT:{'cx': 268028208412, 'u3': 138374649896}
+Trotter: Counting cx for reps:754820.0
+kTrotter:162292338560.0
+-----------------
+Taylor: Running gate count for time: 7.0
+reps:3969000, k_max:4
+Taylor:{'u3': 229090680, 'cx': 171857700}
+Trotter: Counting cx for reps:3632775.0
+Trotter:390537843600.0
+QDrift: Running gate count for time: 7.0
+qDRIFT:{'cx': 46689650, 'u3': 16380945}
+Trotter: Counting cx for reps:9512.0
+kTrotter:2045156096.0
+-----------------
+Taylor: Running gate count for time: 7.0
+reps:3969000, k_max:5
+Taylor:{'u3': 175985460, 'cx': 131056380}
+Trotter: Counting cx for reps:363277432.0
+Trotter:39053777049728.0
+QDrift: Running gate count for time: 7.0
+qDRIFT:{'cx': 4843112184, 'u3': 1994222664}
+Trotter: Counting cx for reps:95119.0
+kTrotter:20451345952.0
+-----------------
+Taylor: Running gate count for time: 7.0
+reps:3969000, k_max:6
+Taylor:{'u3': 239251320, 'cx': 177096780}
+Trotter: Counting cx for reps:36327743129.0
+Trotter:3905377697340016.0
+QDrift: Running gate count for time: 7.0
+qDRIFT:{'cx': 423376686220, 'u3': 191508706664}
+Trotter: Counting cx for reps:951182.0
+kTrotter:204511739456.0
+-----------------
+Taylor: Running gate count for time: 8.0
+reps:5169610, k_max:4
+Taylor:{'u3': 270111600, 'cx': 201666096}
+Trotter: Counting cx for reps:4744849.0
+Trotter:510090246896.0
+QDrift: Running gate count for time: 8.0
+qDRIFT:{'cx': 44962035, 'u3': 19535229}
+Trotter: Counting cx for reps:11622.0
+kTrotter:2498822976.0
+-----------------
+Taylor: Running gate count for time: 8.0
+reps:5169610, k_max:5
+Taylor:{'u3': 221310576, 'cx': 166512816}
+Trotter: Counting cx for reps:474484809.0
+Trotter:51009014906736.0
+QDrift: Running gate count for time: 8.0
+qDRIFT:{'cx': 5488473348, 'u3': 2470329812}
+Trotter: Counting cx for reps:116213.0
+kTrotter:24986724704.0
+-----------------
+Taylor: Running gate count for time: 8.0
+reps:5169610, k_max:6
+Taylor:{'u3': 268353936, 'cx': 198357552}
+Trotter: Counting cx for reps:47448480821.0
+Trotter:5100901482180784.0
+QDrift: Running gate count for time: 8.0
+qDRIFT:{'cx': 488897923063, 'u3': 216024663679}
+Trotter: Counting cx for reps:1162121.0
+kTrotter:249865311968.0
+-----------------
+Taylor: Running gate count for time: 9.0
+reps:6544810, k_max:4
+Taylor:{'u3': 201252600, 'cx': 150530400}
+Trotter: Counting cx for reps:6005199.0
+Trotter:645582913296.0
+QDrift: Running gate count for time: 9.0
+qDRIFT:{'cx': 78751232, 'u3': 31526656}
+Trotter: Counting cx for reps:13867.0
+kTrotter:2981515936.0
+-----------------
+Taylor: Running gate count for time: 9.0
+reps:6544810, k_max:5
+Taylor:{'u3': 348510600, 'cx': 260090352}
+Trotter: Counting cx for reps:600519836.0
+Trotter:64558284449344.0
+QDrift: Running gate count for time: 9.0
+qDRIFT:{'cx': 6697798144, 'u3': 3034939784}
+Trotter: Counting cx for reps:138670.0
+kTrotter:29815159360.0
+-----------------
+Taylor: Running gate count for time: 9.0
+reps:6544810, k_max:6
+Taylor:{'u3': 281884536, 'cx': 210349872}
+Trotter: Counting cx for reps:60051983539.0
+Trotter:6455828438376656.0
+QDrift: Running gate count for time: 9.0
+qDRIFT:{'cx': 750885968392, 'u3': 344047055204}
+Trotter: Counting cx for reps:1386692.0
+kTrotter:298149873536.0
+-----------------
+Taylor: Running gate count for time: 10.0
+reps:8082010, k_max:4
+Taylor:{'u3': 538584480, 'cx': 401756220}
+Trotter: Counting cx for reps:7413826.0
+Trotter:797015950304.0
+QDrift: Running gate count for time: 10.0
+qDRIFT:{'cx': 65084903, 'u3': 35207218}
+Trotter: Counting cx for reps:16242.0
+kTrotter:3492159936.0
+-----------------
+Taylor: Running gate count for time: 10.0
+reps:8082010, k_max:5
+Taylor:{'u3': 357790140, 'cx': 267029280}
+Trotter: Counting cx for reps:741382513.0
+Trotter:79701585677552.0
+QDrift: Running gate count for time: 10.0
+qDRIFT:{'cx': 6847671656, 'u3': 3133132786}
+Trotter: Counting cx for reps:162412.0
+kTrotter:34919879296.0
+-----------------
+Taylor: Running gate count for time: 10.0
+reps:8082010, k_max:6
+Taylor:{'u3': 312450120, 'cx': 230417820}
+Trotter: Counting cx for reps:74138251282.0
+Trotter:7970158565820128.0
+QDrift: Running gate count for time: 10.0
+qDRIFT:{'cx': 896334392820, 'u3': 402139214076}
+Trotter: Counting cx for reps:1624113.0
+kTrotter:349197287904.0
+-----------------
+Saving results at: data/benchmark/heat/methane_gate_err_data.json
+Saving data at:data/benchmark/heat/methane_gate_err_data.json

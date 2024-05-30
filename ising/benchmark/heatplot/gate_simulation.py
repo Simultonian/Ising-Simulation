@@ -1,3 +1,4 @@
+import os
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
@@ -21,11 +22,10 @@ from ising.hamiltonian import parse
 
 
 def plot_gate_error(
-    qubit, h_val, err_pair, point_count_pair, obs_norm, time_pair, file_name
+    qubit, h_val, err_pair, delta, point_count_pair, obs_norm, time_pair, file_name
 ):
     fig, ax = plt.subplots()
 
-    delta = 0.01
     # One col is fixed error
     error_points = [
         10**x for x in np.linspace(err_pair[0], err_pair[1], point_count_pair[0])
@@ -39,8 +39,8 @@ def plot_gate_error(
     # 2D Arrays where the first dim is time and second is error
     taylor, trotter, qdrift, ktrotter = [], [], [], []
 
-    # ham = parse(file_name)
-    ham = parametrized_ising(qubit, h_val)
+    ham = parse(file_name)
+    # ham = parametrized_ising(qubit, h_val)
 
     sorted_pairs = list(
         sorted(
@@ -59,16 +59,32 @@ def plot_gate_error(
 
     # Calculate the alpha commutators for both first and second order
 
-    print("Calculating the alpha commutators")
-    alpha_com_second = alpha_commutator_second_order(
-        sorted_pairs, min_error, delta, cutoff_count=0
-    )
-    alpha_com_first = alpha_commutator_first_order(
-        sorted_pairs, min_error, delta, cutoff_count=0
-    )
-    print(f"com1:{alpha_com_first} \n com2:{alpha_com_second}")
+    alpha_name = f"data/alphacomm/{file_name}.json"
 
-    nrows, ncols = len(time_points), len(error_points)
+    if os.path.exists(alpha_name):
+        with open(alpha_name, "r") as alpha_file:
+            data = json.load(alpha_file)
+        alpha_com_first = data["alpha_1"]
+        alpha_com_second = data["alpha_2"]
+        print("alpha file file, not recomputing")
+        print(f"com1:{alpha_com_first} \ncom2:{alpha_com_second}")
+    else:
+        ll = len(sorted_pairs)
+        print("Calculating the alpha commutators")
+        alpha_com_first = alpha_commutator_first_order(
+            sorted_pairs, min_error, delta=0, cutoff_count=ll**2
+        )
+        alpha_com_second = alpha_commutator_second_order(
+            sorted_pairs, min_error, delta=0, cutoff_count=ll**2
+        )
+        print(f"com1:{alpha_com_first} \ncom2:{alpha_com_second}")
+
+        save_alpha = {"alpha_1": alpha_com_first, "alpha_2": alpha_com_second}
+        print(f"Saving results at: {alpha_name}")
+
+        with open(alpha_name, "w") as file:
+            json.dump(save_alpha, file)
+
     for time in time_points:
         taylor.append([])
         trotter.append([])
@@ -120,17 +136,18 @@ def plot_gate_error(
     with open(json_name, "w") as file:
         json.dump(results, file)
 
-    print(f"Saving data at:{json_name}")
-
 
 if __name__ == "__main__":
-    qubit = 25
+    qubit = 10
     h_val = 0.1
     err_pair = (-1, -5)
+    delta = 0.1
 
     # error, time
     point_count = (3, 10)
     obs_norm = 1
     time_pair = (1, 10)
-    file_name = f"ising_{qubit}"
-    plot_gate_error(qubit, h_val, err_pair, point_count, obs_norm, time_pair, file_name)
+    file_name = f"methane"
+    plot_gate_error(
+        qubit, h_val, err_pair, delta, point_count, obs_norm, time_pair, file_name
+    )

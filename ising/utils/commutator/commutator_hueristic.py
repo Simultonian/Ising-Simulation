@@ -3,9 +3,13 @@ from collections import defaultdict
 from tqdm import tqdm
 
 from qiskit.quantum_info import SparsePauliOp, Pauli
+from functools import lru_cache
 
 
-def balance_prod(t1: tuple[Pauli, float], t2: tuple[Pauli, float]):
+@lru_cache(maxsize=int(1e6))
+def balance_prod(
+    t1: tuple[Pauli, float], t2: tuple[Pauli, float]
+) -> tuple[Pauli, float]:
     pa, ca = t1
     pb, cb = t2
 
@@ -61,33 +65,36 @@ def alpha_commutator_second_order(
 
     total_count = len(inds) ** 3
 
-    hmax = sorted_pairs[0][1]
+    hmax = abs(sorted_pairs[0][1])
 
     alpha_u = total_count * (hmax**3)
     alpha_l = 0
     cur_count = 0
 
-    with tqdm(total=total_count) as pbar:
-        for ia in inds:
-            for ib in inds:
-                for ic in inds:
-                    # abc - acb - bca + cba
-                    pbar.update(1)
+    print(f"Running second order total:{total_count} alpha_u:{alpha_u}")
 
-                    a, b, c = sorted_pairs[ia], sorted_pairs[ib], sorted_pairs[ic]
-                    update = triple_commutator(a, b, c)
+    pbar_count = tqdm(total=total_count, position=0)
+    pbar_alpha = tqdm(total=alpha_u, position=1)
+    for ia in inds:
+        for ib in inds:
+            for ic in inds:
+                # abc - acb - bca + cba
+                pbar_count.update(1)
 
-                    cur_count += 1
-                    alpha_u -= hmax**3
-                    alpha_l += update
-                    alpha_u += update
+                a, b, c = sorted_pairs[ia], sorted_pairs[ib], sorted_pairs[ic]
+                update = triple_commutator(a, b, c)
 
-                    print(f"{alpha_l} : {alpha_u}")
+                cur_count += 1
+                alpha_u -= hmax**3
+                alpha_l += update
+                alpha_u += update
+                pbar_alpha.update(alpha_l)
 
-                    if alpha_l > 0 and (alpha_u / alpha_l) - 1 < (delta / error):
-                        return alpha_l
-                    if cur_count == cutoff_count:
-                        return alpha_u
+                if alpha_l > 0 and (alpha_u / alpha_l) - 1 < (delta / error):
+                    return alpha_l
+                if cur_count == cutoff_count:
+                    # TODO: For the sake of bounds
+                    return alpha_l
 
     assert alpha_l == alpha_u
     assert cur_count == total_count
@@ -115,32 +122,36 @@ def alpha_commutator_first_order(
 
     total_count = len(inds) ** 2
 
-    hmax = sorted_pairs[0][1]
+    hmax = abs(sorted_pairs[0][1])
 
     alpha_u = total_count * (hmax**2)
     alpha_l = 0
     cur_count = 0
+    print(f"Running first order total:{total_count} alpha_u:{alpha_u}")
 
-    with tqdm(total=total_count) as pbar:
-        for ia in inds:
-            for ib in inds:
-                # ab - ba
-                pbar.update(1)
+    pbar_count = tqdm(total=total_count, position=0)
+    pbar_alpha = tqdm(total=alpha_u, position=1)
+    for ia in inds:
+        for ib in inds:
+            # ab - ba
+            pbar_count.update(1)
 
-                a, b = sorted_pairs[ia], sorted_pairs[ib]
-                ce = abs(b[1] * a[1])
+            a, b = sorted_pairs[ia], sorted_pairs[ib]
+            ce = abs(b[1] * a[1])
 
-                cur_count += 1
-                alpha_u -= hmax**2
-                if _pauli_commute(a[0], b[0]):
-                    alpha_l += ce
-                    alpha_u += ce
+            cur_count += 1
+            alpha_u -= hmax**2
+            if _pauli_commute(a[0], b[0]):
+                alpha_l += ce
+                alpha_u += ce
 
-                print(f"{alpha_l} : {alpha_u}")
-                if alpha_l > 0 and (alpha_u / alpha_l) - 1 < (delta / error):
-                    return alpha_l
-                if cur_count == cutoff_count:
-                    return alpha_u
+            pbar_alpha.update(ce)
+
+            if alpha_l > 0 and (alpha_u / alpha_l) - 1 < (delta / error):
+                print("eearly cutoff")
+                return alpha_l
+            if cur_count == cutoff_count:
+                return alpha_u
 
     assert cur_count == total_count
     assert alpha_l == alpha_u
