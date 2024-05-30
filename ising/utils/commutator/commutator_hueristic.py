@@ -19,74 +19,80 @@ def balance_prod(t1: tuple[Pauli, float], t2: tuple[Pauli, float]):
     return (pauli, coeff)
 
 
-def alpha_commutator_second_order(ham: SparsePauliOp, cutoff: float = 0) -> int:
+def triple_commutator(
+    a: tuple[Pauli, float], b: tuple[Pauli, float], c: tuple[Pauli, float]
+) -> float:
+    """
+    Return the value |[a, [b, c]| by manually calculating
+    """
+    tail = defaultdict(float)
+
+    # abc
+    p, ce = balance_prod(a, balance_prod(b, c))
+    tail[p] += ce
+
+    # -acb
+    p, ce = balance_prod(a, balance_prod(c, b))
+    tail[p] -= ce
+
+    # -bca
+    p, ce = balance_prod(b, balance_prod(c, a))
+    tail[p] -= ce
+
+    # cba
+    p, ce = balance_prod(c, balance_prod(b, a))
+    tail[p] -= ce
+
+    update = 0
+    for val in tail.values():
+        update += abs(val)
+
+    return update
+
+
+def alpha_commutator_second_order(
+    sorted_pairs: list[tuple[Pauli, float]], error: float, delta: float, cutoff_count
+) -> float:
     """
     We use three explicit loops for calculating the commutator bound, to avoid
     miscalculations. Any higher trotter bound can not be calculated.
     """
-    paulis, coeffs = ham.paulis, ham.coeffs
-    inds = np.array(list(range(len(paulis))))
+    inds = np.array(list(range(len(sorted_pairs))))
 
     total_count = len(inds) ** 3
 
-    sorted_pairs = list(
-        sorted(zip(paulis, coeffs), key=lambda x: abs(x[1]), reverse=True)
-    )
-    alpha_comm = 0.0
+    hmax = sorted_pairs[0][1]
 
-    max_term = sorted_pairs[0][1]
-
-    norm = 0.0
-    for x, y in sorted_pairs:
-        norm += abs(y)
+    alpha_u = total_count * (hmax**3)
+    alpha_l = 0
+    cur_count = 0
 
     with tqdm(total=total_count) as pbar:
         for ia in inds:
-            ta = sorted_pairs[ia][1]
-            if abs(ta * (max_term**2)) < cutoff:
-                break
-
             for ib in inds:
-                tb = sorted_pairs[ib][1]
-                if abs(ta * tb * max_term) < cutoff:
-                    break
-
                 for ic in inds:
-                    tail = defaultdict(float)
                     # abc - acb - bca + cba
                     pbar.update(1)
 
                     a, b, c = sorted_pairs[ia], sorted_pairs[ib], sorted_pairs[ic]
+                    update = triple_commutator(a, b, c)
 
-                    # abc
-                    p, ce = balance_prod(a, balance_prod(b, c))
-                    if abs(ce) < cutoff:
-                        break
+                    cur_count += 1
+                    alpha_u -= hmax**3
+                    alpha_l += update
+                    alpha_u += update
 
-                    tail[p] += ce
+                    print(f"{alpha_l} : {alpha_u}")
 
-                    # -acb
-                    p, ce = balance_prod(a, balance_prod(c, b))
-                    tail[p] -= ce
-                    if abs(ce) < cutoff:
-                        break
+                    if alpha_l > 0 and (alpha_u / alpha_l) - 1 < (delta / error):
+                        return alpha_l
+                    if cur_count == cutoff_count:
+                        return alpha_u
 
-                    # -bca
-                    p, ce = balance_prod(b, balance_prod(c, a))
-                    tail[p] -= ce
-                    if abs(ce) < cutoff:
-                        break
+    assert alpha_l == alpha_u
+    assert cur_count == total_count
 
-                    # cba
-                    p, ce = balance_prod(c, balance_prod(b, a))
-                    tail[p] += ce
-                    if abs(ce) < cutoff:
-                        break
-
-                    cur_coeffs = np.array(list(tail.values()))
-                    alpha_comm += np.sum(np.abs(cur_coeffs))
-
-    return alpha_comm
+    return alpha_u
 
 
 def _pauli_commute(a: Pauli, b: Pauli):
@@ -161,15 +167,20 @@ def r_first_order(
     return np.ceil(nr / dr)
 
 
-def r_second_order(ham: SparsePauliOp, time: float, error: float, **kwargs) -> int:
+def r_second_order(
+    sorted_pairs: list[tuple[Pauli, float]], time: float, error: float, **kwargs
+) -> int:
     """
     Same as `commutator_r` but it is hard-coded with three for loops
     """
     alpha_com = kwargs.get("alpha_com", -1)
-    cutoff = kwargs.get("cutoff", 0)
+    cutoff_count = kwargs.get("cutoff_count", 0)
+    delta = kwargs.get("delta", 0)
 
     if alpha_com == -1:
-        alpha_com = alpha_commutator_second_order(ham, cutoff)
+        alpha_com = alpha_commutator_second_order(
+            sorted_pairs, error, delta, cutoff_count
+        )
 
     nr = (alpha_com ** (1 / 2)) * (time ** (1 + 1 / 2))
     dr = error ** (1 / 2)
@@ -191,13 +202,11 @@ def main():
 
     sorted_pairs = list(
         sorted(
-            zip(hamiltonian.paulis, hamiltonian.coeffs),
+            [(x, y.real) for (x, y) in zip(hamiltonian.paulis, hamiltonian.coeffs)],
             key=lambda x: abs(x[1]),
             reverse=True,
         )
     )
-
-    sorted_pairs = [(x, y.real) for (x, y) in sorted_pairs]
 
     # norm_first_ord = trotter_reps(num_qubits, h, time, eps)
     # print(f"First Order Non-Commutator: {norm_first_ord}")

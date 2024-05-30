@@ -1,5 +1,10 @@
+from tqdm import tqdm
 from typing import Union
 import numpy as np
+from qiskit.circuit.library import PauliEvolutionGate
+from qiskit import QuantumCircuit
+from qiskit.quantum_info import Pauli, SparsePauliOp
+
 from ising.hamiltonian import Hamiltonian
 from ising.groundstate.simulation.utils import (
     ground_state_constants,
@@ -7,13 +12,9 @@ from ising.groundstate.simulation.utils import (
 )
 from ising.hamiltonian.ising_one import qdrift_count
 from ising.utils import Decomposer
-from qiskit.circuit.library import PauliEvolutionGate
-from qiskit import QuantumCircuit
-from qiskit.quantum_info import Pauli, SparsePauliOp
+from ising.utils.gate_count import count_non_trivial
 
 from ising.benchmark.gates.counter import Counter
-
-from tqdm import tqdm
 
 
 def gates_for_pauli(
@@ -182,6 +183,28 @@ class QDriftBenchmarkTime:
         counter = Counter()
         counter.add(dict(dqc.count_ops()))
         return counter.times(reps // split)
+
+    def circuit_gate_count(self, gate: str, time: int) -> int:
+        """
+        Counts the gates analytically rather than via decomposition.
+        """
+        t_bar = time * self.lambd
+        reps = max(20, int(10 * np.ceil(t_bar) ** 2))
+
+        if gate == "cx":
+            print(f"Taylor: Counting cx for reps:{reps}")
+            total = 0
+            # Each rep has only one Pauli exponentiation.
+            samples = np.random.choice(
+                self.indices, p=self.coeffs / self.lambd, size=reps
+            )
+            for sample in samples:
+                pauli = self.paulis[sample]
+                count = count_non_trivial(pauli)
+                total += 2 * (count - 1)
+            return total
+        else:
+            return 0
 
     def controlled_gate_count(self, time: float, reps: int) -> dict[str, int]:
         print(f"QDrift: Running controlled gate count for time: {time}")

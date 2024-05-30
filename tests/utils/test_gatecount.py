@@ -68,3 +68,20 @@ def test_cs_count_double():
         total += 2 * (count - 1)
 
     assert counter["cx"] == total
+
+
+def test_cx_controlled():
+    pauli = Pauli("XX")
+    time = 100.0
+    controlled_gate = PauliEvolutionGate(pauli, time).control(1)
+
+    circuit = QuantumCircuit(3)
+    circuit.append(controlled_gate, range(pauli.num_qubits + 1))
+
+    tqc = transpile(circuit, None, optimization_level=3, basis_gates=ALL_GATES)
+
+    counter = tqc.count_ops()
+
+    count = count_non_trivial(pauli)
+    actual = 2 * (count - 1)
+    assert counter["cx"] == actual

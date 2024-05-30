@@ -10,11 +10,11 @@ from ising.benchmark.gates import (
     KTrotterBenchmarkTime,
 )
 from ising.hamiltonian.ising_one import qdrift_count
-from ising.utils.commutator import (
-    commutator_r_second_order,
+from ising.utils.commutator.commutator_hueristic import (
+    r_first_order,
+    r_second_order,
     alpha_commutator_second_order,
     alpha_commutator_first_order,
-    commutator_r_first_order,
 )
 import json
 from ising.hamiltonian import parse
@@ -25,10 +25,12 @@ def plot_gate_error(
 ):
     fig, ax = plt.subplots()
 
+    delta = 0.01
     # One col is fixed error
     error_points = [
         10**x for x in np.linspace(err_pair[0], err_pair[1], point_count_pair[0])
     ]
+    min_error = min(error_points)
     # One row is fixed time
     time_points = [
         x for x in np.linspace(time_pair[0], time_pair[1], point_count_pair[1])
@@ -39,6 +41,15 @@ def plot_gate_error(
 
     # ham = parse(file_name)
     ham = parametrized_ising(qubit, h_val)
+
+    sorted_pairs = list(
+        sorted(
+            [(x, y.real) for (x, y) in zip(ham.paulis, ham.coeffs)],
+            key=lambda x: abs(x[1]),
+            reverse=True,
+        )
+    )
+
     lambd = np.sum(np.abs(ham.coeffs))
 
     taylor_bench = TaylorBenchmarkTime(ham)
@@ -48,10 +59,13 @@ def plot_gate_error(
 
     # Calculate the alpha commutators for both first and second order
 
-    min_time = min(time_points)
     print("Calculating the alpha commutators")
-    alpha_com_second = alpha_commutator_second_order(ham.sparse_repr)
-    alpha_com_first = alpha_commutator_first_order(ham.sparse_repr)
+    alpha_com_second = alpha_commutator_second_order(
+        sorted_pairs, min_error, delta, cutoff_count=0
+    )
+    alpha_com_first = alpha_commutator_first_order(
+        sorted_pairs, min_error, delta, cutoff_count=0
+    )
     print(f"com1:{alpha_com_first} \n com2:{alpha_com_second}")
 
     nrows, ncols = len(time_points), len(error_points)
@@ -71,8 +85,8 @@ def plot_gate_error(
             taylor_counts = taylor_bench.simulation_gate_count(time, k)
             print(f"Taylor:{taylor_counts}")
 
-            trotter_rep = commutator_r_first_order(
-                ham.sparse_repr, time, error, alpha_com=alpha_com_first
+            trotter_rep = r_first_order(
+                sorted_pairs, time, error, alpha_com=alpha_com_first
             )
             trotter_counts = trotter_bench.circuit_gate_count("cx", trotter_rep)
             print(f"Trotter:{trotter_counts}")
@@ -81,8 +95,8 @@ def plot_gate_error(
             qdrift_counts = qdrift_bench.simulation_gate_count(time, qdrift_rep)
             print(f"qDRIFT:{qdrift_counts}")
 
-            ktrotter_reps = commutator_r_second_order(
-                ham.sparse_repr, time, error, alpha_com=alpha_com_second
+            ktrotter_reps = r_second_order(
+                sorted_pairs, time, error, alpha_com=alpha_com_second
             )
             ktrotter_counts = ktrotter_bench.circuit_gate_count("cx", ktrotter_reps)
             print(f"kTrotter:{ktrotter_counts}")
@@ -110,7 +124,7 @@ def plot_gate_error(
 
 
 if __name__ == "__main__":
-    qubit = 20
+    qubit = 25
     h_val = 0.1
     err_pair = (-1, -5)
 

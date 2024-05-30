@@ -233,19 +233,29 @@ class TaylorBenchmarkTime:
             )
             circuit.append(evo, range(evo.num_qubits))
 
-        return circuit
+        big_circ = QuantumCircuit(self.ham.num_qubits + 1)
+        controlled_gate = circuit.to_gate().control(1)
+        big_circ.append(controlled_gate, range(self.ham.num_qubits + 1))
 
-    def circuit_gate_count(self, gate: str, reps: int) -> int:
+        return big_circ
+
+    def circuit_gate_count(self, gate: str, time: int) -> int:
         """
         Counts the gates analytically rather than via decomposition.
         """
+        t_bar = time * self.lambd
+        reps = max(20, int(10 * np.ceil(t_bar) ** 2))
+
         if gate == "cx":
-            print(f"Trotter: Counting cx for reps:{reps}")
+            print(f"Taylor: Counting cx for reps:{reps}")
             total = 0
-            for pauli in self.ham.paulis:
+            # Each rep has only one Pauli exponentiation.
+            samples = np.random.choice(self.indices, p=self.coeffs, size=reps)
+            for sample in samples:
+                pauli = self.paulis[sample]
                 count = count_non_trivial(pauli)
                 total += 2 * (count - 1)
-            return total * reps
+            return total
         else:
             return 0
 
