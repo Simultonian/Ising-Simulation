@@ -6,15 +6,15 @@ from ising.benchmark.gates import (
     KTrotterBenchmarkTime,
 )
 from ising.hamiltonian.ising_one import qdrift_count
-from ising.utils.commutator import (
-    commutator_r_second_order,
+from ising.utils.commutator.commutator_hueristic import (
+    r_second_order,
     alpha_commutator_second_order,
     alpha_commutator_first_order,
-    commutator_r_first_order,
+    r_first_order,
 )
 import json
 
-QUBITS = 15
+QUBITS = 25
 TIME = 1.0
 ORDER = 2
 
@@ -36,7 +36,7 @@ def _truncate(num, digits=5):
 from ising.hamiltonian import parametrized_ising
 
 
-def main():
+def test_main():
     answers = {
         "META": {"QUBITS": str(QUBITS), "TIME": str(TIME), "GATE": str(GATE)},
         "taylor": {},
@@ -50,10 +50,19 @@ def main():
         10**x for x in np.linspace(ERROR_RANGE[0], ERROR_RANGE[1], ERROR_COUNT)
     ]
     h_points = [10**x for x in np.linspace(H_RANGE[0], H_RANGE[1], H_COUNT)]
+    min_error = min(error_points)
 
     for h in h_points:
         h_str = _truncate(h)
         hamiltonian = parametrized_ising(qubits=QUBITS, h=h)
+        sorted_pairs = list(
+            sorted(
+                [(x, y.real) for (x, y) in zip(hamiltonian.paulis, hamiltonian.coeffs)],
+                key=lambda x: abs(x[1]),
+                reverse=True,
+            )
+        )
+
         lambd = np.sum(np.abs(hamiltonian.coeffs))
 
         taylor_bench = TaylorBenchmarkTime(hamiltonian)
@@ -69,8 +78,12 @@ def main():
         answers["trotter2"][h_str] = {}
 
         print("Calculating the alpha commutators")
-        alpha_com_second = alpha_commutator_second_order(hamiltonian.sparse_repr)
-        alpha_com_first = alpha_commutator_first_order(hamiltonian.sparse_repr)
+        alpha_com_first = alpha_commutator_first_order(
+            sorted_pairs, min_error, delta=0, cutoff_count=0
+        )
+        alpha_com_second = alpha_commutator_second_order(
+            sorted_pairs, min_error, delta=0, cutoff_count=0
+        )
         print("Completed the calculation")
 
         for error in error_points:
@@ -85,8 +98,8 @@ def main():
             print(f"Taylor:{count}")
             answers["taylor"][h_str][error_str] = _truncate(count.get(GATE, 0))
 
-            trotter_rep = commutator_r_first_order(
-                hamiltonian.sparse_repr, TIME, error, alpha_com_first
+            trotter_rep = r_first_order(
+                sorted_pairs, TIME, error, alpha_com=alpha_com_first
             )
             count = trotter_bench.simulation_gate_count(TIME, trotter_rep)
             print(f"Trotter:{count}")
@@ -97,8 +110,8 @@ def main():
             print(f"qDRIFT:{count}")
             answers["qdrift"][h_str][error_str] = _truncate(count.get(GATE, 0))
 
-            ktrotter_reps = commutator_r_second_order(
-                hamiltonian.sparse_repr, TIME, error, alpha_com_second
+            ktrotter_reps = r_second_order(
+                sorted_pairs, TIME, error, alpha_com=alpha_com_second
             )
             count = ktrotter_bench.simulation_gate_count(TIME, ktrotter_reps)
             print(f"kTrotter:{count}")
@@ -118,4 +131,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    test_main()
