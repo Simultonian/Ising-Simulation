@@ -88,7 +88,7 @@ def alpha_commutator_second_order(
                 alpha_u -= hmax**3
                 alpha_l += update
                 alpha_u += update
-                pbar_alpha.update(alpha_l)
+                pbar_alpha.update(update)
 
                 if alpha_l > 0 and (alpha_u / alpha_l) - 1 < (delta / error):
                     return alpha_l

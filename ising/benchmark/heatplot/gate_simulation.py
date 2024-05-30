@@ -75,7 +75,7 @@ def plot_gate_error(
             sorted_pairs, min_error, delta=0, cutoff_count=ll**2
         )
         alpha_com_second = alpha_commutator_second_order(
-            sorted_pairs, min_error, delta=0, cutoff_count=ll**2
+            sorted_pairs, min_error, delta=0, cutoff_count=int(ll**2.2)
         )
         print(f"com1:{alpha_com_first} \ncom2:{alpha_com_second}")
 

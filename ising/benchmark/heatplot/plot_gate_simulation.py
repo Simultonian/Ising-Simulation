@@ -81,7 +81,7 @@ def plot_gate_error(
     # TEXT ON THE COLORBAR
     cbar.ax.text(
         0.55,
-        0.22,
+        0.25,
         r"CNOT Count ($\log_{10}$ scale)",
         rotation=90,
         ha="center",
@@ -120,8 +120,8 @@ def plot_gate_error(
     )
     ax.text(
         2.5,
-        2.10,
-        "Truncated Taylor Series",
+        1.65,
+        "Single Ancilla LCU",
         rotation=90,
         ha="center",
         va="center",
@@ -154,6 +154,6 @@ if __name__ == "__main__":
     point_count = (3, 10)
     obs_norm = 1
     time_pair = (1, 10)
-    file_name = f"methane"
+    file_name = f"ising_{qubit}"
 
     plot_gate_error(qubit, h_val, err_pair, point_count, obs_norm, time_pair, file_name)
