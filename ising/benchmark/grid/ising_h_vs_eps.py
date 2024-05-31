@@ -15,15 +15,15 @@ from ising.utils.commutator.commutator_hueristic import (
 import json
 
 QUBITS = 25
-TIME = 1.0
+TIME = 10.0
 ORDER = 2
 
 # THE BELOW ARE LOGARITHMIC WRT 10
 H_RANGE = (-3, 2)
-H_COUNT = 10
+H_COUNT = 20
 
-ERROR_RANGE = (-1, -3)
-ERROR_COUNT = 10
+ERROR_RANGE = (-1, -5)
+ERROR_COUNT = 20
 GATE = "cx"
 FILE_NAME = "ising_one"
 

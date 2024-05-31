@@ -15,6 +15,11 @@ def _read_json(file_name):
     return data
 
 
+def _truncate(num, digits=1):
+    a, dot, b = str(num).partition(".")
+    return a + dot + b[:digits]
+
+
 def plot_gate_error(
     qubit, h_val, err_pair, point_count_pair, obs_norm, time_pair, file_name
 ):
@@ -81,7 +86,7 @@ def plot_gate_error(
     # TEXT ON THE COLORBAR
     cbar.ax.text(
         0.55,
-        0.25,
+        0.23,
         r"CNOT Count ($\log_{10}$ scale)",
         rotation=90,
         ha="center",
@@ -105,13 +110,13 @@ def plot_gate_error(
     # SETTING THE LABELS
     error_marks = [np.log10(x) for x in error_points]
     ax.set_xticklabels(["{}".format(i) for i in error_marks])
-    ax.set_yticklabels(["{}".format(i) for i in time_points])
+    ax.set_yticklabels(["{}".format(_truncate(i)) for i in time_points])
 
     # LABELLING the BARS
-    ax.text(0.5, 0.75, "qDRIFT", rotation=90, ha="center", va="center", color="black")
+    ax.text(0.5, 1.45, "qDRIFT", rotation=90, ha="center", va="center", color="black")
     ax.text(
         1.5,
-        2.20,
+        4.55,
         "First Order Trotterization",
         rotation=90,
         ha="center",
@@ -120,7 +125,7 @@ def plot_gate_error(
     )
     ax.text(
         2.5,
-        1.65,
+        3.45,
         "Single Ancilla LCU",
         rotation=90,
         ha="center",
@@ -129,7 +134,7 @@ def plot_gate_error(
     )
     ax.text(
         3.5,
-        1.60,
+        3.30,
         "kth Order Trotter",
         rotation=90,
         ha="center",
@@ -149,11 +154,12 @@ if __name__ == "__main__":
     qubit = 25
     h_val = 0.1
     err_pair = (-1, -5)
+    delta = 0.1
 
     # error, time
-    point_count = (3, 10)
+    point_count = (5, 20)
     obs_norm = 1
     time_pair = (1, 10)
-    file_name = f"ising_{qubit}"
+    file_name = f"methane"
 
     plot_gate_error(qubit, h_val, err_pair, point_count, obs_norm, time_pair, file_name)

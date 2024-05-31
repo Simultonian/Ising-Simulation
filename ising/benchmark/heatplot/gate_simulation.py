@@ -75,7 +75,7 @@ def plot_gate_error(
             sorted_pairs, min_error, delta=0, cutoff_count=ll**2
         )
         alpha_com_second = alpha_commutator_second_order(
-            sorted_pairs, min_error, delta=0, cutoff_count=int(ll**2.2)
+            sorted_pairs, min_error, delta=0, cutoff_count=ll
         )
         print(f"com1:{alpha_com_first} \ncom2:{alpha_com_second}")
 
@@ -138,13 +138,13 @@ def plot_gate_error(
 
 
 if __name__ == "__main__":
-    qubit = 10
+    qubit = 25
     h_val = 0.1
     err_pair = (-1, -5)
     delta = 0.1
 
     # error, time
-    point_count = (3, 10)
+    point_count = (5, 20)
     obs_norm = 1
     time_pair = (1, 10)
     file_name = f"methane"
