@@ -1,0 +1,11 @@
+qubit = 25
+h_val = 0.1
+err_pair = (-1, -5)
+delta = 0.1
+
+# error, time
+point_count = (5, 20)
+obs_norm = 1
+time_pair = (1, 10)
+file_name = f"ising_{qubit}"
+
