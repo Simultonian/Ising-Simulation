@@ -1,6 +1,7 @@
 import numpy as np
 from qiskit.quantum_info import SparsePauliOp, Pauli
 
+
 def test_mult():
     x, y = Pauli("X"), Pauli("Y")
     ca, cb = 1, 2
@@ -18,7 +19,7 @@ def test_sort():
     coeffs = [-1, 2, 3, 0]
 
     sorted_pairs = list(sorted(zip(paulis, coeffs), key=lambda x: abs(x[1])))
-    
+
     first = sorted_pairs[0]
     assert first[0] == Pauli("ZZ")
     assert first[1] == 0
@@ -36,6 +37,7 @@ def _pauli_commute(a: Pauli, b: Pauli):
 
     return a_dot_b == b_dot_a
 
+
 def _pauli_multi_commute(a: Pauli, xs, zs):
     x1, z1 = a._x, a._z
 
@@ -43,6 +45,7 @@ def _pauli_multi_commute(a: Pauli, xs, zs):
     b_dot_a = np.mod((xs & z1).sum(axis=1), 2)
 
     return np.all(a_dot_b == b_dot_a, axis=1)
+
 
 def test_multi_commute():
     paulis = [Pauli("XI"), Pauli("IX"), Pauli("ZI")]

@@ -7,6 +7,7 @@ from ising.utils.gate_count import count_non_trivial
 
 ALL_GATES = ["cx", "u3"]
 
+
 def test_cs_count_zz():
     zz = Pauli("ZZ")
     time = 5.0
@@ -20,6 +21,7 @@ def test_cs_count_zz():
     counter = tqc.count_ops()
     assert counter["cx"] == 2
 
+
 def test_cs_count_xx():
     xx = Pauli("XX")
     time = 100.0
@@ -32,6 +34,7 @@ def test_cs_count_xx():
 
     counter = tqc.count_ops()
     assert counter["cx"] == 2
+
 
 def test_cs_count_xxixxix():
     pauli = Pauli("XXIXXIX")
@@ -48,6 +51,7 @@ def test_cs_count_xxixxix():
     count = count_non_trivial(pauli)
     actual = 2 * (count - 1)
     assert counter["cx"] == actual
+
 
 def test_cs_count_double():
     paulis = [Pauli("XXIXXIX"), Pauli("IXIXIII")]

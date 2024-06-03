@@ -11,11 +11,14 @@ class TestIsing:
     def test_long_range_two(self):
         h = 1.0
         ham = parametrized_ising_power(2, h=h, power=1)
-        assert ham.sparse_repr.paulis == ['ZZ', 'XI', 'IX']
-        assert all(ham.sparse_repr.coeffs == [-1.+0.j,  1.+0.j,  1.+0.j])
+        assert ham.sparse_repr.paulis == ["ZZ", "XI", "IX"]
+        assert all(ham.sparse_repr.coeffs == [-1.0 + 0.0j, 1.0 + 0.0j, 1.0 + 0.0j])
 
     def test_long_range_three(self):
         h = 1.0
         ham = parametrized_ising_power(3, h=h, power=1)
-        assert ham.sparse_repr.paulis == ['ZZI', 'ZIZ', 'IZZ', 'XII', 'IXI', 'IIX']
-        assert all(ham.sparse_repr.coeffs == [-1.+0.j,  -1/2, -1, 1.+0.j,  1.+0.j, 1])
+        assert ham.sparse_repr.paulis == ["ZZI", "ZIZ", "IZZ", "XII", "IXI", "IIX"]
+        assert all(
+            ham.sparse_repr.coeffs
+            == [-1.0 + 0.0j, -1 / 2, -1, 1.0 + 0.0j, 1.0 + 0.0j, 1]
+        )
