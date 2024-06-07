@@ -65,8 +65,6 @@ def lindbladian_operator(hamiltonian, lindbladian_ops):
     # Transpose of Ising Chain does not make any change
     term2 = 1j * np.kron(hamiltonian.T, identity)
 
-    return term1 + term2
-
     term3 = np.zeros_like(term1)
 
     for l_op in lindbladian_ops:

@@ -1,9 +1,9 @@
 import numpy as np
 import json
-from ising.hamiltonian import Hamiltonian, parametrized_ising
+from ising.hamiltonian import parametrized_ising
 from ising.utils import close_state
 from ising.observables import overall_magnetization
-from ising.lindbladian.unraveled import transpose, lowering_all_sites, LOWERING, lindbladian_operator
+from ising.lindbladian.unraveled import lowering_all_sites, lindbladian_operator
 
 # log scale
 GAMMA_RANGE = (0, -1)
@@ -20,22 +20,18 @@ H_VAL = -0.1
 # simulation params
 OVERLAP = 0.9
 
+
 def _round(mat):
     return np.round(mat, decimals=3)
 
+
 def matrix_exp_no_i(eig_vec, eig_val, eig_vec_inv, time: float):
-    return (
-        eig_vec
-        @ np.diag(time * eig_val)
-        @ eig_vec_inv
-    )
+    return eig_vec @ np.diag(np.exp(time * eig_val)) @ eig_vec_inv
+
 
 def matrix_exp(eig_vec, eig_val, eig_vec_inv, time: float):
-    return (
-        eig_vec
-        @ np.diag(np.exp(complex(0, -1) * time * eig_val))
-        @ eig_vec_inv
-    )
+    return eig_vec @ np.diag(np.exp(complex(0, -1) * time * eig_val)) @ eig_vec_inv
+
 
 def reshape_vec(vec):
     l = vec.shape[0]
@@ -51,14 +47,11 @@ def reshape_vec(vec):
     return rho
 
 
-
 def test_main():
     gamma_points = [
         10**x for x in np.linspace(GAMMA_RANGE[0], GAMMA_RANGE[1], GAMMA_COUNT)
     ]
-    time_points = [
-        x for x in np.linspace(TIME_RANGE[0], TIME_RANGE[1], TIME_COUNT)
-    ]
+    time_points = [x for x in np.linspace(TIME_RANGE[0], TIME_RANGE[1], TIME_COUNT)]
     observable = overall_magnetization(CHAIN_SIZE).matrix
 
     magnetization = {}
@@ -75,15 +68,11 @@ def test_main():
         rho_vec = rho_init.reshape(-1, 1)
 
         cks = lowering_all_sites(CHAIN_SIZE, gamma=0)
-        l_op = lindbladian_operator(ising_matrix, [])
-
+        l_op = lindbladian_operator(ising_matrix, cks)
 
         # eigenvalue manipulation
         eig_val, eig_vec = np.linalg.eig(l_op)
         eig_vec_inv = np.linalg.inv(eig_vec)
-
-        # lam_0 = np.min(eig_val)
-        # eig_val -= lam_0
 
         h_eig_val, h_eig_vec = np.linalg.eig(ising_matrix)
         h_eig_vec_inv = np.linalg.inv(h_eig_vec)
@@ -91,7 +80,7 @@ def test_main():
         for time in time_points:
             op_time_matrix = matrix_exp_no_i(eig_vec, eig_val, eig_vec_inv, time)
             rho_vec_final = op_time_matrix @ rho_vec
-            rho_final = reshape_vec(rho_vec_final) 
+            rho_final = reshape_vec(rho_vec_final)
             result = np.trace(np.abs(observable @ rho_final))
 
             magnetization[gamma][time] = result
@@ -101,12 +90,10 @@ def test_main():
             h_op_time_matrix = matrix_exp(h_eig_vec, h_eig_val, h_eig_vec_inv, time)
             psi_final = h_op_time_matrix @ init_state
             final_rho = np.outer(psi_final, psi_final.conj())
-            # assert False
             result = np.trace(np.abs(observable @ final_rho))
 
             print(f"gamma:{gamma}, time:{time}, RES: {result}")
 
-            # assert False
         print("------------------------------------------")
 
     save = {"META": {"H_VAL": H_VAL, "OVERLAP": 0.9}, "ANSWERS": magnetization}
@@ -115,6 +102,7 @@ def test_main():
     with open(file_name, "w") as file:
         json.dump(save, file)
     print(f"saved to {file_name}")
+
 
 if __name__ == "__main__":
     test_main()

@@ -135,4 +135,4 @@ class LCUSynthesizer:
 
             assert total_count == count
 
-r       return calculate_mu(results, count, self.lcu_coeffs)
+        return calculate_mu(results, count, self.lcu_coeffs)
