@@ -22,7 +22,7 @@ def transpose(sparse: SparsePauliOp) -> SparsePauliOp:
     return SparsePauliOp(data=sparse.paulis, coeffs=new_coeffs)
 
 
-LOWERING = np.array([[0, 0], [1, 0]])
+LOWERING = np.array([[0, 1], [0, 0]])
 
 
 def lowering_all_sites(chain_size: int, gamma: float = 1):

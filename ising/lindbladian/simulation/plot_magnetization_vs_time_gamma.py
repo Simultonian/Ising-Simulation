@@ -1,11 +1,6 @@
-import numpy as np
 import json
 import seaborn as sns
 from matplotlib import pyplot as plt
-from ising.hamiltonian import parametrized_ising
-from ising.utils import close_state
-from ising.observables import overall_magnetization
-from ising.lindbladian.unraveled import lowering_all_sites, lindbladian_operator
 
 # log scale
 GAMMA_RANGE = (0, -5)
