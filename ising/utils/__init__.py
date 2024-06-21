@@ -3,6 +3,7 @@ from .overlap import close_state
 from .simdiag import simdiag
 from .kron import control_version
 from .decompose import Decomposer
+from .phase import global_phase
 
 MAXSIZE = 10000
 
@@ -14,4 +15,5 @@ __all__ = [
     "simdiag",
     "control_version",
     "Decomposer",
+    "global_phase",
 ]
