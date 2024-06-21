@@ -22,14 +22,14 @@ import json
 from ising.hamiltonian import parse
 
 
-QUBIT = 10
+QUBIT = 25
 H_VAL = 0.1
 ERROR = 0.01
 DELTA = 0.1
 
 # ERROR, TIME
 OBS_NORM = 1
-TIME_PAIR = (1, 8)
+TIME_PAIR = (0, 2)
 TIME_COUNT = 8
 FILE_NAME = f"ising_{QUBIT}"
 

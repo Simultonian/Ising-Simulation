@@ -118,7 +118,7 @@ def trotter_gates(
     return benchmarker.calculate_gates()
 
 
-SPLIT_SIZE = 1
+SPLIT_SIZE = 100
 
 
 class TrotterBenchmarkTime:
