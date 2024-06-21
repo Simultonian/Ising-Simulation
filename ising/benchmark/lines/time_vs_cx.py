@@ -31,15 +31,15 @@ DELTA = 0.1
 OBS_NORM = 1
 TIME_PAIR = (0, 2)
 TIME_COUNT = 8
-FILE_NAME = f"ising_{QUBIT}"
+FILE_NAME = f"methane"
 
 
 def test_main():
     # One row is fixed time
     time_points = [10**x for x in np.linspace(TIME_PAIR[0], TIME_PAIR[1], TIME_COUNT)]
 
-    # ham = parse(FILE_NAME)
-    ham = parametrized_ising(QUBIT, H_VAL)
+    ham = parse(FILE_NAME)
+    # ham = parametrized_ising(QUBIT, H_VAL)
 
     sorted_pairs = list(
         sorted(

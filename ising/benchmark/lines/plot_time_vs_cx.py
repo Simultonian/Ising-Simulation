@@ -13,7 +13,7 @@ DELTA = 0.1
 OBS_NORM = 1
 TIME_PAIR = (0, 2)
 TIME_COUNT = 8
-FILE_NAME = f"ising_{QUBIT}"
+FILE_NAME = f"methane"
 
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
 MAP = {
