@@ -1,8 +1,7 @@
 import numpy as np
 from ising.lindbladian.interaction import RepetitionMap, set_ham_into_pos
-from ising.hamiltonian import parametrized_ising, Hamiltonian
+from ising.hamiltonian import parametrized_ising
 from ising.utils import close_state, global_phase
-from qiskit.quantum_info import SparsePauliOp
 
 ENV_SIZE = 1
 SYS_SIZE = 2
@@ -50,7 +49,7 @@ def without_env(ham, rho_sys):
 
 def test_main():
     ham_sys = parametrized_ising(SYS_SIZE, H_VAL)
-    env_sys = Hamiltonian(sparse_repr=SparsePauliOp(["I" * ENV_SIZE], [1.0]))
+    env_sys = parametrized_ising(ENV_SIZE, H_VAL)
 
     init_state = close_state(ham_sys.ground_state, OVERLAP)
     rho_sys = np.outer(init_state, init_state.conj())
