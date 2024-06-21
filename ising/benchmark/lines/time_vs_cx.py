@@ -24,7 +24,7 @@ from ising.hamiltonian import parse
 
 QUBIT = 10
 H_VAL = 0.1
-ERROR = 0.1
+ERROR = 0.01
 DELTA = 0.1
 
 # ERROR, TIME

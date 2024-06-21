@@ -6,7 +6,7 @@ import json
 
 QUBIT = 10
 H_VAL = 0.1
-ERROR = 0.1
+ERROR = 0.01
 DELTA = 0.1
 
 # ERROR, TIME
@@ -39,16 +39,25 @@ def test_main():
             x_values.append(time)
             y_values.append(res)
 
+        ax = sns.lineplot(
+            x=x_values,
+            y=y_values,
+            color=COLORS[ind],
+            alpha=0.6,
+        )
+
+    for ind, (method, time_gate) in enumerate(results.items()):
+        x_values, y_values = [], []
+        for time_str, res_str in time_gate.items():
+            time, res = float(time_str), float(res_str)
+            x_values.append(time)
+            y_values.append(res)
+
         ax = sns.scatterplot(
             x=x_values,
             y=y_values,
             label=f"{MAP[method]}",
-            linewidth=3,
-            color=COLORS[ind],
-        )
-        ax = sns.lineplot(
-            x=x_values,
-            y=y_values,
+            s=15,
             color=COLORS[ind],
         )
 
@@ -66,7 +75,7 @@ def test_main():
 
     file_name = f"plots/benchmark/lines/size_{FILE_NAME}.png"
 
-    plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.10), ncol=3, fontsize=10)
+    plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.15), ncol=2, fontsize=10)
     plt.savefig(file_name, dpi=300)
     print(f"saved the plot to {file_name}")
 
