@@ -27,8 +27,12 @@ OVERLAP = 0.8
 
 ZERO = np.array([[1], [0]])
 ONE = np.array([[0], [1]])
-SIGMA_MINUS = np.array([[0, 1], [0, 0]])
-SIGMA_PLUS = np.array([[0, 0], [1, 0]])
+SIGMA_MINUS = np.array([
+    [0, 1], 
+    [0, 0]])
+SIGMA_PLUS = np.array([
+    [0, 0], 
+    [1, 0]])
 
 
 def _round(mat):
@@ -57,6 +61,17 @@ def reshape_vec(vec):
     return rho
 
 
+def apply_amplitude_damping(rho, gamma, time):
+    """
+    Applies the Kraus operator and get the final state
+    """
+    new_gamma = 1 - np.exp(-gamma * time)
+    e0 = np.array([[1, 0], [0, np.sqrt(1 - new_gamma)]])
+    e1 = np.array([[0, np.sqrt(new_gamma)], [0, 0]])
+
+    return (e0 @ rho @ e0.conj().T) + (e1 @ rho @ e1.conj().T)
+
+
 def lindblad_evo(rho, ham, gamma, time):
     """
     Function to calculate final state after amplitude damping.
@@ -83,7 +98,7 @@ def lindblad_evo(rho, ham, gamma, time):
     return rho_final
 
 
-def ham_evo(rho_sys, rho_env, ham_sys, gamma, time):
+def ham_evo(rho_sys, rho_env, ham_sys, gamma, time, neu=1000):
     """
     Replicate the Lindbladian evolution of amplitude damping using
     interaction Hamiltonian dynamics.
@@ -95,31 +110,33 @@ def ham_evo(rho_sys, rho_env, ham_sys, gamma, time):
         - gamma: Strength of amplitude damping
         - time: Evolution time to match
     """
+    tau = time / neu
     big_ham_sys = np.kron(ham_sys, np.eye(rho_env.shape[0]))
 
     # interaction Hamiltonian directly from the formula
-    g = gamma
-    ham_int = g * (np.kron(SIGMA_PLUS, SIGMA_MINUS) + np.kron(SIGMA_MINUS, SIGMA_PLUS))
+    ham_int_norm = np.sqrt(gamma)
+    ham_int = ham_int_norm * (np.kron(SIGMA_PLUS, SIGMA_MINUS) + np.kron(SIGMA_MINUS, SIGMA_PLUS))
 
     if ham_int.shape != big_ham_sys.shape:
         raise ValueError("Incorrect size: {ham_int.shape}, {big_ham_sys.shape}")
 
     complete_ham = big_ham_sys + ham_int
-    complete_rho = np.kron(rho_sys, rho_env)
 
+    cur_rho_sys = rho_sys
     eig_val, eig_vec = np.linalg.eig(complete_ham)
     eig_vec_inv = np.linalg.inv(eig_vec)
 
+    for _ in range(neu):
+        complete_rho = np.kron(cur_rho_sys, rho_env)
 
-    rho_fin = (
-        matrix_exp(eig_vec, eig_val, eig_vec_inv, time)
-        @ complete_rho
-        @ matrix_exp(eig_vec, eig_val, eig_vec_inv, -time)
-    )
+        rho_fin = (
+            matrix_exp(eig_vec, eig_val, eig_vec_inv, time=np.sqrt(tau))
+            @ complete_rho
+            @ matrix_exp(eig_vec, eig_val, eig_vec_inv, time=-np.sqrt(tau))
+        )
+        cur_rho_sys = partial_trace(rho_fin, [1])
 
-    rho_sys_fin = partial_trace(rho_fin, [1])
-
-    return rho_sys_fin
+    return cur_rho_sys 
 
 
 
@@ -129,13 +146,18 @@ def test_main():
 
     rho_env = np.outer(ZERO, ZERO.conj())
 
-    gamma = 0.2
+    gamma = 0.5
+    TIMES = [0, 0.5, 1, 1.5, 2]
+    EPS = 0.01
 
-    rho_linds = [lindblad_evo(rho_sys, ham, gamma, time) for time in [0, 0.5, 1, 1.5]]
-    rho_hams = [ham_evo(rho_sys, rho_env, ham, gamma, time) for time in [0, 0.5, 1, 1.5]]
+    for time in TIMES:
+        neu = max(100, int(100 * (time ** 2) / EPS))
+        rho_ham = ham_evo(rho_sys, rho_env, ham, gamma, time, neu)
+        rho_amp = apply_amplitude_damping(rho_sys, gamma, time)
+        rho_lin = lindblad_evo(rho_sys, ham, gamma, time)
 
-    for rho_lin, rho_ham in zip(rho_linds, rho_hams):
-        np.testing.assert_almost_equal(rho_lin, rho_ham)
+        np.testing.assert_almost_equal(rho_lin, rho_amp, decimal=4)
+        np.testing.assert_almost_equal(rho_lin, rho_ham, decimal=4)
 
     
 if __name__ == "__main__":
