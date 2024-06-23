@@ -1,4 +1,5 @@
 import numpy as np
+from itertools import product
 import json
 from ising.lindbladian.simulation.unraveled import (
     lowering_all_sites,
@@ -14,6 +15,7 @@ SIGMA_MINUS = np.array([[0, 1], [0, 0]])
 SIGMA_PLUS = np.array([[0, 0], [1, 0]])
 
 
+QUBIT_COUNT = 2
 GAMMAS = [0, 0.1, 0.4, 0.7, 0.9]
 TIMES = [0, 0.5, 1, 1.5, 2]
 EPS = 0.01
@@ -44,16 +46,29 @@ def reshape_vec(vec):
 
     return rho
 
+def _kron_multi(ls):
+    prod = ls[0]
+    for term in ls[1:]:
+        prod = np.kron(prod, term)
+    return prod
 
 def apply_amplitude_damping(rho, gamma, time):
     """
-    Applies the Kraus operator and get the final state
+    Applies the Kraus operator and get the final state, this is applicable for
+    multiple qubits. The damping is applied to all the qubits at the same time
     """
+    num_qubits = int(np.log2(rho.shape[0]))
     new_gamma = 1 - np.exp(-gamma * time)
     e0 = np.array([[1, 0], [0, np.sqrt(1 - new_gamma)]])
     e1 = np.array([[0, np.sqrt(new_gamma)], [0, 0]])
 
-    return (e0 @ rho @ e0.conj().T) + (e1 @ rho @ e1.conj().T)
+    final_rho = np.zeros_like(rho)
+
+    for kraus_ops in product([e0, e1], repeat=num_qubits):
+        term = _kron_multi(kraus_ops)
+        final_rho += (term @ rho @ term.conj().T)
+
+    return final_rho
 
 
 def lindblad_evo(rho, ham, gamma, time):
@@ -70,7 +85,7 @@ def lindblad_evo(rho, ham, gamma, time):
     rho_vec = rho.reshape(-1, 1)
 
     # Hamiltonian is zero
-    l_op = lindbladian_operator(ham, [np.sqrt(gamma) * SIGMA_MINUS])
+    l_op = lindbladian_operator(ham, lowering_all_sites(QUBIT_COUNT, gamma=gamma))
 
     eig_val, eig_vec = np.linalg.eig(l_op)
     eig_vec_inv = np.linalg.inv(eig_vec)
@@ -80,6 +95,42 @@ def lindblad_evo(rho, ham, gamma, time):
     rho_final = reshape_vec(rho_vec_final)
 
     return rho_final
+
+
+def interaction_hamiltonian(QUBIT_COUNT, gamma):
+    """
+    Construct a `2*QUBIT_COUNT` Hamiltonian for each interaction point.
+    There will be `QUBIT_COUNT` of them, acting on two qubits each
+
+    Input:
+        - QUBIT_COUNT: Size of the chain
+        - gamma: Strength of the Hamiltonian
+    """
+    ham_ints = []
+    for _site in range(QUBIT_COUNT):
+        sys_site, env_site = _site, _site + QUBIT_COUNT
+
+        ham_int1, ham_int2 = None, None
+        for pos in range(2*QUBIT_COUNT):
+            cur_op1, cur_op2 = None, None
+            if pos == sys_site:
+                cur_op1, cur_op2 = SIGMA_PLUS, SIGMA_MINUS
+            elif pos == env_site:
+                cur_op1, cur_op2 = SIGMA_MINUS, SIGMA_PLUS
+            else:
+                cur_op1, cur_op2 = np.eye(2), np.eye(2)
+
+            if ham_int1 is None or ham_int2 is None:
+                ham_int1, ham_int2 = cur_op1, cur_op2
+            else:
+                ham_int1 = np.kron(ham_int1, cur_op1)
+                ham_int2 = np.kron(ham_int2, cur_op2)
+
+        assert ham_int1 is not None and ham_int2 is not None
+
+        ham_ints.append(np.sqrt(gamma) * (ham_int1 + ham_int2))
+
+    return ham_ints
 
 
 def ham_evo(rho_sys, rho_env, ham_sys, gamma, time, neu=1000):
@@ -95,59 +146,55 @@ def ham_evo(rho_sys, rho_env, ham_sys, gamma, time, neu=1000):
         - time: Evolution time to match
     """
     tau = time / neu
-    big_ham_sys = np.kron(ham_sys, np.eye(rho_env.shape[0]))
+    big_ham_sys = np.kron(ham_sys, np.eye(2 ** QUBIT_COUNT))
 
-    # interaction Hamiltonian directly from the formula
-    ham_int_norm = np.sqrt(gamma)
-    ham_int = ham_int_norm * (
-        np.kron(SIGMA_PLUS, SIGMA_MINUS) + np.kron(SIGMA_MINUS, SIGMA_PLUS)
-    )
-
-    if ham_int.shape != big_ham_sys.shape:
-        raise ValueError("Incorrect size: {ham_int.shape}, {big_ham_sys.shape}")
-
-    complete_ham = big_ham_sys + ham_int
+    big_rho_env = rho_env
+    for _ in range(QUBIT_COUNT - 1):
+        big_rho_env = np.kron(big_rho_env, rho_env)
 
     cur_rho_sys = rho_sys
-    eig_val, eig_vec = np.linalg.eig(complete_ham)
-    eig_vec_inv = np.linalg.inv(eig_vec)
+
+    ham_ints = interaction_hamiltonian(QUBIT_COUNT, gamma=gamma)
+
+    hams = []
+    for ham_int in ham_ints:
+        ham = (big_ham_sys / QUBIT_COUNT) + ham_int
+        eig_val, eig_vec = np.linalg.eig(ham)
+        eig_vec_inv = np.linalg.inv(eig_vec)
+        hams.append((eig_vec, eig_val, eig_vec_inv))
 
     for _ in range(neu):
-        complete_rho = np.kron(cur_rho_sys, rho_env)
-
-        rho_fin = (
-            matrix_exp(eig_vec, eig_val, eig_vec_inv, time=np.sqrt(tau))
-            @ complete_rho
-            @ matrix_exp(eig_vec, eig_val, eig_vec_inv, time=-np.sqrt(tau))
-        )
-        cur_rho_sys = partial_trace(rho_fin, [1])
+        for eig_vec, eig_val, eig_vec_inv in hams:
+            complete_rho = np.kron(cur_rho_sys, big_rho_env)
+            rho_fin = (
+                matrix_exp(eig_vec, eig_val, eig_vec_inv, time=np.sqrt(tau))
+                @ complete_rho
+                @ matrix_exp(eig_vec, eig_val, eig_vec_inv, time=-np.sqrt(tau))
+            )
+            cur_rho_sys = partial_trace(rho_fin, list(range(QUBIT_COUNT, 2*QUBIT_COUNT)))
 
     return cur_rho_sys
 
 
-def _random_psi():
-    real_psi = np.random.uniform(-1, 1, 2)
-    x = 0
-    for a in real_psi:
-        x += np.abs(a) ** 2
-
-    real_psi /= np.sqrt(x)
-    return real_psi
+def _random_psi(qubit_count):
+    real_psi = np.random.uniform(-1, 1, 2**qubit_count)
+    norm = sum([np.abs(x) for x in real_psi]) ** 0.5
+    return real_psi / norm
 
 
 def test_main():
     np.random.seed(42)
 
-    psi = _random_psi()
+    psi = _random_psi(qubit_count=QUBIT_COUNT)
     rho_sys = np.outer(psi, psi.conj())
-    rho_sys = rho_sys / global_phase(rho_sys)
     ham = np.zeros_like(rho_sys)
 
+    # Environment qubit is always in ZERO, and it is always only one qubit each
     rho_env = np.outer(ZERO, ZERO.conj())
 
     for gamma in GAMMAS:
         for time in TIMES:
-            neu = max(100, int(100 * (time**2) / EPS))
+            neu = max(100, int(10 * (time**2) / EPS))
             rho_ham = ham_evo(rho_sys, rho_env, ham, gamma, time, neu)
             rho_amp = apply_amplitude_damping(rho_sys, gamma, time)
             rho_lin = lindblad_evo(rho_sys, ham, gamma, time)

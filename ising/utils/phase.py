@@ -10,10 +10,9 @@ def global_phase(a: NDArray):
         for x in row:
             if np.abs(x) > 1e-3:
                 theta = cmath.phase(x)
+                if abs(theta) < 1e-6:
+                    theta = 0
                 # phase is e^{i\theta}
                 phase = np.exp(0 + 1j * theta)
-
-                if phase != 1:
-                    return phase
 
     return phase
