@@ -8,6 +8,7 @@ from ising.lindbladian.simulation.unraveled import (
 
 from ising.utils import global_phase
 from ising.utils.trace import partial_trace
+from ising.hamiltonian import parametrized_ising
 
 ZERO = np.array([[1], [0]])
 ONE = np.array([[0], [1]])
@@ -19,6 +20,8 @@ QUBIT_COUNT = 2
 GAMMAS = [0, 0.1, 0.4, 0.7, 0.9]
 TIMES = [0, 0.5, 1, 1.5, 2]
 EPS = 0.01
+
+H_VAL = -0.1
 
 
 def _round(mat):
@@ -52,23 +55,39 @@ def _kron_multi(ls):
         prod = np.kron(prod, term)
     return prod
 
-def apply_amplitude_damping(rho, gamma, time):
+def apply_amplitude_damping(rho_sys, ham, gamma, time, nue=1000):
     """
     Applies the Kraus operator and get the final state, this is applicable for
     multiple qubits. The damping is applied to all the qubits at the same time
     """
-    num_qubits = int(np.log2(rho.shape[0]))
-    new_gamma = 1 - np.exp(-gamma * time)
+    delta_t = time / nue
+    num_qubits = int(np.log2(rho_sys.shape[0]))
+    new_gamma = 1 - np.exp(-gamma * delta_t)
+
     e0 = np.array([[1, 0], [0, np.sqrt(1 - new_gamma)]])
     e1 = np.array([[0, np.sqrt(new_gamma)], [0, 0]])
 
-    final_rho = np.zeros_like(rho)
+    cur_rho = rho_sys
 
+    eig_val, eig_vec = np.linalg.eig(ham)
+    eig_vec_inv = np.linalg.inv(eig_vec)
+
+    krauses = []
     for kraus_ops in product([e0, e1], repeat=num_qubits):
-        term = _kron_multi(kraus_ops)
-        final_rho += (term @ rho @ term.conj().T)
+        krauses.append(_kron_multi(kraus_ops))
 
-    return final_rho
+    for _ in range(nue):
+        final_rho = np.zeros_like(cur_rho)
+        for kraus in krauses:
+            final_rho += (kraus @ cur_rho @ kraus.conj().T)
+
+        cur_rho = (
+            matrix_exp(eig_vec, eig_val, eig_vec_inv, time=delta_t)
+            @ final_rho
+            @ matrix_exp(eig_vec, eig_val, eig_vec_inv, time=-delta_t)
+        )
+
+    return cur_rho
 
 
 def lindblad_evo(rho, ham, gamma, time):
@@ -158,7 +177,7 @@ def ham_evo(rho_sys, rho_env, ham_sys, gamma, time, neu=1000):
 
     hams = []
     for ham_int in ham_ints:
-        ham = (big_ham_sys / QUBIT_COUNT) + ham_int
+        ham = (np.sqrt(tau) * big_ham_sys / QUBIT_COUNT) + ham_int
         eig_val, eig_vec = np.linalg.eig(ham)
         eig_vec_inv = np.linalg.inv(eig_vec)
         hams.append((eig_vec, eig_val, eig_vec_inv))
@@ -187,7 +206,8 @@ def test_main():
 
     psi = _random_psi(qubit_count=QUBIT_COUNT)
     rho_sys = np.outer(psi, psi.conj())
-    ham = np.zeros_like(rho_sys)
+    # ham = np.zeros_like(rho_sys)
+    ham = parametrized_ising(QUBIT_COUNT, H_VAL).matrix
 
     # Environment qubit is always in ZERO, and it is always only one qubit each
     rho_env = np.outer(ZERO, ZERO.conj())
@@ -196,7 +216,7 @@ def test_main():
         for time in TIMES:
             neu = max(100, int(10 * (time**2) / EPS))
             rho_ham = ham_evo(rho_sys, rho_env, ham, gamma, time, neu)
-            rho_amp = apply_amplitude_damping(rho_sys, gamma, time)
+            rho_amp = apply_amplitude_damping(rho_sys, ham, gamma, time, neu)
             rho_lin = lindblad_evo(rho_sys, ham, gamma, time)
 
             rho_lin = rho_lin / global_phase(rho_lin)
