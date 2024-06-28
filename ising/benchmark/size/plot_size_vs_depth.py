@@ -87,7 +87,7 @@ def main():
     ax.spines["right"].set_visible(False)
 
     # Add labels for each group
-    plt.xlabel(r"Size ($\log_{10}$ scale)")
+    plt.xlabel(r"Chain Size")
     plt.ylabel(r"CNOT Gate Count ($\log_{10}$ scale)")
 
     plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.15), ncol=2, fontsize=10)
