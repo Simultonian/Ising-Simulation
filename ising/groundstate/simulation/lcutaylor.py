@@ -120,3 +120,4 @@ class LCUTaylor:
                 pbar.update(1)
 
         return calculate_mu(results, count, self.lcu_coeffs)
+

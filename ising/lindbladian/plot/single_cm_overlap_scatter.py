@@ -29,26 +29,32 @@ def test_main():
 
     fig, ax = plt.subplots()
 
-    for ind, (_title, result) in enumerate(results.items()):
+    x_values, y_values = [], []
+    for time_str, res_str in results["lindbladian"].items():
+        time, res = float(time_str), float(res_str)
+        x_values.append(time)
+        y_values.append(res)
 
-        x_values, y_values = [], []
-        for time_str, res_str in result.items():
-            time, res = float(time_str), float(res_str)
-            x_values.append(time)
-            y_values.append(res)
+    ax = sns.lineplot(
+        x=x_values,
+        y=y_values,
+        label=f"{MAP['lindbladian']}",
+        color=COLORS[0],
+    )
 
-        ax = sns.scatterplot(
-            x=x_values,
-            y=y_values,
-            label=f"{MAP[_title]}",
-            linewidth=3,
-            color=COLORS[ind],
-        )
-        ax = sns.lineplot(
-            x=x_values,
-            y=y_values,
-            color=COLORS[ind],
-        )
+    x_values, y_values = [], []
+    for time_str, res_str in results["interaction"].items():
+        time, res = float(time_str), float(res_str)
+        x_values.append(time)
+        y_values.append(res)
+
+    ax = sns.scatterplot(
+        x=x_values,
+        y=y_values,
+        label=f"{MAP['interaction']}",
+        s=25,
+        color=COLORS[1],
+    )
 
     # Remove the top and right border
     ax.spines["top"].set_visible(False)
@@ -58,7 +64,7 @@ def test_main():
     plt.ylabel(r"Overlap with $|1\rangle$ state")
     plt.xlabel(r"Evolution time")
 
-    file_name = f"plots/lindbladian/simulation/single_cm.png"
+    file_name = f"plots/lindbladian/simulation/single_cm_scatter.png"
 
     plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.10), ncol=3, fontsize=10)
     plt.savefig(file_name, dpi=300)

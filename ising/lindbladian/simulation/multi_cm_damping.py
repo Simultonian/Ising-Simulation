@@ -9,6 +9,10 @@ from ising.lindbladian.simulation.unraveled import (
 from ising.utils import global_phase
 from ising.utils.trace import partial_trace
 from ising.hamiltonian import parametrized_ising
+from ising.observables import overall_magnetization
+
+from tqdm import tqdm
+
 
 ZERO = np.array([[1], [0]])
 ONE = np.array([[0], [1]])
@@ -16,12 +20,16 @@ SIGMA_MINUS = np.array([[0, 1], [0, 0]])
 SIGMA_PLUS = np.array([[0, 0], [1, 0]])
 
 
-QUBIT_COUNT = 2
+QUBIT_COUNT = 5
 GAMMAS = [0, 0.1, 0.4, 0.7, 0.9]
-TIMES = [0, 0.5, 1, 1.5, 2]
+GAMMA = 0
+TIME_RANGE = (0, 3)
+TIME_COUNT = 10
 EPS = 0.01
 
 H_VAL = -0.1
+COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
+
 
 
 def _round(mat):
@@ -176,21 +184,30 @@ def ham_evo(rho_sys, rho_env, ham_sys, gamma, time, neu=1000):
     ham_ints = interaction_hamiltonian(QUBIT_COUNT, gamma=gamma)
 
     hams = []
+    print(f"Running for time:{time}, neu:{neu}")
     for ham_int in ham_ints:
         ham = (np.sqrt(tau) * big_ham_sys / QUBIT_COUNT) + ham_int
         eig_val, eig_vec = np.linalg.eig(ham)
         eig_vec_inv = np.linalg.inv(eig_vec)
         hams.append((eig_vec, eig_val, eig_vec_inv))
+    print("Kraus operator calculation complete")
 
-    for _ in range(neu):
-        for eig_vec, eig_val, eig_vec_inv in hams:
-            complete_rho = np.kron(cur_rho_sys, big_rho_env)
-            rho_fin = (
-                matrix_exp(eig_vec, eig_val, eig_vec_inv, time=np.sqrt(tau))
-                @ complete_rho
-                @ matrix_exp(eig_vec, eig_val, eig_vec_inv, time=-np.sqrt(tau))
-            )
-            cur_rho_sys = partial_trace(rho_fin, list(range(QUBIT_COUNT, 2*QUBIT_COUNT)))
+    us, u_dags = [], []
+    for eig_vec, eig_val, eig_vec_inv in hams:
+        u = matrix_exp(eig_vec, eig_val, eig_vec_inv, time=np.sqrt(tau))
+        u_dag = matrix_exp(eig_vec, eig_val, eig_vec_inv, time=-np.sqrt(tau))
+        us.append(u)
+        u_dags.append(u_dag)
+
+    with tqdm(total=neu) as pbar:
+        for _ in range(neu):
+            pbar.update(1)
+            for u, u_dag in zip(us, u_dags):
+                complete_rho = np.kron(cur_rho_sys, big_rho_env)
+                rho_fin = (
+                    u @ complete_rho @ u_dag 
+                )
+                cur_rho_sys = partial_trace(rho_fin, list(range(QUBIT_COUNT, 2*QUBIT_COUNT)))
 
     return cur_rho_sys
 
@@ -212,19 +229,28 @@ def test_main():
     # Environment qubit is always in ZERO, and it is always only one qubit each
     rho_env = np.outer(ZERO, ZERO.conj())
 
-    for gamma in GAMMAS:
-        for time in TIMES:
-            neu = max(100, int(10 * (time**2) / EPS))
-            rho_ham = ham_evo(rho_sys, rho_env, ham, gamma, time, neu)
-            rho_amp = apply_amplitude_damping(rho_sys, ham, gamma, time, neu)
-            rho_lin = lindblad_evo(rho_sys, ham, gamma, time)
+    observable = overall_magnetization(QUBIT_COUNT).matrix
 
-            rho_lin = rho_lin / global_phase(rho_lin)
-            rho_amp = rho_amp / global_phase(rho_amp)
-            rho_ham = rho_ham / global_phase(rho_ham)
+    gamma = GAMMA
+    results = {"interaction": {}, "lindbladian": {}}
+    times = np.linspace(TIME_RANGE[0], TIME_RANGE[1], TIME_COUNT)
+    for time in times:
+        neu = max(100, int(10 * (time**2) / EPS))
+        rho_ham = ham_evo(rho_sys, rho_env, ham, gamma, time, neu)
+        rho_amp = apply_amplitude_damping(rho_sys, ham, gamma, time, neu)
+        rho_lin = lindblad_evo(rho_sys, ham, gamma, time)
 
-            np.testing.assert_almost_equal(rho_lin, rho_amp, decimal=4)
-            np.testing.assert_almost_equal(rho_lin, rho_ham, decimal=4)
+        rho_lin = rho_lin / global_phase(rho_lin)
+        rho_amp = rho_amp / global_phase(rho_amp)
+        rho_ham = rho_ham / global_phase(rho_ham)
+        results["interaction"][time] = np.trace(np.abs(observable @ rho_ham))
+        results["lindbladian"][time] = np.trace(np.abs(observable @ rho_lin))
+
+    file_name = f"data/lindbladian/time_vs_magn/size_{QUBIT_COUNT}.json"
+    with open(file_name, "w") as file:
+        json.dump(results, file)
+
+    print(f"saved the data to {file_name}")
 
 
 if __name__ == "__main__":

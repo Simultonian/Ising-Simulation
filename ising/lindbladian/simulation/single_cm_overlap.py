@@ -18,10 +18,11 @@ SIGMA_PLUS = np.array([[0, 0], [1, 0]])
 
 QUBIT_COUNT = 1
 GAMMA = 0.1
-TIMES = [0, 10, 100, 150]
+TIMES_RANGE = (0, 5)
+TIMES_COUNT = 20
 EPS = 0.5
 
-H_VAL = -0.1
+H_VAL = -1
 
 
 def _round(mat):
@@ -230,11 +231,13 @@ def test_main():
     # Environment qubit is always in ZERO, and it is always only one qubit each
     rho_env = np.outer(ZERO, ZERO.conj())
 
+    times = np.linspace(TIMES_RANGE[0], TIMES_RANGE[1], TIMES_COUNT)
+
     file_name = f"data/lindbladian/overlap/one_qubit.json"
     results = {
-            "interaction": ham_evo_overlap(rho_sys, rho_env, ham, GAMMA, TIMES),
-            "kraus": apply_amplitude_damping_overlap(rho_sys, ham, GAMMA, TIMES),
-            "lindbladian": lindblad_evo_overlap(rho_sys, ham, GAMMA, TIMES)
+            "interaction": ham_evo_overlap(rho_sys, rho_env, ham, GAMMA, times),
+            "kraus": apply_amplitude_damping_overlap(rho_sys, ham, GAMMA, times),
+            "lindbladian": lindblad_evo_overlap(rho_sys, ham, GAMMA, times)
         }
 
     with open(file_name, "w") as file:
