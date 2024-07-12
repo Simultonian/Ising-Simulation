@@ -18,25 +18,30 @@ from ising.utils.commutator.commutator_hueristic import (
     alpha_commutator_second_order,
     alpha_commutator_first_order,
 )
+from ising.groundstate.simulation.utils import (
+    ground_state_constants,
+    ground_state_maximum_time,
+)
 import json
 from ising.hamiltonian import parse
 
 
-QUBIT = 25
+QUBIT = 5
 H_VAL = 0.1
-ERROR = 0.01
-DELTA = 0.1
+ERROR_RANGE = (-1, -4)
+ERROR_COUNT = 10
+OVERLAP = 0.1
+PROBABILITY = 0.1
+
 
 # ERROR, TIME
 OBS_NORM = 1
-TIME_PAIR = (0, 4)
-TIME_COUNT = 8
 FILE_NAME = f"methane"
 
 
 def test_main():
     # One row is fixed time
-    time_points = [10**x for x in np.linspace(TIME_PAIR[0], TIME_PAIR[1], TIME_COUNT)]
+    error_points = [10**x for x in np.linspace(ERROR_RANGE[0], ERROR_RANGE[1], ERROR_COUNT)]
 
     ham = parse(FILE_NAME)
     # ham = parametrized_ising(QUBIT, H_VAL)
@@ -59,6 +64,7 @@ def test_main():
     # Calculate the alpha commutators for both first and second order
 
     alpha_name = f"data/alphacomm/{FILE_NAME}.json"
+    min_error = min(error_points)
 
     if os.path.exists(alpha_name):
         with open(alpha_name, "r") as alpha_file:
@@ -71,10 +77,10 @@ def test_main():
         ll = len(sorted_pairs)
         print("Calculating the alpha commutators")
         alpha_com_first = alpha_commutator_first_order(
-            sorted_pairs, ERROR, delta=0, cutoff_count=ll**2
+            sorted_pairs, min_error, delta=0, cutoff_count=ll**2
         )
         alpha_com_second = alpha_commutator_second_order(
-            sorted_pairs, ERROR, delta=0, cutoff_count=ll
+            sorted_pairs, min_error, delta=0, cutoff_count=ll
         )
         print(f"com1:{alpha_com_first} \ncom2:{alpha_com_second}")
 
@@ -91,10 +97,12 @@ def test_main():
         "ktrotter": {},
     }
 
-    for time in time_points:
+    for error in error_points:
+        ground_params = ground_state_constants(ham.spectral_gap, OVERLAP, error, PROBABILITY, obs_norm=1)
+        time = ground_state_maximum_time(ground_params)
         k = int(
             np.floor(
-                np.log(lambd * time / ERROR) / np.log(np.log(lambd * time / ERROR))
+                np.log(lambd * time / error) / np.log(np.log(lambd * time / error))
             )
         )
 
@@ -102,30 +110,31 @@ def test_main():
         print(f"Taylor:{taylor_counts}")
 
         trotter_rep = r_first_order(
-            sorted_pairs, time, ERROR, alpha_com=alpha_com_first
+            sorted_pairs, time, error, alpha_com=alpha_com_first
         )
-        trotter_counts = trotter_bench.circuit_gate_count("cx", trotter_rep)
+        trotter_counts = trotter_bench.controlled_gate_count(time, trotter_rep)["cx"]
         print(f"Trotter:{trotter_counts}")
 
-        qdrift_rep = qdrift_count(lambd, time, ERROR)
+        qdrift_rep = qdrift_count(lambd, time, error)
         qdrift_counts = qdrift_bench.simulation_gate_count(time, qdrift_rep)
         print(f"qDRIFT:{qdrift_counts}")
 
         ktrotter_reps = r_second_order(
-            sorted_pairs, time, ERROR, alpha_com=alpha_com_second
+            sorted_pairs, time, error, alpha_com=alpha_com_second
         )
-        ktrotter_counts = ktrotter_bench.circuit_gate_count("cx", ktrotter_reps)
+        ktrotter_counts = ktrotter_bench.controlled_gate_count(time, ktrotter_reps)["cx"]
         print(f"kTrotter:{ktrotter_counts}")
 
-        results["taylor"][time] = str(taylor_counts["cx"])
-        results["trotter"][time] = str(trotter_counts)
-        results["qdrift"][time] = str(qdrift_counts["cx"])
-        results["ktrotter"][time] = str(ktrotter_counts)
+        results["taylor"][error] = str(taylor_counts["cx"])
+        results["trotter"][error] = str(trotter_counts)
+        results["qdrift"][error] = str(qdrift_counts["cx"])
+        results["ktrotter"][error] = str(ktrotter_counts)
 
         print("-----------------")
 
-    json_name = f"data/benchmark/line/time/{FILE_NAME}_{TIME_PAIR[1]}.json"
+    json_name = f"data/benchmark/line/error/{FILE_NAME}_{ERROR_RANGE[0]}.json"
 
+    print(results)
     print(f"Saving results at: {json_name}")
     with open(json_name, "w") as file:
         json.dump(results, file)

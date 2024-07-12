@@ -20,12 +20,12 @@ SIGMA_MINUS = np.array([[0, 1], [0, 0]])
 SIGMA_PLUS = np.array([[0, 0], [1, 0]])
 
 
-QUBIT_COUNT = 5
+QUBIT_COUNT = 4
 GAMMAS = [0, 0.1, 0.4, 0.7, 0.9]
 GAMMA = 0
-TIME_RANGE = (0, 3)
-TIME_COUNT = 10
-EPS = 0.01
+TIME_RANGE = (0, 10)
+TIME_COUNT = 50
+EPS = 0.1
 
 H_VAL = -0.1
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
@@ -237,11 +237,9 @@ def test_main():
     for time in times:
         neu = max(100, int(10 * (time**2) / EPS))
         rho_ham = ham_evo(rho_sys, rho_env, ham, gamma, time, neu)
-        rho_amp = apply_amplitude_damping(rho_sys, ham, gamma, time, neu)
         rho_lin = lindblad_evo(rho_sys, ham, gamma, time)
 
         rho_lin = rho_lin / global_phase(rho_lin)
-        rho_amp = rho_amp / global_phase(rho_amp)
         rho_ham = rho_ham / global_phase(rho_ham)
         results["interaction"][time] = np.trace(np.abs(observable @ rho_ham))
         results["lindbladian"][time] = np.trace(np.abs(observable @ rho_lin))

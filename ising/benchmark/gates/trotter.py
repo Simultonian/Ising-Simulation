@@ -1,4 +1,5 @@
 from typing import Union
+from functools import cache
 import numpy as np
 from tqdm import tqdm
 
@@ -150,6 +151,20 @@ class TrotterBenchmarkTime:
         circuit = circuit.repeat(reps)
         return circuit
 
+    @cache
+    def controlled_simulation_circuit_decomposed(self, time: float, reps: int) -> Counter:
+        """
+        Get the simulation circuit when controlled
+        """
+        big_circ = QuantumCircuit(self.ham.num_qubits + 1)
+        controlled_gate = self.simulation_circuit(time, reps).to_gate().control(1)
+        big_circ.append(controlled_gate, range(self.ham.num_qubits + 1))
+        dqc = self.decomposer.decompose(big_circ)
+        counter = Counter()
+        counter.add(dict(dqc.count_ops()))
+
+        return counter
+
     def circuit_gate_count(self, gate: str, reps: int) -> int:
         """
         Counts the gates analytically rather than via decomposition.
@@ -185,18 +200,13 @@ class TrotterBenchmarkTime:
     def controlled_gate_count(self, time: float, reps: int) -> dict[str, int]:
         print(f"Trotter: Running controlled gate count for time: {time}")
 
-        big_circ = QuantumCircuit(self.ham.num_qubits + 1)
         if reps < SPLIT_SIZE:
             split = 1
         else:
             split = SPLIT_SIZE
 
-        controlled_gate = self.simulation_circuit(time, split).to_gate().control(1)
-        big_circ.append(controlled_gate, range(self.ham.num_qubits + 1))
-        dqc = self.decomposer.decompose(big_circ)
+        counter = self.controlled_simulation_circuit_decomposed(time, split)
 
-        counter = Counter()
-        counter.add(dict(dqc.count_ops()))
         return counter.times(reps // split)
 
 

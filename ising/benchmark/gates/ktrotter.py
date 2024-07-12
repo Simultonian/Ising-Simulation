@@ -49,6 +49,17 @@ class KTrotterBenchmarkTime:
         print("created circuit")
         circuit = circuit.repeat(reps)
         return circuit
+    
+    def controlled_simulation_circuit_decomposed(self, time: float, reps: int) -> Counter:
+        big_circ = QuantumCircuit(self.ham.num_qubits + 1)
+        controlled_gate = self.simulation_circuit(time, reps).to_gate().control(1)
+        big_circ.append(controlled_gate, range(self.ham.num_qubits + 1))
+        dqc = self.decomposer.decompose(big_circ)
+        counter = Counter()
+        counter.add(dict(dqc.count_ops()))
+        return counter
+
+
 
     def circuit_gate_count(self, gate: str, reps: int) -> int:
         """
@@ -89,18 +100,13 @@ class KTrotterBenchmarkTime:
     def controlled_gate_count(self, time: float, reps: int) -> dict[str, int]:
         print(f"KTrotter: Running controlled gate count for time: {time}")
 
-        big_circ = QuantumCircuit(self.ham.num_qubits + 1)
         if reps < SPLIT_SIZE:
             split = 1
         else:
             split = SPLIT_SIZE
 
-        controlled_gate = self.simulation_circuit(time, split).to_gate().control(1)
-        big_circ.append(controlled_gate, range(self.ham.num_qubits + 1))
-        dqc = self.decomposer.decompose(big_circ)
+        counter = self.controlled_simulation_circuit_decomposed(time, split)
 
-        counter = Counter()
-        counter.add(dict(dqc.count_ops()))
         return counter.times(reps // split)
 
 
