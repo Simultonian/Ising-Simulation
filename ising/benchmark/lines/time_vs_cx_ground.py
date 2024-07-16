@@ -29,7 +29,7 @@ from ising.hamiltonian import parse
 QUBIT = 5
 H_VAL = 0.1
 ERROR_RANGE = (-1, -4)
-ERROR_COUNT = 10
+ERROR_COUNT = 5
 OVERLAP = 0.1
 PROBABILITY = 0.1
 
@@ -100,6 +100,13 @@ def test_main():
     for error in error_points:
         ground_params = ground_state_constants(ham.spectral_gap, OVERLAP, error, PROBABILITY, obs_norm=1)
         time = ground_state_maximum_time(ground_params)
+
+        trotter_rep = r_first_order(
+            sorted_pairs, time, error, alpha_com=alpha_com_first
+        )
+        trotter_counts = trotter_bench.controlled_gate_count(time, trotter_rep)["cx"]
+        print(f"Trotter:{trotter_counts}")
+
         k = int(
             np.floor(
                 np.log(lambd * time / error) / np.log(np.log(lambd * time / error))
@@ -109,11 +116,6 @@ def test_main():
         taylor_counts = taylor_bench.simulation_gate_count(time, k)
         print(f"Taylor:{taylor_counts}")
 
-        trotter_rep = r_first_order(
-            sorted_pairs, time, error, alpha_com=alpha_com_first
-        )
-        trotter_counts = trotter_bench.controlled_gate_count(time, trotter_rep)["cx"]
-        print(f"Trotter:{trotter_counts}")
 
         qdrift_rep = qdrift_count(lambd, time, error)
         qdrift_counts = qdrift_bench.simulation_gate_count(time, qdrift_rep)

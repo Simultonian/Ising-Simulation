@@ -27,6 +27,6 @@ class Decomposer:
         self.skd = SolovayKitaev(recursion_degree=3, basic_approximations=approx)
 
     def decompose(self, circuit):
-        tqc = transpile(circuit, None, optimization_level=3, basis_gates=ALL_GATES)
+        tqc = transpile(circuit, None, optimization_level=1, basis_gates=ALL_GATES)
         return tqc
         return self.skd(tqc)

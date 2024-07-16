@@ -1,11 +1,9 @@
 from typing import Union
 import numpy as np
+from functools import cache
 from ising.hamiltonian import Hamiltonian
-from ising.groundstate.simulation.utils import (
-    ground_state_constants,
-    ground_state_maximum_time,
-)
 from ising.utils.gate_count import count_non_trivial
+from tqdm import tqdm
 
 from ising.hamiltonian.ising_one import trotter_reps_general
 from ising.utils import Decomposer
@@ -16,7 +14,7 @@ from qiskit.quantum_info import Pauli, SparsePauliOp
 from ising.benchmark.gates.counter import Counter
 from qiskit.synthesis import SuzukiTrotter
 
-SPLIT_SIZE = 100
+SPLIT_SIZE = 1
 
 
 class KTrotterBenchmarkTime:
@@ -40,6 +38,7 @@ class KTrotterBenchmarkTime:
         circuit = QuantumCircuit(self.ham.num_qubits)
 
         print("creating circuit")
+
         evo = PauliEvolutionGate(
             self.ham.sparse_repr, time=time / reps, synthesis=self.synth
         )
@@ -50,16 +49,29 @@ class KTrotterBenchmarkTime:
         circuit = circuit.repeat(reps)
         return circuit
     
+    @cache
     def controlled_simulation_circuit_decomposed(self, time: float, reps: int) -> Counter:
-        big_circ = QuantumCircuit(self.ham.num_qubits + 1)
-        controlled_gate = self.simulation_circuit(time, reps).to_gate().control(1)
-        big_circ.append(controlled_gate, range(self.ham.num_qubits + 1))
-        dqc = self.decomposer.decompose(big_circ)
+        """
+        Get the simulation circuit when controlled
+        """
+
+        print("starting circuit")
         counter = Counter()
-        counter.add(dict(dqc.count_ops()))
+        with tqdm(total=reps*len(self.ham.paulis)) as pbar:
+            for _ in range(reps):
+                for pauli, _coeff in zip(self.ham.paulis, self.ham.coeffs):
+                    coeff = abs(_coeff)
+                    evo = PauliEvolutionGate(pauli, time=coeff * time / reps).control(1)
+                    circuit = QuantumCircuit(evo.num_qubits)
+                    circuit.append(evo, range(evo.num_qubits))
+                    count = dict(self.decomposer.decompose(circuit).count_ops())
+                    counter.weighted_add(2, count)
+
+                    pbar.update(1)
+
+        print("circuit complete")
+
         return counter
-
-
 
     def circuit_gate_count(self, gate: str, reps: int) -> int:
         """

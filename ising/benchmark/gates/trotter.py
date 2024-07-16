@@ -119,7 +119,7 @@ def trotter_gates(
     return benchmarker.calculate_gates()
 
 
-SPLIT_SIZE = 100
+SPLIT_SIZE = 2
 
 
 class TrotterBenchmarkTime:
@@ -141,14 +141,13 @@ class TrotterBenchmarkTime:
         circuit = QuantumCircuit(self.ham.num_qubits)
 
         print("starting circuit")
-        for pauli, _coeff in zip(self.ham.paulis, self.ham.coeffs):
-            coeff = abs(_coeff)
-            evo = PauliEvolutionGate(pauli, time=coeff * time / reps)
-            circuit.append(evo, range(evo.num_qubits))
+        for _ in range(reps):
+            for pauli, _coeff in zip(self.ham.paulis, self.ham.coeffs):
+                coeff = abs(_coeff)
+                evo = PauliEvolutionGate(pauli, time=coeff * time / reps)
+                circuit.append(evo, range(evo.num_qubits))
 
-        # Could be heavy operation for large reps.
-        print(f"repeating circuit for {reps}")
-        circuit = circuit.repeat(reps)
+        print("circuit complete")
         return circuit
 
     @cache
@@ -156,12 +155,22 @@ class TrotterBenchmarkTime:
         """
         Get the simulation circuit when controlled
         """
-        big_circ = QuantumCircuit(self.ham.num_qubits + 1)
-        controlled_gate = self.simulation_circuit(time, reps).to_gate().control(1)
-        big_circ.append(controlled_gate, range(self.ham.num_qubits + 1))
-        dqc = self.decomposer.decompose(big_circ)
+
+        print("starting circuit")
         counter = Counter()
-        counter.add(dict(dqc.count_ops()))
+        with tqdm(total=reps*len(self.ham.paulis)) as pbar:
+            for _ in range(reps):
+                for pauli, _coeff in zip(self.ham.paulis, self.ham.coeffs):
+                    coeff = abs(_coeff)
+                    evo = PauliEvolutionGate(pauli, time=coeff * time / reps).control(1)
+                    circuit = QuantumCircuit(evo.num_qubits)
+                    circuit.append(evo, range(evo.num_qubits))
+                    count = dict(self.decomposer.decompose(circuit).count_ops())
+                    counter.add(count)
+
+                    pbar.update(1)
+
+        print("circuit complete")
 
         return counter
 
