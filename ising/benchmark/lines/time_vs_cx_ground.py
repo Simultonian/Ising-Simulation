@@ -26,7 +26,7 @@ import json
 from ising.hamiltonian import parse
 
 
-QUBIT = 5
+QUBIT = 25
 H_VAL = 0.1
 ERROR_RANGE = (-1, -4)
 ERROR_COUNT = 5
@@ -36,15 +36,15 @@ PROBABILITY = 0.1
 
 # ERROR, TIME
 OBS_NORM = 1
-FILE_NAME = f"methane"
+FILE_NAME = f"ising_{QUBIT}"
 
 
 def test_main():
     # One row is fixed time
     error_points = [10**x for x in np.linspace(ERROR_RANGE[0], ERROR_RANGE[1], ERROR_COUNT)]
 
-    ham = parse(FILE_NAME)
-    # ham = parametrized_ising(QUBIT, H_VAL)
+    # ham = parse(FILE_NAME)
+    ham = parametrized_ising(QUBIT, H_VAL)
 
     sorted_pairs = list(
         sorted(

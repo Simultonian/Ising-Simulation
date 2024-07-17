@@ -9,7 +9,7 @@ import json
 from ising.hamiltonian import parse
 
 
-QUBIT = 5
+QUBIT = 25
 H_VAL = 0.1
 ERROR_RANGE = (-1, -4)
 ERROR_COUNT = 10
@@ -19,7 +19,7 @@ PROBABILITY = 0.1
 
 # ERROR, TIME
 OBS_NORM = 1
-FILE_NAME = f"methane"
+FILE_NAME = f"ising_{QUBIT}"
 
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
 MAP = {

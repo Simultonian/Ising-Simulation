@@ -130,10 +130,12 @@ def parametrized_ising(
         # Reset to avoid copying
         p_i[i] = "I"
 
-    return Hamiltonian(
+    ham = Hamiltonian(
         sparse_repr=SparsePauliOp(
             zz_terms + x_terms, np.concatenate([zz_coeffs, x_coeffs])
         ),
         normalized=normalize,
         _approx_spectral_gap=2 * abs(J) * abs(1 - h),
     )
+    ham._spectral_gap = ham._approx_spectral_gap
+    return ham
