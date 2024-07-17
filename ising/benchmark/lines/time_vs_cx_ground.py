@@ -57,9 +57,9 @@ def test_main():
     lambd = np.sum(np.abs(ham.coeffs))
 
     taylor_bench = TaylorBenchmarkTime(ham)
-    trotter_bench = TrotterBenchmarkTime(ham)
+    trotter_bench = TrotterBenchmarkTime(ham, system=FILE_NAME)
     qdrift_bench = QDriftBenchmarkTime(ham)
-    ktrotter_bench = KTrotterBenchmarkTime(ham, order=2)
+    ktrotter_bench = KTrotterBenchmarkTime(ham, system=FILE_NAME, order=2)
 
     # Calculate the alpha commutators for both first and second order
 

@@ -19,11 +19,11 @@ PROBABILITY = 0.1
 
 # ERROR, TIME
 OBS_NORM = 1
-FILE_NAME = f"ising_{QUBIT}"
+FILE_NAME = f"methane"
 
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
 MAP = {
-    "taylor": "Truncated Taylor Series",
+    "taylor": "Single Ancilla LCU",
     "qdrift": "QDrift Protocol",
     "trotter": "First Order Trotterization",
     "ktrotter": "Second Order Trotterization",

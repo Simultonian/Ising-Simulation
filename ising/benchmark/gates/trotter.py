@@ -17,6 +17,7 @@ from ising.benchmark.gates.counter import Counter
 from ising.utils.gate_count import count_non_trivial
 from ising.hamiltonian.ising_one import trotter_reps_general
 from ising.utils import Decomposer
+from ising.utils.pauligate import PauliCounter
 
 
 def gates_for_pauli(
@@ -119,11 +120,11 @@ def trotter_gates(
     return benchmarker.calculate_gates()
 
 
-SPLIT_SIZE = 2
+SPLIT_SIZE = 1
 
 
 class TrotterBenchmarkTime:
-    def __init__(self, ham: Hamiltonian):
+    def __init__(self, ham: Hamiltonian, system: str):
         """
         Benchmark calculator for Trotterization based groundstate preparation.
 
@@ -132,6 +133,7 @@ class TrotterBenchmarkTime:
         """
 
         self.ham = ham
+        self.system = system
         self.decomposer = Decomposer()
 
     def simulation_circuit(self, time: float, reps: int) -> QuantumCircuit:
@@ -158,21 +160,35 @@ class TrotterBenchmarkTime:
 
         print("starting circuit")
         counter = Counter()
-        with tqdm(total=reps*len(self.ham.paulis)) as pbar:
-            for _ in range(reps):
+
+        # Coeff remains same for the system
+        pauli_counter = PauliCounter(self.system, self.ham.num_qubits, time / reps)
+        prev_data = pauli_counter.control_data
+
+        if len(prev_data) != len(self.ham.paulis):
+            data = {}
+            with tqdm(total=len(self.ham.paulis)) as pbar:
                 for pauli, _coeff in zip(self.ham.paulis, self.ham.coeffs):
                     coeff = abs(_coeff)
                     evo = PauliEvolutionGate(pauli, time=coeff * time / reps).control(1)
+
                     circuit = QuantumCircuit(evo.num_qubits)
                     circuit.append(evo, range(evo.num_qubits))
                     count = dict(self.decomposer.decompose(circuit).count_ops())
                     counter.add(count)
+                    data[str(pauli)] = count
 
                     pbar.update(1)
-
-        print("circuit complete")
-
-        return counter
+            result = {"total": counter.count, "individual": data}
+            pauli_counter.set_control_data(result)
+            print("circuit complete")
+        else:
+            print("Loaded from Pauli Counter")
+            counter.add(pauli_counter.control_total)
+        
+        new_counter = Counter()
+        new_counter.weighted_add(reps, counter.count)
+        return new_counter 
 
     def circuit_gate_count(self, gate: str, reps: int) -> int:
         """
