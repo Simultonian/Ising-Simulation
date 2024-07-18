@@ -20,11 +20,11 @@ SIGMA_MINUS = np.array([[0, 1], [0, 0]])
 SIGMA_PLUS = np.array([[0, 0], [1, 0]])
 
 
-QUBIT_COUNT = 4
+QUBIT_COUNT = 5
 GAMMAS = [0, 0.1, 0.4, 0.7, 0.9]
 GAMMA = 0
-TIME_RANGE = (0, 10)
-TIME_COUNT = 50
+TIME_RANGE = (0, 5)
+TIME_COUNT = 10
 EPS = 0.1
 
 H_VAL = -0.1
@@ -190,7 +190,7 @@ def ham_evo(rho_sys, rho_env, ham_sys, gamma, time, neu=1000):
         eig_val, eig_vec = np.linalg.eig(ham)
         eig_vec_inv = np.linalg.inv(eig_vec)
         hams.append((eig_vec, eig_val, eig_vec_inv))
-    print("Kraus operator calculation complete")
+    print("Ham operator calculation complete")
 
     us, u_dags = [], []
     for eig_vec, eig_val, eig_vec_inv in hams:
