@@ -14,7 +14,7 @@ from ising.observables import overall_magnetization
 from tqdm import tqdm
 
 
-ZERO = np.array([[1], [0]])
+ERO = np.array([[1], [0]])
 ONE = np.array([[0], [1]])
 SIGMA_MINUS = np.array([[0, 1], [0, 0]])
 SIGMA_PLUS = np.array([[0, 0], [1, 0]])
