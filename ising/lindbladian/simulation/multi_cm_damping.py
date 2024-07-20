@@ -23,8 +23,8 @@ SIGMA_PLUS = np.array([[0, 0], [1, 0]])
 QUBIT_COUNT = 5
 GAMMAS = [0, 0.1, 0.4, 0.7, 0.9]
 GAMMA = 0
-TIME_RANGE = (0, 5)
-TIME_COUNT = 10
+TIME_RANGE = (0, 7)
+TIME_COUNT = 20
 EPS = 0.1
 
 H_VAL = -0.1
