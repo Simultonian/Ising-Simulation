@@ -252,7 +252,7 @@ class Taylor:
 
 def collision_model_evo(
     rho_sys: NDArray,
-    big_rho_env: NDArray,
+    rho_env: NDArray,
     ham_ints: list[tuple[list[Pauli], list[float]]],
     ham_sys: tuple[list[Pauli], list[float]],
     tau: float,
@@ -319,10 +319,10 @@ def collision_model_evo(
 
             for _ in range(neu):
                 for taylor in taylors:
-                    complete_rho = np.kron(cur_rho_sys, big_rho_env)
+                    complete_rho = np.kron(cur_rho_sys, rho_env)
                     rho_fin = taylor.sample_and_evolve(complete_rho)
                     cur_rho_sys = partial_trace(
-                        rho_fin, list(range(qubit_count, 2 * qubit_count))
+                        rho_fin, list(range(qubit_count, qubit_count + 1))
                     )
 
             cur_rho_sys = cur_rho_sys / global_phase(cur_rho_sys)

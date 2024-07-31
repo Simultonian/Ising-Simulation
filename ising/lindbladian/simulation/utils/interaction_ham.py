@@ -6,21 +6,21 @@ SIGMA_MINUS = np.array([[0, 1], [0, 0]])
 SIGMA_PLUS = np.array([[0, 0], [1, 0]])
 
 
-def interaction_hamiltonian(qubit_count):
+def interaction_hamiltonian(QUBIT_COUNT):
     """
-    Construct a `2*qubit_count` Hamiltonian for each interaction point.
-    There will be `qubit_count` of them, acting on two qubits each
+    Construct a `QUBIT_COUNT+1` Hamiltonian for each interaction point.
+    There will be `QUBIT_COUNT` of them, acting on two qubits each
 
     Input:
-        - qubit_count: Size of the chain
+        - QUBIT_COUNT: Size of the chain
         - gamma: Strength of the Hamiltonian
     """
     ham_ints = []
-    for _site in range(qubit_count):
-        sys_site, env_site = _site, _site + qubit_count
+    for _site in range(QUBIT_COUNT):
+        sys_site, env_site = _site, QUBIT_COUNT + 1
 
         ham_int1, ham_int2 = None, None
-        for pos in range(2*qubit_count):
+        for pos in range(QUBIT_COUNT + 1):
             cur_op1, cur_op2 = None, None
             if pos == sys_site:
                 cur_op1, cur_op2 = SIGMA_PLUS, SIGMA_MINUS

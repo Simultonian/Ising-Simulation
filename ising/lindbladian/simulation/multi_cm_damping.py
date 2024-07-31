@@ -237,10 +237,6 @@ def taylor_evo(rho_sys, rho_env, observable, gamma, time, error, neu=10):
     """
     tau = time / neu
 
-    big_rho_env = rho_env
-    for _ in range(QUBIT_COUNT - 1):
-        big_rho_env = np.kron(big_rho_env, rho_env)
-
     pre_gamma_ham_ints = load_interaction_hams(QUBIT_COUNT)
     ham_ints = []
 
@@ -251,12 +247,13 @@ def taylor_evo(rho_sys, rho_env, observable, gamma, time, error, neu=10):
 
     ham_sys = parametrized_ising(QUBIT_COUNT, H_VAL)
     pauli_sys, coeff_sys = ham_sys.paulis, ham_sys.coeffs
-    pauli_sys = [Pauli(pauli.to_label() + "I" * QUBIT_COUNT) for pauli in pauli_sys]
-    results = []
+
+    # single environment qubit
+    pauli_sys = [Pauli(pauli.to_label() + "I") for pauli in pauli_sys]
 
     magn_h = collision_model_evo(
         rho_sys = rho_sys,
-        big_rho_env = big_rho_env,
+        rho_env = rho_env,
         ham_ints = ham_ints,
         ham_sys = (pauli_sys, coeff_sys),
         tau = tau,
@@ -302,7 +299,7 @@ def test_main():
 
         results["interaction"][time] = np.trace(np.abs(observable @ rho_ham))
         results["lindbladian"][time] = np.trace(np.abs(observable @ rho_lin))
-        # results["sal"][time] = taylor_evo(rho_sys, rho_env, observable, gamma, time, EPS)
+        results["sal"][time] = taylor_evo(rho_sys, rho_env, observable, gamma, time, EPS)
 
     file_name = f"data/lindbladian/time_vs_magn/size_{QUBIT_COUNT}.json"
     with open(file_name, "w") as file:
