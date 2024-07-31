@@ -50,7 +50,7 @@ def save_interaction_hams(qubit_count):
         result[ind] = {"paulis": paulis, "coeffs": coeffs}
 
     file_name = f"data/lindbladian/hamiltonian/size_{qubit_count}.json"
-    with open(file_name, "w") as file:
+    with open(file_name, "w+") as file:
         json.dump(result, file)
         
     print(f"Saved interaction_hams for {qubit_count} qubits at: {file_name}")

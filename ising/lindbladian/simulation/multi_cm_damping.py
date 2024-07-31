@@ -1,10 +1,14 @@
 import numpy as np
 from itertools import product
 import json
+from qiskit.quantum_info import Pauli
 from ising.lindbladian.simulation.unraveled import (
     lowering_all_sites,
     lindbladian_operator,
 )
+
+from ising.lindbladian.simulation.imprecise import collision_model_evo
+from ising.lindbladian.simulation.utils import load_interaction_hams
 
 from ising.utils import global_phase
 from ising.utils.trace import partial_trace
@@ -14,19 +18,28 @@ from ising.observables import overall_magnetization
 from tqdm import tqdm
 
 
-ERO = np.array([[1], [0]])
+ZERO = np.array([[1], [0]])
 ONE = np.array([[0], [1]])
 SIGMA_MINUS = np.array([[0, 1], [0, 0]])
 SIGMA_PLUS = np.array([[0, 0], [1, 0]])
 
 
-QUBIT_COUNT = 5
+QUBIT_COUNT = 3
 GAMMAS = [0, 0.1, 0.4, 0.7, 0.9]
 GAMMA = 0
-TIME_RANGE = (0, 7)
+TIME_RANGE = (1, 5)
 TIME_COUNT = 20
 EPS = 0.1
+DELTA = 0.9
 
+SAL_RUNS = int(
+            8
+            * np.ceil(
+                ((np.log(2 / (1 - DELTA)))) / (EPS ** 2)
+            )
+        )
+
+SAL_RUNS = 100
 H_VAL = -0.1
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
 
@@ -212,6 +225,52 @@ def ham_evo(rho_sys, rho_env, ham_sys, gamma, time, neu=1000):
     return cur_rho_sys
 
 
+def taylor_evo(rho_sys, rho_env, observable, gamma, time, error, neu=10):
+    """
+    Replicate the Lindbladian evolution of amplitude damping using
+    interaction Hamiltonian dynamics.
+
+    Inputs:
+        - rho_sys: Initial state of system only
+        - rho_env: Initial state of environment only
+        - gamma: Strength of amplitude damping
+        - time: Evolution time to match
+    """
+    tau = time / neu
+
+    big_rho_env = rho_env
+    for _ in range(QUBIT_COUNT - 1):
+        big_rho_env = np.kron(big_rho_env, rho_env)
+
+    pre_gamma_ham_ints = load_interaction_hams(QUBIT_COUNT)
+    ham_ints = []
+
+    for sparse_repr in pre_gamma_ham_ints:
+        paulis, coeffs = sparse_repr.paulis, sparse_repr.coeffs
+        coeffs = [gamma * coeff for coeff in coeffs]
+        ham_ints.append((paulis, coeffs))
+
+    ham_sys = parametrized_ising(QUBIT_COUNT, H_VAL)
+    pauli_sys, coeff_sys = ham_sys.paulis, ham_sys.coeffs
+    pauli_sys = [Pauli(pauli.to_label() + "I" * QUBIT_COUNT) for pauli in pauli_sys]
+    results = []
+
+    magn_h = collision_model_evo(
+        rho_sys = rho_sys,
+        big_rho_env = big_rho_env,
+        ham_ints = ham_ints,
+        ham_sys = (pauli_sys, coeff_sys),
+        tau = tau,
+        error = error,
+        neu = neu,
+        runs = SAL_RUNS,
+        observable = observable,
+    )
+
+
+    return magn_h 
+
+
 def _random_psi(qubit_count):
     real_psi = np.random.uniform(-1, 1, 2**qubit_count)
     norm = sum([np.abs(x) for x in real_psi]) ** 0.5
@@ -232,17 +291,19 @@ def test_main():
     observable = overall_magnetization(QUBIT_COUNT).matrix
 
     gamma = GAMMA
-    results = {"interaction": {}, "lindbladian": {}}
+    results = {"interaction": {}, "lindbladian": {}, "sal": {}}
     times = np.linspace(TIME_RANGE[0], TIME_RANGE[1], TIME_COUNT)
     for time in times:
-        neu = max(100, int(10 * (time**2) / EPS))
+        neu = max(10, int(10 * (time**2) / EPS))
         rho_ham = ham_evo(rho_sys, rho_env, ham, gamma, time, neu)
         rho_lin = lindblad_evo(rho_sys, ham, gamma, time)
 
         rho_lin = rho_lin / global_phase(rho_lin)
         rho_ham = rho_ham / global_phase(rho_ham)
+
         results["interaction"][time] = np.trace(np.abs(observable @ rho_ham))
         results["lindbladian"][time] = np.trace(np.abs(observable @ rho_lin))
+        results["sal"][time] = taylor_evo(rho_sys, rho_env, observable, gamma, time, EPS)
 
     file_name = f"data/lindbladian/time_vs_magn/size_{QUBIT_COUNT}.json"
     with open(file_name, "w") as file:

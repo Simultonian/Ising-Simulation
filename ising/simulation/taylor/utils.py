@@ -14,7 +14,7 @@ def calculate_mu(mu_samples, count, coeffs):
 
 
 def get_cap_k(t_bar, obs_norm, eps) -> int:
-    t_bar = abs(t_bar)
+    t_bar = max(1, abs(t_bar))
     numr = np.log(t_bar * obs_norm / eps)
     return int(np.ceil(numr / np.log(numr)))
 
