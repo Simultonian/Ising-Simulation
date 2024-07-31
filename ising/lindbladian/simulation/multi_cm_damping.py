@@ -28,7 +28,7 @@ QUBIT_COUNT = 3
 GAMMAS = [0, 0.1, 0.4, 0.7, 0.9]
 GAMMA = 0
 TIME_RANGE = (1, 5)
-TIME_COUNT = 20
+TIME_COUNT = 10
 EPS = 0.1
 DELTA = 0.9
 
@@ -139,7 +139,7 @@ def lindblad_evo(rho, ham, gamma, time):
 
 def interaction_hamiltonian(QUBIT_COUNT, gamma):
     """
-    Construct a `2*QUBIT_COUNT` Hamiltonian for each interaction point.
+    Construct a `QUBIT_COUNT+1` Hamiltonian for each interaction point.
     There will be `QUBIT_COUNT` of them, acting on two qubits each
 
     Input:
@@ -148,10 +148,10 @@ def interaction_hamiltonian(QUBIT_COUNT, gamma):
     """
     ham_ints = []
     for _site in range(QUBIT_COUNT):
-        sys_site, env_site = _site, _site + QUBIT_COUNT
+        sys_site, env_site = _site, QUBIT_COUNT + 1
 
         ham_int1, ham_int2 = None, None
-        for pos in range(2*QUBIT_COUNT):
+        for pos in range(QUBIT_COUNT + 1):
             cur_op1, cur_op2 = None, None
             if pos == sys_site:
                 cur_op1, cur_op2 = SIGMA_PLUS, SIGMA_MINUS
@@ -186,14 +186,13 @@ def ham_evo(rho_sys, rho_env, ham_sys, gamma, time, neu=1000):
         - time: Evolution time to match
     """
     tau = time / neu
-    big_ham_sys = np.kron(ham_sys, np.eye(2 ** QUBIT_COUNT))
 
-    big_rho_env = rho_env
-    for _ in range(QUBIT_COUNT - 1):
-        big_rho_env = np.kron(big_rho_env, rho_env)
+    # QUBIT_COUNT + 1 size Hamiltonian
+    big_ham_sys = np.kron(ham_sys, np.eye(2))
 
     cur_rho_sys = rho_sys
 
+    # QUBIT_COUNT + 1 size Hamiltonians
     ham_ints = interaction_hamiltonian(QUBIT_COUNT, gamma=gamma)
 
     hams = []
@@ -216,11 +215,11 @@ def ham_evo(rho_sys, rho_env, ham_sys, gamma, time, neu=1000):
         for _ in range(neu):
             pbar.update(1)
             for u, u_dag in zip(us, u_dags):
-                complete_rho = np.kron(cur_rho_sys, big_rho_env)
+                complete_rho = np.kron(cur_rho_sys, rho_env)
                 rho_fin = (
                     u @ complete_rho @ u_dag 
                 )
-                cur_rho_sys = partial_trace(rho_fin, list(range(QUBIT_COUNT, 2*QUBIT_COUNT)))
+                cur_rho_sys = partial_trace(rho_fin, list(range(QUBIT_COUNT, QUBIT_COUNT + 1)))
 
     return cur_rho_sys
 
@@ -303,7 +302,7 @@ def test_main():
 
         results["interaction"][time] = np.trace(np.abs(observable @ rho_ham))
         results["lindbladian"][time] = np.trace(np.abs(observable @ rho_lin))
-        results["sal"][time] = taylor_evo(rho_sys, rho_env, observable, gamma, time, EPS)
+        # results["sal"][time] = taylor_evo(rho_sys, rho_env, observable, gamma, time, EPS)
 
     file_name = f"data/lindbladian/time_vs_magn/size_{QUBIT_COUNT}.json"
     with open(file_name, "w") as file:
