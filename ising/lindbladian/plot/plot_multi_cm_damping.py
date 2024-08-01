@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
 
-QUBIT_COUNT = 3
+QUBIT_COUNT = 2
 
 def _round(mat):
     return np.round(mat, decimals=2)
@@ -42,17 +42,30 @@ def test_main():
         color=COLORS[0],
     )
 
-    if "sal" in results.keys():
+    if "sal0" in results.keys():
         sal = []
-        for _, res in results["sal"].items():
+        for _, res in results["sal0"].items():
             sal.append(res)
 
         ax = sns.scatterplot(
             x=times,
             y=sal,
-            label=f"Single Ancilla Evolution",
+            label=f"Single Ancilla Evolution 0",
             s=35,
             color=COLORS[2],
+        )
+
+    if "sal1" in results.keys():
+        sal = []
+        for _, res in results["sal1"].items():
+            sal.append(res)
+
+        ax = sns.scatterplot(
+            x=times,
+            y=sal,
+            label=f"Single Ancilla Evolution 1",
+            s=35,
+            color=COLORS[3],
         )
 
     # Remove the top and right border

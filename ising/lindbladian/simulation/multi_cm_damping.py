@@ -24,10 +24,10 @@ SIGMA_MINUS = np.array([[0, 1], [0, 0]])
 SIGMA_PLUS = np.array([[0, 0], [1, 0]])
 
 
-QUBIT_COUNT = 3
+QUBIT_COUNT = 2
 GAMMAS = [0, 0.1, 0.4, 0.7, 0.9]
 GAMMA = 0
-TIME_RANGE = (1, 5)
+TIME_RANGE = (1, 2)
 TIME_COUNT = 10
 EPS = 0.1
 DELTA = 0.9
@@ -224,7 +224,7 @@ def ham_evo(rho_sys, rho_env, ham_sys, gamma, time, neu=1000):
     return cur_rho_sys
 
 
-def taylor_evo(rho_sys, rho_env, observable, gamma, time, error, neu=10):
+def taylor_evo(rho_sys, rho_env, observable, gamma, time, error, sal_runs, neu=10):
     """
     Replicate the Lindbladian evolution of amplitude damping using
     interaction Hamiltonian dynamics.
@@ -262,7 +262,7 @@ def taylor_evo(rho_sys, rho_env, observable, gamma, time, error, neu=10):
         tau = tau,
         error = error,
         neu = neu,
-        runs = SAL_RUNS,
+        runs = sal_runs,
         observable = observable,
     )
 
@@ -290,7 +290,7 @@ def test_main():
     observable = overall_magnetization(QUBIT_COUNT).matrix
 
     gamma = GAMMA
-    results = {"interaction": {}, "lindbladian": {}, "sal": {}}
+    results = {"interaction": {}, "lindbladian": {}, "sal0": {}, "sal1": {}}
     times = np.linspace(TIME_RANGE[0], TIME_RANGE[1], TIME_COUNT)
     for time in times:
         neu = max(10, int(10 * (time**2) / EPS))
@@ -302,7 +302,11 @@ def test_main():
 
         results["interaction"][time] = np.trace(np.abs(observable @ rho_ham))
         results["lindbladian"][time] = np.trace(np.abs(observable @ rho_lin))
-        # results["sal"][time] = taylor_evo(rho_sys, rho_env, observable, gamma, time, EPS)
+
+    for ind, sal_runs in enumerate([100, 200]):
+        for time in times:
+            neu = max(10, int(10 * (time**2) / EPS))
+            results[f"sal{ind}"][time] = taylor_evo(rho_sys, rho_env, observable, gamma, time, EPS, sal_runs, neu)
 
     file_name = f"data/lindbladian/time_vs_magn/size_{QUBIT_COUNT}.json"
     with open(file_name, "w") as file:
