@@ -65,7 +65,7 @@ def test_main():
             y=trotter,
             label=f"Trotter Evolution",
             s=35,
-            color=COLORS[2],
+            color=COLORS[3],
         )
 
 
@@ -79,7 +79,7 @@ def test_main():
 
     file_name = f"plots/lindbladian/simulation/size_{QUBIT_COUNT}_multi_cm_magnetization.png"
 
-    plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.10), ncol=3, fontsize=10)
+    plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.10), ncol=2, fontsize=10)
     plt.savefig(file_name, dpi=300)
     print(f"saved the plot to {file_name}")
 

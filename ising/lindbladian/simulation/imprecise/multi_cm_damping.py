@@ -2,16 +2,15 @@ import numpy as np
 import json
 from qiskit.quantum_info import Pauli, SparsePauliOp
 
-from ising.lindbladian.simulation.imprecise import collision_model_evo
-
 from ising.utils import global_phase
 from ising.utils.trace import partial_trace
 from ising.hamiltonian import parametrized_ising, Hamiltonian
 from ising.observables import overall_magnetization
 from ising.lindbladian.simulation.multi_cm_damping import lindblad_evo, interaction_hamiltonian
-from ising.lindbladian.simulation.imprecise import GroupedLieCircuit
+from ising.lindbladian.simulation.imprecise import GroupedLieCircuit, Taylor
 
 from ising.lindbladian.simulation.utils import load_interaction_hams
+from ising.simulation.taylor.utils import calculate_mu
 
 from tqdm import tqdm
 
@@ -20,6 +19,8 @@ ZERO = np.array([[1], [0]])
 ONE = np.array([[0], [1]])
 SIGMA_MINUS = np.array([[0, 1], [0, 0]])
 SIGMA_PLUS = np.array([[0, 0], [1, 0]])
+PSI_PLUS = np.array([[1], [1]]) / np.sqrt(2)
+RHO_PLUS = np.outer(PSI_PLUS, PSI_PLUS.conj())
 
 
 QUBIT_COUNT = 3
@@ -51,46 +52,6 @@ def matrix_exp(eig_vec, eig_val, eig_vec_inv, time: float):
     return eig_vec @ np.diag(np.exp(complex(0, -1) * time * eig_val)) @ eig_vec_inv
 
 
-def taylor_evo(rho_sys, rho_env, observable, gamma, time, error, neu=10):
-    """
-    Replicate the Lindbladian evolution of amplitude damping using
-    interaction Hamiltonian dynamics.
-
-    Inputs:
-        - rho_sys: Initial state of system only
-        - rho_env: Initial state of environment only
-        - gamma: Strength of amplitude damping
-        - time: Evolution time to match
-    """
-    pre_gamma_ham_ints = load_interaction_hams(QUBIT_COUNT)
-    ham_ints = []
-
-    for sparse_repr in pre_gamma_ham_ints:
-        paulis, coeffs = sparse_repr.paulis, sparse_repr.coeffs
-        coeffs = [gamma * coeff for coeff in coeffs]
-        ham_ints.append((paulis, coeffs))
-
-    ham_sys = parametrized_ising(QUBIT_COUNT, H_VAL)
-    pauli_sys, coeff_sys = ham_sys.paulis, ham_sys.coeffs
-
-    # single environment qubit
-    pauli_sys = [Pauli(pauli.to_label() + "I") for pauli in pauli_sys]
-
-    magn_h = collision_model_evo(
-        rho_sys = rho_sys,
-        rho_env = rho_env,
-        ham_ints = ham_ints,
-        ham_sys = (pauli_sys, coeff_sys),
-        tau = tau,
-        error = error,
-        neu = neu,
-        runs = SAL_RUNS,
-        observable = observable,
-    )
-
-
-    return magn_h 
-
 def _random_psi(qubit_count):
     real_psi = np.random.uniform(-1, 1, 2**qubit_count)
     norm = sum([np.abs(x) for x in real_psi]) ** 0.5
@@ -100,7 +61,7 @@ def _random_psi(qubit_count):
 def test_main():
     np.random.seed(42)
     # results = {"interaction": {}, "lindbladian": {}, "sal": {}}
-    results = {"interaction": {}, "lindbladian": {}, "trotter": {}}
+    results = {"interaction": {}, "lindbladian": {}, "trotter": {}, "sal": {}}
 
     gamma = GAMMA
     times = np.linspace(TIME_RANGE[0], TIME_RANGE[1], TIME_COUNT)
@@ -137,6 +98,7 @@ def test_main():
         print(f"Running for time:{time}, neu:{neu}")
         us = []
         lie_us = []
+        taylors = []
         for ham_int_sparse in ham_ints_sparse:
             ham_sparse = (np.sqrt(tau) * big_ham_sys / QUBIT_COUNT) + (GAMMA * ham_int_sparse)
 
@@ -152,6 +114,13 @@ def test_main():
             lie_circuit = GroupedLieCircuit(Hamiltonian(sparse_repr=ham_sparse), ham_sim_error)
             lie_u = lie_circuit.matrix(np.sqrt(tau))
             lie_us.append(lie_u)
+
+            """
+            This is constructing the Taylor Circuits
+            """
+            taylor = Taylor(ham_sparse.paulis, ham_sparse.coeffs, ham_sim_error)
+            taylor.setup_time(np.sqrt(tau))
+            taylors.append(taylor)
 
         print("Ham operator calculation complete")
 
@@ -176,6 +145,32 @@ def test_main():
                         u @ complete_rho @ u.conj().T
                     )
                     rho_sys_trotter = partial_trace(rho_fin, list(range(QUBIT_COUNT, QUBIT_COUNT + 1)))
+
+        print("Trotter and Exact complete, sampling from SAL now")
+        with tqdm(total=SAL_RUNS) as pbar:
+            sampling_results = []
+            for _ in range (SAL_RUNS):
+                pbar.update(1)
+                rho_sys_sal = rho_sys.copy()
+                for _ in range(neu):
+                    for taylor in taylors:
+                        complete_rho = np.kron(rho_sys_sal, rho_env)
+                        complete_rho = np.kron(RHO_PLUS, complete_rho)
+
+                        u = taylor.sample_matrix()
+
+                        rho_fin = (
+                            u @ complete_rho @ u.conj().T
+                        )
+                        rho_fin = partial_trace(rho_fin, [0])
+
+                        rho_sys_sal = partial_trace(rho_fin, list(range(QUBIT_COUNT, QUBIT_COUNT + 1)))
+
+                result = np.trace(np.abs(observable.matrix @ rho_sys_sal))
+                sampling_results.append(result)
+
+            results["sal"][time] = calculate_mu(sampling_results, SAL_RUNS, [1])
+
 
         results["interaction"][time] = np.trace(np.abs(observable.matrix @ rho_sys_exact))
         results["trotter"][time] = np.trace(np.abs(observable.matrix @ rho_sys_trotter))

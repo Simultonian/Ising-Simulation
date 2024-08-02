@@ -1,2 +1,2 @@
-from .taylor import collision_model_evo
+from .taylor import Taylor
 from .lie import GroupedLieCircuit

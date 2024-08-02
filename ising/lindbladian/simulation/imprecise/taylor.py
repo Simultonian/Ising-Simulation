@@ -164,38 +164,6 @@ class Taylor:
         assert np.isclose(np.trace(final_rho), 1)
         return final_rho
 
-    def apply_lcu(self, time, final_psi, control_val):
-        """
-        Samples V from the LCU and applies it to `psi_init` with given
-        control value. The groundstate preparation algorithm calls this
-        function twice for V1, V2. It is done separately because `time` is
-        independently sampled for V1 and V2 unlike LCU simulation.
-        ---
-        `final_psi` has already been copied in the parent function call
-        """
-        t_bar = time * self.beta
-        # For t_bar < 1, r is too small to get accurate results.
-        r = max(20, int(10 * np.ceil(t_bar) ** 2))
-
-        evo_time = np.round(t_bar / r, 6)
-
-        alphas = get_alphas(t_bar, self.cap_k, r)
-        k_probs = np.abs(alphas)
-        k_probs /= np.sum(k_probs)
-
-        k = np.random.choice(self.cap_k + 1, p=k_probs)
-
-        k_terms = np.random.choice(len(self.kth_probs[k]), p=self.kth_probs[k], size=r)
-        for k_term in k_terms:
-            v = self.control_unitary(evo_time, k, k_term, control_val)
-            final_psi = v @ final_psi
-
-        neg = 1
-        if alphas[k] < 0 and r % 2 == 1:
-            neg *= -1
-
-        return neg * final_psi
-
     def setup_time(self, time: float):
         """
         Set the time for which SAL will be used.
@@ -219,26 +187,23 @@ class Taylor:
         k_probs = np.abs(self.alphas)
         self.k_probs = k_probs / np.sum(k_probs)
 
-    def sample_and_evolve(self, rho_init):
+    def sample_matrix(self):
         """
         Given rho_init we evolve the state by time t using SAL after freshly 
         sampling the unitaries. Returns the new density matrix
         """
-        final_rho = np.kron(
-            RHO_PLUS, rho_init
-        )
         neg = 1
+        matrix = np.eye(2 ** (self.num_qubits + 1))
         for _ in range(self.r):
             k_1, k_2 = np.random.choice(self.cap_k + 1, p=self.k_probs, size=2)
 
             k1_term = np.random.choice(len(self.kth_probs[k_1]), p=self.kth_probs[k_1])
             v1 = self.control_unitary(self.evo_time, k_1, k1_term, control_val=1)
-            final_rho = v1 @ final_rho @ v1.conj().T
+            matrix = v1 @ matrix
 
             k2_term = np.random.choice(len(self.kth_probs[k_2]), p=self.kth_probs[k_2])
-
             v2 = self.control_unitary(self.evo_time, k_2, k2_term, control_val=1)
-            final_rho = v2 @ final_rho @ v2.conj().T
+            matrix = v2 @ matrix
 
             if self.alphas[k_1] < 0 and self.r % 2 == 1:
                 neg *= -1
@@ -246,89 +211,5 @@ class Taylor:
             if self.alphas[k_2] < 0 and self.r % 2 == 1:
                 neg *= -1
 
-        final_rho = neg * final_rho
-        final_rho = partial_trace(final_rho, [0])
-        return final_rho
-
-def collision_model_evo(
-    rho_sys: NDArray,
-    rho_env: NDArray,
-    ham_ints: list[tuple[list[Pauli], list[float]]],
-    ham_sys: tuple[list[Pauli], list[float]],
-    tau: float,
-    error: float,
-    neu: int,
-    runs: int,
-    observable,
-):
-    """
-    Replicate the Lindbladian evolution of amplitude damping using
-    interaction Hamiltonian dynamics.
-
-    Inputs:
-        - rho_sys: Initial state of system only
-        - rho_env: Initial state of environment only
-        - ham_ints: Interaction Hamiltonians in Pauli basis (gamma included)
-        - ham_sys: Pauli basis representation of the system Hamiltonian
-        - gamma: Strength of amplitude damping
-        - time: Evolution time to match
-    """
-
-    sys_paulis, sys_coeffs = ham_sys
-
-    if len(sys_paulis) == 0 or len(sys_paulis) != len(sys_coeffs):
-        raise ValueError("System Hamiltonian Incorrect Dimension")
-
-    qubit_count: int = sys_paulis[0].num_qubits // 2
-
-
-    print(f"Calculating Hamiltonians for tau:{tau}, neu:{neu}")
-    final_hams = []
-    for (int_paulis, int_coeffs) in ham_ints:
-        ham_int = defaultdict(float)
-
-        # Adding the system Hamiltonian part
-        for (sys_pauli, sys_coeff) in zip(sys_paulis, sys_coeffs):
-            ham_int[sys_pauli.to_label()] = (np.sqrt(tau) * sys_coeff / qubit_count)
-
-        # Adding the interaction Hamiltonian part
-        for (int_pauli, int_coeff) in zip(int_paulis, int_coeffs):
-            ham_int[int_pauli.to_label()] += int_coeff
-
-        final_paulis, final_coeffs = [], []
-        for pauli, coeff in ham_int.items():
-            final_paulis.append(pauli)
-            final_coeffs.append(coeff)
-        
-        final_hams.append((final_paulis, final_coeffs))
-
-    print("Ham operator calculation complete")
-
-    taylors = []
-    for (paulis, coeffs) in final_hams:
-        pauli_objs = [Pauli(pauli) for pauli in paulis]
-        taylor = Taylor(pauli_objs, coeffs, error)
-        taylor.setup_time(tau)
-        taylors.append(taylor)
-
-    results = []
-    with tqdm(total=runs) as pbar:
-        for _ in range(runs):
-            cur_rho_sys = rho_sys
-            pbar.update(1)
-
-            for _ in range(neu):
-                for taylor in taylors:
-                    complete_rho = np.kron(cur_rho_sys, rho_env)
-                    rho_fin = taylor.sample_and_evolve(complete_rho)
-                    cur_rho_sys = partial_trace(
-                        rho_fin, list(range(qubit_count, qubit_count + 1))
-                    )
-
-            cur_rho_sys = cur_rho_sys / global_phase(cur_rho_sys)
-
-            result = np.trace(np.abs(observable @ cur_rho_sys))
-            results.append(result)
-
-    magn_h = calculate_mu(results, runs, [1])
-    return magn_h
+        matrix = neg * matrix
+        return matrix 
