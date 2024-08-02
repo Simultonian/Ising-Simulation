@@ -7,9 +7,6 @@ from ising.lindbladian.simulation.unraveled import (
     lindbladian_operator,
 )
 
-from ising.lindbladian.simulation.imprecise import collision_model_evo
-from ising.lindbladian.simulation.utils import load_interaction_hams
-
 from ising.utils import global_phase
 from ising.utils.trace import partial_trace
 from ising.hamiltonian import parametrized_ising
@@ -137,7 +134,7 @@ def lindblad_evo(rho, ham, gamma, time):
     return rho_final
 
 
-def interaction_hamiltonian(QUBIT_COUNT, gamma):
+def interaction_hamiltonian(QUBIT_COUNT, gamma=1):
     """
     Construct a `QUBIT_COUNT+1` Hamiltonian for each interaction point.
     There will be `QUBIT_COUNT` of them, acting on two qubits each
@@ -222,49 +219,6 @@ def ham_evo(rho_sys, rho_env, ham_sys, gamma, time, neu=1000):
                 cur_rho_sys = partial_trace(rho_fin, list(range(QUBIT_COUNT, QUBIT_COUNT + 1)))
 
     return cur_rho_sys
-
-
-def taylor_evo(rho_sys, rho_env, observable, gamma, time, error, neu=10):
-    """
-    Replicate the Lindbladian evolution of amplitude damping using
-    interaction Hamiltonian dynamics.
-
-    Inputs:
-        - rho_sys: Initial state of system only
-        - rho_env: Initial state of environment only
-        - gamma: Strength of amplitude damping
-        - time: Evolution time to match
-    """
-    tau = time / neu
-
-    pre_gamma_ham_ints = load_interaction_hams(QUBIT_COUNT)
-    ham_ints = []
-
-    for sparse_repr in pre_gamma_ham_ints:
-        paulis, coeffs = sparse_repr.paulis, sparse_repr.coeffs
-        coeffs = [gamma * coeff for coeff in coeffs]
-        ham_ints.append((paulis, coeffs))
-
-    ham_sys = parametrized_ising(QUBIT_COUNT, H_VAL)
-    pauli_sys, coeff_sys = ham_sys.paulis, ham_sys.coeffs
-
-    # single environment qubit
-    pauli_sys = [Pauli(pauli.to_label() + "I") for pauli in pauli_sys]
-
-    magn_h = collision_model_evo(
-        rho_sys = rho_sys,
-        rho_env = rho_env,
-        ham_ints = ham_ints,
-        ham_sys = (pauli_sys, coeff_sys),
-        tau = tau,
-        error = error,
-        neu = neu,
-        runs = SAL_RUNS,
-        observable = observable,
-    )
-
-
-    return magn_h 
 
 
 def _random_psi(qubit_count):

@@ -1,25 +1,16 @@
 from typing import Optional, Union, Sequence
-from functools import lru_cache
 import numpy as np
 from numpy.typing import NDArray
 
 from qiskit.quantum_info import Pauli, SparsePauliOp
-from qiskit.circuit import QuantumCircuit, Parameter
+from qiskit.circuit import QuantumCircuit
 from qiskit.synthesis import LieTrotter
 
-from ising.hamiltonian import Hamiltonian, trotter_reps, general_grouping
-from ising.hamiltonian.hamiltonian import substitute_parameter
-from ising.utils import MAXSIZE, control_version
+from ising.hamiltonian import Hamiltonian, general_grouping
+from ising.hamiltonian.ising_one import trotter_reps_general
+
+from ising.utils import control_version
 from ising.utils import simdiag
-
-
-def circuit_depth(ham: Hamiltonian, time: float, err: float) -> int:
-    """
-    Gets the number of iterations required to get the value to epsilon close.
-    """
-    reps = trotter_reps(ham.sparse_repr.num_qubits, ham.coeffs[0], time, err)
-    l = len(ham.paulis)
-    return l * reps
 
 
 class GroupedLie(LieTrotter):
@@ -142,16 +133,11 @@ def clubbed_evolve(
 
 
 class GroupedLieCircuit:
-    def __init__(self, ham: Hamiltonian, h: Parameter, error: float):
+    def __init__(self, ham: Hamiltonian, error: float):
         self.ham = ham
         self.num_qubits = ham.sparse_repr.num_qubits
         self.error = error
-        self.ham_subbed: Optional[Hamiltonian] = None
         self.obs: Optional[NDArray] = None
-
-        self.h = h
-        self.time = Parameter("t")
-        self.reps = Parameter("r")
 
         self.synthesizer = GroupedLie(reps=1)
         self.groups = general_grouping(self.ham.sparse_repr.paulis)
@@ -166,20 +152,9 @@ class GroupedLieCircuit:
         self.svd_map = self.synthesizer.svd_map(self.groups)
         self._eigvals = [np.copy(x[0]) for x in self.svd_map]
 
-    @property
-    def ground_state(self) -> NDArray:
-        if self.ham_subbed is None:
-            raise ValueError(
-                "h value has not been substituted, qiskit does not support parametrized Hamiltonians."
-            )
-        return self.ham_subbed.ground_state
-
-    def subsitute_h(self, h_val: float) -> None:
-        self.h_val = h_val
-        self.ham_subbed = substitute_parameter(self.ham, self.h, h_val)
 
         self.group_coeffs = [
-            np.array(x) for x in get_grouped_coeffs(self.ham_subbed, self.groups)
+            np.array(x) for x in get_grouped_coeffs(self.ham, self.groups)
         ]
 
         for g_ind, coeffs in enumerate(self.group_coeffs):
@@ -190,6 +165,10 @@ class GroupedLieCircuit:
             np.sum(self.svd_map[g_ind][0], axis=0)
             for g_ind, _ in enumerate(self.groups)
         ]
+
+    @property
+    def ground_state(self) -> NDArray:
+        return self.ham.ground_state
 
     def pauli_matrix(self, pauli: Pauli, time: float, reps: int) -> NDArray:
         p_ind, g_ind = self.group_map[pauli]
@@ -216,17 +195,10 @@ class GroupedLieCircuit:
             @ eig_inv
         )
 
-    def circuit_depth(self, time: float) -> int:
-        l = len(self.ham.paulis)
-        return l * trotter_reps(self.num_qubits, self.h_val, time, self.error)
-
     def matrix(self, time: float, reps: int = -1) -> NDArray:
-        if self.ham_subbed is None:
-            raise ValueError("h value has not been substituted.")
-
         if reps == -1:
-            reps = trotter_reps(self.num_qubits, self.h_val, time, self.error)
-
+            reps = trotter_reps_general(ham = self.ham.sparse_repr, time = time, eps = self.error)
+ 
         final_op = np.identity(2**self.num_qubits).astype(np.complex128)
 
         for g_ind, _ in enumerate(self.groups):
@@ -234,47 +206,3 @@ class GroupedLieCircuit:
             final_op = np.dot(group_op, final_op)
 
         return np.linalg.matrix_power(final_op, reps)
-
-    def evolve(self, psi_init: NDArray, time) -> NDArray:
-        return self.matrix(time) @ psi_init
-
-    def control_evolve(
-        self, psi_init: NDArray, time: float, control_val: int
-    ) -> NDArray:
-        """
-        There is no further optimization that can be done here, since it is
-        faster to use `matrix_power` than apply the operation `reps` times.
-        """
-        op = control_version(self.matrix(time), control_val)
-        return op @ psi_init
-
-    def substitute_obs(self, obs: Hamiltonian):
-        self.obs = obs.matrix
-
-    def get_observation(self, psi_init: NDArray, time: float, reps: int):
-        if self.obs is None:
-            raise ValueError("Observable not set")
-
-        unitary = self.matrix(time, reps)
-
-        psi_final = unitary @ psi_init
-        rho_final = np.outer(psi_final, psi_final.conj())
-
-        return np.trace(np.abs(self.obs @ rho_final))
-
-    def get_observations(self, psi_init: NDArray, times: list[float]):
-        if self.obs is None:
-            raise ValueError("Observable not set")
-
-        results = []
-        for time in times:
-            # assert self.ham_subbed is not None
-            # depth = circuit_depth(self.ham_subbed, time, self.error)
-            # print(f"Time: {time} Depth: {depth}")
-
-            final_psi = self.evolve(psi_init, time)
-            final_rho = np.outer(final_psi, final_psi.conj())
-            result = np.trace(np.abs(self.obs @ final_rho))
-            results.append(result)
-
-        return results

@@ -55,6 +55,20 @@ def test_main():
             color=COLORS[2],
         )
 
+    if "trotter" in results.keys():
+        trotter = []
+        for _, res in results["trotter"].items():
+            trotter.append(res)
+
+        ax = sns.scatterplot(
+            x=times,
+            y=trotter,
+            label=f"Trotter Evolution",
+            s=35,
+            color=COLORS[2],
+        )
+
+
     # Remove the top and right border
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)

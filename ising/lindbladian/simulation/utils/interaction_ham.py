@@ -2,44 +2,9 @@ import numpy as np
 import json
 from qiskit.quantum_info import SparsePauliOp
 from ising.utils import unitary_to_pauli_decomposition
+from ising.lindbladian.simulation.multi_cm_damping import interaction_hamiltonian
 SIGMA_MINUS = np.array([[0, 1], [0, 0]])
 SIGMA_PLUS = np.array([[0, 0], [1, 0]])
-
-
-def interaction_hamiltonian(QUBIT_COUNT):
-    """
-    Construct a `QUBIT_COUNT+1` Hamiltonian for each interaction point.
-    There will be `QUBIT_COUNT` of them, acting on two qubits each
-
-    Input:
-        - QUBIT_COUNT: Size of the chain
-        - gamma: Strength of the Hamiltonian
-    """
-    ham_ints = []
-    for _site in range(QUBIT_COUNT):
-        sys_site, env_site = _site, QUBIT_COUNT + 1
-
-        ham_int1, ham_int2 = None, None
-        for pos in range(QUBIT_COUNT + 1):
-            cur_op1, cur_op2 = None, None
-            if pos == sys_site:
-                cur_op1, cur_op2 = SIGMA_PLUS, SIGMA_MINUS
-            elif pos == env_site:
-                cur_op1, cur_op2 = SIGMA_MINUS, SIGMA_PLUS
-            else:
-                cur_op1, cur_op2 = np.eye(2), np.eye(2)
-
-            if ham_int1 is None or ham_int2 is None:
-                ham_int1, ham_int2 = cur_op1, cur_op2
-            else:
-                ham_int1 = np.kron(ham_int1, cur_op1)
-                ham_int2 = np.kron(ham_int2, cur_op2)
-
-        assert ham_int1 is not None and ham_int2 is not None
-
-        ham_ints.append(ham_int1 + ham_int2)
-
-    return ham_ints
 
 
 def save_interaction_hams(qubit_count):
