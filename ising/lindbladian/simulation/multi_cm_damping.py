@@ -119,10 +119,11 @@ def lindblad_evo(rho, ham, gamma, time):
         - time: evolution time
     """
     # columnize
+    qubit_count = int(np.log2(rho.shape[0]))
     rho_vec = rho.reshape(-1, 1)
 
     # Hamiltonian is zero
-    l_op = lindbladian_operator(ham, lowering_all_sites(QUBIT_COUNT, gamma=gamma))
+    l_op = lindbladian_operator(ham, lowering_all_sites(qubit_count, gamma=gamma))
 
     eig_val, eig_vec = np.linalg.eig(l_op)
     eig_vec_inv = np.linalg.inv(eig_vec)

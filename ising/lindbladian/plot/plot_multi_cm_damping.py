@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
 
-QUBIT_COUNT = 3
+QUBIT_COUNT = 4
 
 def _round(mat):
     return np.round(mat, decimals=2)

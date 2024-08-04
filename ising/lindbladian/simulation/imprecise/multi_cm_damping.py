@@ -23,10 +23,9 @@ PSI_PLUS = np.array([[1], [1]]) / np.sqrt(2)
 RHO_PLUS = np.outer(PSI_PLUS, PSI_PLUS.conj())
 
 
-QUBIT_COUNT = 3
-GAMMAS = [0, 0.1, 0.4, 0.7, 0.9]
+QUBIT_COUNT = 4
 GAMMA = 0
-TIME_RANGE = (1, 3)
+TIME_RANGE = (1, 5)
 TIME_COUNT = 10
 EPS = 0.1
 DELTA = 0.9
@@ -85,8 +84,14 @@ def test_main():
     big_ham_sys = SparsePauliOp([x.to_label() + "I" for x in ham_sys.paulis], ham_sys.coeffs)
     observable = overall_magnetization(QUBIT_COUNT)
 
+
     for time in times:
-        neu = max(10, int(10 * (time**2) / EPS))
+        rho_lin = lindblad_evo(rho_sys, ham_sys.to_matrix(), gamma, time)
+        rho_lin = rho_lin / global_phase(rho_lin)
+        results["lindbladian"][time] = np.trace(np.abs(observable.matrix @ rho_lin))
+
+    for time in times:
+        neu = max(10, int((time**2) / EPS))
         tau = time / neu
 
         # QUBIT_COUNT are the number of collision sites
@@ -147,24 +152,26 @@ def test_main():
                     rho_sys_trotter = partial_trace(rho_fin, list(range(QUBIT_COUNT, QUBIT_COUNT + 1)))
 
         print("Trotter and Exact complete, sampling from SAL now")
-        with tqdm(total=SAL_RUNS) as pbar:
+        with tqdm(total=SAL_RUNS, desc="SAL runs") as pbar:
             sampling_results = []
             for _ in range (SAL_RUNS):
                 pbar.update(1)
                 rho_sys_sal = rho_sys.copy()
-                for _ in range(neu):
-                    for taylor in taylors:
-                        complete_rho = np.kron(rho_sys_sal, rho_env)
-                        complete_rho = np.kron(RHO_PLUS, complete_rho)
+                with tqdm(total=neu, desc="Neu bar", leave=False) as pbar_inner:
+                    for _ in range(neu):
+                        pbar_inner.update(1)
+                        for taylor in taylors:
+                            complete_rho = np.kron(rho_sys_sal, rho_env)
+                            complete_rho = np.kron(RHO_PLUS, complete_rho)
 
-                        u = taylor.sample_matrix()
+                            u = taylor.sample_matrix()
 
-                        rho_fin = (
-                            u @ complete_rho @ u.conj().T
-                        )
-                        rho_fin = partial_trace(rho_fin, [0])
+                            rho_fin = (
+                                u @ complete_rho @ u.conj().T
+                            )
+                            rho_fin = partial_trace(rho_fin, [0])
 
-                        rho_sys_sal = partial_trace(rho_fin, list(range(QUBIT_COUNT, QUBIT_COUNT + 1)))
+                            rho_sys_sal = partial_trace(rho_fin, list(range(QUBIT_COUNT, QUBIT_COUNT + 1)))
 
                 result = np.trace(np.abs(observable.matrix @ rho_sys_sal))
                 sampling_results.append(result)
@@ -174,12 +181,6 @@ def test_main():
 
         results["interaction"][time] = np.trace(np.abs(observable.matrix @ rho_sys_exact))
         results["trotter"][time] = np.trace(np.abs(observable.matrix @ rho_sys_trotter))
-
-
-    for time in times:
-        rho_lin = lindblad_evo(rho_sys, ham_sys.to_matrix(), gamma, time)
-        rho_lin = rho_lin / global_phase(rho_lin)
-        results["lindbladian"][time] = np.trace(np.abs(observable.matrix @ rho_lin))
 
     file_name = f"data/lindbladian/time_vs_magn/size_{QUBIT_COUNT}.json"
     with open(file_name, "w") as file:

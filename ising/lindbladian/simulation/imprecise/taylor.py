@@ -83,7 +83,7 @@ def sum_decomposition_k_fold(paulis, coeffs, cap_k):
 
     return (kth_paulis, kth_exps, kth_probs)
 
-@lru_cache(maxsize=None)
+@lru_cache(maxsize=1000)
 def pauli_to_matrix(pauli):
     return pauli.to_matrix()
 
@@ -194,22 +194,25 @@ class Taylor:
         """
         neg = 1
         matrix = np.eye(2 ** (self.num_qubits + 1))
-        for _ in range(self.r):
-            k_1, k_2 = np.random.choice(self.cap_k + 1, p=self.k_probs, size=2)
 
-            k1_term = np.random.choice(len(self.kth_probs[k_1]), p=self.kth_probs[k_1])
-            v1 = self.control_unitary(self.evo_time, k_1, k1_term, control_val=1)
-            matrix = v1 @ matrix
+        with tqdm(total=self.r, desc = "SAL r", leave=False) as pbar:
+            for _ in range(self.r):
+                pbar.update(1)
+                k_1, k_2 = np.random.choice(self.cap_k + 1, p=self.k_probs, size=2)
 
-            k2_term = np.random.choice(len(self.kth_probs[k_2]), p=self.kth_probs[k_2])
-            v2 = self.control_unitary(self.evo_time, k_2, k2_term, control_val=1)
-            matrix = v2 @ matrix
+                k1_term = np.random.choice(len(self.kth_probs[k_1]), p=self.kth_probs[k_1])
+                v1 = self.control_unitary(self.evo_time, k_1, k1_term, control_val=1)
+                matrix = v1 @ matrix
 
-            if self.alphas[k_1] < 0 and self.r % 2 == 1:
-                neg *= -1
+                k2_term = np.random.choice(len(self.kth_probs[k_2]), p=self.kth_probs[k_2])
+                v2 = self.control_unitary(self.evo_time, k_2, k2_term, control_val=1)
+                matrix = v2 @ matrix
 
-            if self.alphas[k_2] < 0 and self.r % 2 == 1:
-                neg *= -1
+                if self.alphas[k_1] < 0 and self.r % 2 == 1:
+                    neg *= -1
+
+                if self.alphas[k_2] < 0 and self.r % 2 == 1:
+                    neg *= -1
 
         matrix = neg * matrix
         return matrix 

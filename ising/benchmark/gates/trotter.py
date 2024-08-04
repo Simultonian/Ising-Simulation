@@ -133,6 +133,11 @@ class TrotterBenchmarkTime:
         """
 
         self.ham = ham
+        if system == "":
+            self.use_system = False
+        else:
+            self.use_system = True
+
         self.system = system
         self.decomposer = Decomposer()
 
@@ -161,9 +166,13 @@ class TrotterBenchmarkTime:
         print("starting circuit")
         counter = Counter()
 
-        # Coeff remains same for the system
-        pauli_counter = PauliCounter(self.system, self.ham.num_qubits, time / reps)
-        prev_data = pauli_counter.control_data
+        if self.use_system:
+            # Coeff remains same for the system
+            pauli_counter = PauliCounter(self.system, self.ham.num_qubits, time / reps)
+            prev_data = pauli_counter.control_data
+        else:
+            pauli_counter = None
+            prev_data = {}
 
         if len(prev_data) != len(self.ham.paulis):
             data = {}
@@ -180,11 +189,13 @@ class TrotterBenchmarkTime:
 
                     pbar.update(1)
             result = {"total": counter.count, "individual": data}
-            pauli_counter.set_control_data(result)
+            if pauli_counter is not None:
+                pauli_counter.set_control_data(result)
             print("circuit complete")
         else:
             print("Loaded from Pauli Counter")
-            counter.add(pauli_counter.control_total)
+            if pauli_counter is not None:
+                counter.add(pauli_counter.control_total)
         
         new_counter = Counter()
         new_counter.weighted_add(reps, counter.count)
