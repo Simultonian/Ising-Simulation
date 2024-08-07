@@ -1,1 +1,1 @@
-{"0": {"paulis": ["XIIII"], "coeffs": [1.0]}, "1": {"paulis": ["IXIII"], "coeffs": [1.0]}, "2": {"paulis": ["IIXII"], "coeffs": [1.0]}, "3": {"paulis": ["IIIXI"], "coeffs": [1.0]}}
+{"0": {"paulis": ["XIIII", "YIIII", "XIIII", "YIIII"], "coeffs": [0.5, 0.0, 0.5, 0.0]}, "1": {"paulis": ["IXIII", "IYIII", "IXIII", "IYIII"], "coeffs": [0.5, 0.0, 0.5, 0.0]}, "2": {"paulis": ["IIXII", "IIYII", "IIXII", "IIYII"], "coeffs": [0.5, 0.0, 0.5, 0.0]}, "3": {"paulis": ["IIIXI", "IIIYI", "IIIXI", "IIIYI"], "coeffs": [0.5, 0.0, 0.5, 0.0]}}

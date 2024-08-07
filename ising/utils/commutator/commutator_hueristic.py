@@ -90,13 +90,13 @@ def alpha_commutator_second_order(
                 alpha_u += update
                 pbar_alpha.update(update)
 
-                if alpha_l > 0 and (alpha_u / alpha_l) - 1 < (delta / error):
-                    return alpha_l
-                if cur_count == cutoff_count:
-                    # TODO: For the sake of bounds
-                    return alpha_l
+                # if alpha_l > 0 and (alpha_u / alpha_l) - 1 < (delta / error):
+                #     return alpha_l
+                # if cur_count == cutoff_count:
+                #     # TODO: For the sake of bounds
+                #     return alpha_l
 
-    assert abs(alpha_l - alpha_u) < 0.0001
+    assert abs(alpha_l - alpha_u) < 1e-5
     assert cur_count == total_count
 
     return alpha_u
@@ -147,11 +147,11 @@ def alpha_commutator_first_order(
 
             pbar_alpha.update(ce)
 
-            if alpha_l > 0 and (alpha_u / alpha_l) - 1 < (delta / error):
-                print("eearly cutoff")
-                return alpha_l
-            if cur_count == cutoff_count:
-                return alpha_u
+            # if alpha_l > 0 and (alpha_u / alpha_l) - 1 < (delta / error):
+            #     print("eearly cutoff")
+            #     return alpha_l
+            # if cur_count == cutoff_count:
+            #     return alpha_u
 
     assert cur_count == total_count
     assert abs(alpha_l - alpha_u) < 0.0001

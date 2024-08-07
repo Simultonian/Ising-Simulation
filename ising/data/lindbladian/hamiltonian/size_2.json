@@ -1,1 +1,1 @@
-{"0": {"paulis": ["XIXI", "YIYI"], "coeffs": [0.5, 0.5]}, "1": {"paulis": ["IXIX", "IYIY"], "coeffs": [0.5, 0.5]}}
+{"0": {"paulis": ["XII", "YII", "XII", "YII"], "coeffs": [0.5, 0.0, 0.5, 0.0]}, "1": {"paulis": ["IXI", "IYI", "IXI", "IYI"], "coeffs": [0.5, 0.0, 0.5, 0.0]}}
