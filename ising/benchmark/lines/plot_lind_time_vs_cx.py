@@ -4,7 +4,7 @@ import seaborn as sns
 import json
 
 
-QUBIT_COUNT = 5
+QUBIT_COUNT = 10
 H_VAL = 0.1
 ERROR = 0.01
 DELTA = 0.1
