@@ -25,8 +25,8 @@ def calculate_gamma(beta):
 
 
 QUBIT_COUNT = 3
-GAMMA = 0.5
-TIME_RANGE = (0, 10)
+GAMMA = 0.4
+TIME_RANGE = (0, 5)
 TIME_COUNT = 5
 EPS = 0.1
 
@@ -128,7 +128,7 @@ def lindblad_evo(rho, ham, gamma, z, time):
 
 def interaction_hamiltonian(QUBIT_COUNT, gamma):
     """
-    Construct a `2*QUBIT_COUNT` Hamiltonian for each interaction point.
+    Construct a `QUBIT_COUNT + 1` Hamiltonian for each interaction point.
     There will be `QUBIT_COUNT` of them, acting on two qubits each
 
     Input:
@@ -137,10 +137,10 @@ def interaction_hamiltonian(QUBIT_COUNT, gamma):
     """
     ham_ints = []
     for _site in range(QUBIT_COUNT):
-        sys_site, env_site = _site, _site + QUBIT_COUNT
+        sys_site, env_site = _site, QUBIT_COUNT
 
         ham_int1, ham_int2 = None, None
-        for pos in range(2*QUBIT_COUNT):
+        for pos in range(QUBIT_COUNT+1):
             cur_op1, cur_op2 = None, None
             if pos == sys_site:
                 cur_op1, cur_op2 = SIGMA_PLUS, SIGMA_MINUS
@@ -175,11 +175,7 @@ def ham_evo(rho_sys, rho_env, ham_sys, gamma, time, neu=1000):
         - time: Evolution time to match
     """
     tau = time / neu
-    big_ham_sys = np.kron(ham_sys, np.eye(2 ** QUBIT_COUNT))
-
-    big_rho_env = rho_env
-    for _ in range(QUBIT_COUNT - 1):
-        big_rho_env = np.kron(big_rho_env, rho_env)
+    big_ham_sys = np.kron(ham_sys, np.eye(2))
 
     cur_rho_sys = rho_sys
 
@@ -205,11 +201,11 @@ def ham_evo(rho_sys, rho_env, ham_sys, gamma, time, neu=1000):
         for _ in range(neu):
             pbar.update(1)
             for u, u_dag in zip(us, u_dags):
-                complete_rho = np.kron(cur_rho_sys, big_rho_env)
+                complete_rho = np.kron(cur_rho_sys, rho_env)
                 rho_fin = (
                     u @ complete_rho @ u_dag 
                 )
-                cur_rho_sys = partial_trace(rho_fin, list(range(QUBIT_COUNT, 2*QUBIT_COUNT)))
+                cur_rho_sys = partial_trace(rho_fin, list(range(QUBIT_COUNT, QUBIT_COUNT + 1)))
 
     return cur_rho_sys
 
@@ -236,7 +232,7 @@ def test_main():
     observable = overall_magnetization(QUBIT_COUNT).matrix
 
     z = calculate_gamma(inv_temp)
-    gamma = 0.1
+    gamma = GAMMA
 
     results = {"interaction": {}, "lindbladian": {}}
     times = np.linspace(TIME_RANGE[0], TIME_RANGE[1], TIME_COUNT)
