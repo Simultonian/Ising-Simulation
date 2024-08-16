@@ -1,8 +1,8 @@
 import numpy as np
 from itertools import product
 import json
-from qiskit.quantum_info import Pauli
 from ising.lindbladian.simulation.unraveled import (
+    thermal_lindbladians,
     lowering_all_sites,
     lindbladian_operator,
 )
@@ -17,26 +17,19 @@ from tqdm import tqdm
 
 ZERO = np.array([[1], [0]])
 ONE = np.array([[0], [1]])
-SIGMA_MINUS = np.array([[0, 1], [0, 0]])
-SIGMA_PLUS = np.array([[0, 0], [1, 0]])
+SIGMA_MINUS = np.array([[0, 1], [0, 0]]) # a_dag
+SIGMA_PLUS = np.array([[0, 0], [1, 0]]) # a_n
+
+def calculate_gamma(beta):
+    return np.exp(-beta) / (1 + np.exp(-beta))
 
 
 QUBIT_COUNT = 3
-GAMMAS = [0, 0.1, 0.4, 0.7, 0.9]
-GAMMA = 0
-TIME_RANGE = (1, 5)
-TIME_COUNT = 10
+GAMMA = 0.5
+TIME_RANGE = (0, 10)
+TIME_COUNT = 5
 EPS = 0.1
-DELTA = 0.9
 
-SAL_RUNS = int(
-            8
-            * np.ceil(
-                ((np.log(2 / (1 - DELTA)))) / (EPS ** 2)
-            )
-        )
-
-SAL_RUNS = 100
 H_VAL = -0.1
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
 
@@ -108,7 +101,7 @@ def apply_amplitude_damping(rho_sys, ham, gamma, time, nue=1000):
     return cur_rho
 
 
-def lindblad_evo(rho, ham, gamma, time):
+def lindblad_evo(rho, ham, gamma, z, time):
     """
     Function to calculate final state after amplitude damping.
 
@@ -119,11 +112,10 @@ def lindblad_evo(rho, ham, gamma, time):
         - time: evolution time
     """
     # columnize
-    qubit_count = int(np.log2(rho.shape[0]))
     rho_vec = rho.reshape(-1, 1)
 
     # Hamiltonian is zero
-    l_op = lindbladian_operator(ham, lowering_all_sites(qubit_count, gamma=gamma))
+    l_op = lindbladian_operator(ham, thermal_lindbladians(QUBIT_COUNT, gamma=gamma, z=z))
 
     eig_val, eig_vec = np.linalg.eig(l_op)
     eig_vec_inv = np.linalg.inv(eig_vec)
@@ -134,10 +126,9 @@ def lindblad_evo(rho, ham, gamma, time):
 
     return rho_final
 
-
-def interaction_hamiltonian(QUBIT_COUNT, gamma=1):
+def interaction_hamiltonian(QUBIT_COUNT, gamma):
     """
-    Construct a `QUBIT_COUNT+1` Hamiltonian for each interaction point.
+    Construct a `2*QUBIT_COUNT` Hamiltonian for each interaction point.
     There will be `QUBIT_COUNT` of them, acting on two qubits each
 
     Input:
@@ -146,10 +137,10 @@ def interaction_hamiltonian(QUBIT_COUNT, gamma=1):
     """
     ham_ints = []
     for _site in range(QUBIT_COUNT):
-        sys_site, env_site = _site, QUBIT_COUNT + 1
+        sys_site, env_site = _site, _site + QUBIT_COUNT
 
         ham_int1, ham_int2 = None, None
-        for pos in range(QUBIT_COUNT + 1):
+        for pos in range(2*QUBIT_COUNT):
             cur_op1, cur_op2 = None, None
             if pos == sys_site:
                 cur_op1, cur_op2 = SIGMA_PLUS, SIGMA_MINUS
@@ -184,13 +175,14 @@ def ham_evo(rho_sys, rho_env, ham_sys, gamma, time, neu=1000):
         - time: Evolution time to match
     """
     tau = time / neu
+    big_ham_sys = np.kron(ham_sys, np.eye(2 ** QUBIT_COUNT))
 
-    # QUBIT_COUNT + 1 size Hamiltonian
-    big_ham_sys = np.kron(ham_sys, np.eye(2))
+    big_rho_env = rho_env
+    for _ in range(QUBIT_COUNT - 1):
+        big_rho_env = np.kron(big_rho_env, rho_env)
 
     cur_rho_sys = rho_sys
 
-    # QUBIT_COUNT + 1 size Hamiltonians
     ham_ints = interaction_hamiltonian(QUBIT_COUNT, gamma=gamma)
 
     hams = []
@@ -213,11 +205,11 @@ def ham_evo(rho_sys, rho_env, ham_sys, gamma, time, neu=1000):
         for _ in range(neu):
             pbar.update(1)
             for u, u_dag in zip(us, u_dags):
-                complete_rho = np.kron(cur_rho_sys, rho_env)
+                complete_rho = np.kron(cur_rho_sys, big_rho_env)
                 rho_fin = (
                     u @ complete_rho @ u_dag 
                 )
-                cur_rho_sys = partial_trace(rho_fin, list(range(QUBIT_COUNT, QUBIT_COUNT + 1)))
+                cur_rho_sys = partial_trace(rho_fin, list(range(QUBIT_COUNT, 2*QUBIT_COUNT)))
 
     return cur_rho_sys
 
@@ -237,24 +229,27 @@ def test_main():
     ham = parametrized_ising(QUBIT_COUNT, H_VAL).matrix
 
     # Environment qubit is always in ZERO, and it is always only one qubit each
-    rho_env = np.outer(ZERO, ZERO.conj())
+    inv_temp = 10
+    alpha, beta = 1, np.exp(-inv_temp) 
+    rho_env1 = (alpha * np.outer(ZERO, ZERO) + beta * np.outer(ONE, ONE)) / (alpha + beta)
 
     observable = overall_magnetization(QUBIT_COUNT).matrix
 
-    gamma = GAMMA
-    results = {"interaction": {}, "lindbladian": {}, "sal": {}}
+    z = calculate_gamma(inv_temp)
+    gamma = 0.1
+
+    results = {"interaction": {}, "lindbladian": {}}
     times = np.linspace(TIME_RANGE[0], TIME_RANGE[1], TIME_COUNT)
     for time in times:
-        neu = max(10, int(10 * (time**2) / EPS))
-        rho_ham = ham_evo(rho_sys, rho_env, ham, gamma, time, neu)
-        rho_lin = lindblad_evo(rho_sys, ham, gamma, time)
+        neu = max(100, int(10 * (time**2) / EPS))
+        rho_ham = ham_evo(rho_sys, rho_env1, ham, gamma, time, neu)
+        rho_lin = lindblad_evo(rho_sys, ham, gamma, z, time)
 
-        rho_lin = rho_lin / global_phase(rho_lin)
         rho_ham = rho_ham / global_phase(rho_ham)
+        rho_lin = rho_lin / global_phase(rho_lin)
 
         results["interaction"][time] = np.trace(np.abs(observable @ rho_ham))
         results["lindbladian"][time] = np.trace(np.abs(observable @ rho_lin))
-        results["sal"][time] = taylor_evo(rho_sys, rho_env, observable, gamma, time, EPS)
 
     file_name = f"data/lindbladian/time_vs_magn/size_{QUBIT_COUNT}.json"
     with open(file_name, "w") as file:

@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
 
-QUBIT_COUNT = 4
+QUBIT_COUNT = 3
 
 def _round(mat):
     return np.round(mat, decimals=2)
@@ -28,6 +28,7 @@ def test_main():
     for _, res in results["lindbladian"].items():
         lindbladian.append(res)
 
+
     ax = sns.lineplot(
         x=times,
         y=lindbladian,
@@ -42,33 +43,6 @@ def test_main():
         color=COLORS[0],
     )
 
-    if "sal" in results.keys():
-        sal = []
-        for _, res in results["sal"].items():
-            sal.append(res)
-
-        ax = sns.scatterplot(
-            x=times,
-            y=sal,
-            label=f"Single Ancilla Evolution",
-            s=35,
-            color=COLORS[2],
-        )
-
-    if "trotter" in results.keys():
-        trotter = []
-        for _, res in results["trotter"].items():
-            trotter.append(res)
-
-        ax = sns.scatterplot(
-            x=times,
-            y=trotter,
-            label=f"Trotter Evolution",
-            s=35,
-            color=COLORS[3],
-        )
-
-
     # Remove the top and right border
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
@@ -79,7 +53,7 @@ def test_main():
 
     file_name = f"plots/lindbladian/simulation/size_{QUBIT_COUNT}_multi_cm_magnetization.png"
 
-    plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.10), ncol=2, fontsize=10)
+    plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.10), ncol=3, fontsize=10)
     plt.savefig(file_name, dpi=300)
     print(f"saved the plot to {file_name}")
 
