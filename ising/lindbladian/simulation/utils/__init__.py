@@ -1,1 +1,1 @@
-from .interaction_ham import save_interaction_hams, load_interaction_hams, interaction_hamiltonian
+from .interaction_ham import save_interaction_hams, load_interaction_hams, interaction_hamiltonian, interaction_hamiltonian_sparse

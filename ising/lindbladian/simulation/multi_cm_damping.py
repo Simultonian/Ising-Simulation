@@ -177,33 +177,29 @@ def ham_evo(rho_sys, rho_env, ham_sys, gamma, time, neu=1000):
     tau = time / neu
     big_ham_sys = np.kron(ham_sys, np.eye(2))
 
-    cur_rho_sys = rho_sys
 
     ham_ints = interaction_hamiltonian(QUBIT_COUNT, gamma=gamma)
 
-    hams = []
+    us = []
     print(f"Running for time:{time}, neu:{neu}")
     for ham_int in ham_ints:
         ham = (np.sqrt(tau) * big_ham_sys / QUBIT_COUNT) + ham_int
         eig_val, eig_vec = np.linalg.eig(ham)
         eig_vec_inv = np.linalg.inv(eig_vec)
-        hams.append((eig_vec, eig_val, eig_vec_inv))
+
+        u = matrix_exp(eig_vec, eig_val, eig_vec_inv, time=np.sqrt(tau))
+        us.append(u)
+
     print("Ham operator calculation complete")
 
-    us, u_dags = [], []
-    for eig_vec, eig_val, eig_vec_inv in hams:
-        u = matrix_exp(eig_vec, eig_val, eig_vec_inv, time=np.sqrt(tau))
-        u_dag = matrix_exp(eig_vec, eig_val, eig_vec_inv, time=-np.sqrt(tau))
-        us.append(u)
-        u_dags.append(u_dag)
-
+    cur_rho_sys = rho_sys
     with tqdm(total=neu) as pbar:
         for _ in range(neu):
             pbar.update(1)
-            for u, u_dag in zip(us, u_dags):
+            for u in us:
                 complete_rho = np.kron(cur_rho_sys, rho_env)
                 rho_fin = (
-                    u @ complete_rho @ u_dag 
+                    u @ complete_rho @ u.conj().T
                 )
                 cur_rho_sys = partial_trace(rho_fin, list(range(QUBIT_COUNT, QUBIT_COUNT + 1)))
 
