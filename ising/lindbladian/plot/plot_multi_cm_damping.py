@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
 
-QUBIT_COUNT = 5
+QUBIT_COUNT = 3
 
 def _round(mat):
     return np.round(mat, decimals=2)
@@ -20,13 +20,16 @@ def test_main():
     with open(file_name, "r") as file:
         results = json.load(file)
 
-    times, interaction, lindbladian = [], [], []
+    times, interaction, lindbladian, lin_old = [], [], [], []
     for time, res in results["interaction"].items():
         times.append(_round(float(time)))
         interaction.append(res)
 
     for _, res in results["lindbladian"].items():
         lindbladian.append(res)
+
+    for _, res in results["lindbladian_old"].items():
+        lin_old.append(res)
 
     ax = sns.lineplot(
         x=times,
@@ -42,6 +45,14 @@ def test_main():
         color=COLORS[0],
     )
 
+    ax = sns.scatterplot(
+        x=times,
+        y=lin_old,
+        label=f"Lindbladian Old",
+        s=35,
+        color=COLORS[2],
+    )
+
     # Remove the top and right border
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
@@ -50,7 +61,7 @@ def test_main():
     plt.ylabel(r"Overall Magnetization")
     plt.xlabel(r"Evolution time")
 
-    file_name = f"plots/lindbladian/simulation/multi_cm_magnetization.png"
+    file_name = f"plots/lindbladian/simulation/size_{QUBIT_COUNT}_multi_cm_magnetization.png"
 
     plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.10), ncol=3, fontsize=10)
     plt.savefig(file_name, dpi=300)

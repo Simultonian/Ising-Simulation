@@ -23,6 +23,7 @@ def transpose(sparse: SparsePauliOp) -> SparsePauliOp:
 
 
 LOWERING = np.array([[0, 1], [0, 0]])
+RAISING = np.array([[0, 0], [1, 0]])
 
 
 def lowering_all_sites(chain_size: int, gamma: float = 1):
@@ -47,6 +48,40 @@ def lowering_all_sites(chain_size: int, gamma: float = 1):
 
     return l_ops
 
+def thermal_lindbladians(chain_size: int, gamma: float = 1, z: float = 1):
+    """
+    Returns the list for lindbladian operators for the lowering operator
+    on all sites.
+    """
+
+    l_ops = []
+    for site in range(chain_size):
+        l, r = site, chain_size - (site + 1)
+
+        if l == 0:
+            op = LOWERING.copy()
+        else:
+            op = np.kron(np.eye(2**l), LOWERING)
+
+        if r > 0:
+            op = np.kron(op, np.eye(2**r))
+
+        l_ops.append(np.sqrt(gamma) * np.sqrt(1 - z) * op)
+
+    for site in range(chain_size):
+        l, r = site, chain_size - (site + 1)
+
+        if l == 0:
+            op = RAISING.copy()
+        else:
+            op = np.kron(np.eye(2**l), RAISING)
+
+        if r > 0:
+            op = np.kron(op, np.eye(2**r))
+
+        l_ops.append(np.sqrt(gamma) * np.sqrt(z) * op)
+
+    return l_ops
 
 def lindbladian_operator(hamiltonian, lindbladian_ops):
     """

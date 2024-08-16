@@ -2,6 +2,7 @@ import numpy as np
 from itertools import product
 import json
 from ising.lindbladian.simulation.unraveled import (
+    thermal_lindbladians,
     lowering_all_sites,
     lindbladian_operator,
 )
@@ -14,17 +15,19 @@ from ising.observables import overall_magnetization
 from tqdm import tqdm
 
 
-ERO = np.array([[1], [0]])
+ZERO = np.array([[1], [0]])
 ONE = np.array([[0], [1]])
-SIGMA_MINUS = np.array([[0, 1], [0, 0]])
-SIGMA_PLUS = np.array([[0, 0], [1, 0]])
+SIGMA_MINUS = np.array([[0, 1], [0, 0]]) # a_dag
+SIGMA_PLUS = np.array([[0, 0], [1, 0]]) # a_n
+
+def calculate_gamma(beta):
+    return np.exp(-beta) / (1 + np.exp(-beta))
 
 
-QUBIT_COUNT = 5
-GAMMAS = [0, 0.1, 0.4, 0.7, 0.9]
-GAMMA = 0
-TIME_RANGE = (0, 7)
-TIME_COUNT = 20
+QUBIT_COUNT = 3
+GAMMA = 0.5
+TIME_RANGE = (0, 3)
+TIME_COUNT = 5
 EPS = 0.1
 
 H_VAL = -0.1
@@ -39,6 +42,11 @@ def _round(mat):
 def matrix_exp_no_i(eig_vec, eig_val, eig_vec_inv, time: float):
     return eig_vec @ np.diag(np.exp(time * eig_val)) @ eig_vec_inv
 
+
+def matrix_exp_no_eig(mat):
+    eig_val, eig_vec = np.linalg.eig(mat)
+    eig_vec_inv = np.linalg.inv(eig_vec)
+    return matrix_exp(eig_vec, eig_val, eig_vec_inv, time = 1)
 
 def matrix_exp(eig_vec, eig_val, eig_vec_inv, time: float):
     return eig_vec @ np.diag(np.exp(complex(0, -1) * time * eig_val)) @ eig_vec_inv
@@ -98,7 +106,32 @@ def apply_amplitude_damping(rho_sys, ham, gamma, time, nue=1000):
     return cur_rho
 
 
-def lindblad_evo(rho, ham, gamma, time):
+def lindblad_evo(rho, ham, gamma, z, time):
+    """
+    Function to calculate final state after amplitude damping.
+
+    Inputs:
+        - rho: Starting state of system
+        - ham: System Hamiltonian
+        - gamma: Strength of amplitude damping
+        - time: evolution time
+    """
+    # columnize
+    rho_vec = rho.reshape(-1, 1)
+
+    # Hamiltonian is zero
+    l_op = lindbladian_operator(ham, thermal_lindbladians(QUBIT_COUNT, gamma=gamma, z=z))
+
+    eig_val, eig_vec = np.linalg.eig(l_op)
+    eig_vec_inv = np.linalg.inv(eig_vec)
+
+    op_time_matrix = matrix_exp_no_i(eig_vec, eig_val, eig_vec_inv, time)
+    rho_vec_final = op_time_matrix @ rho_vec
+    rho_final = reshape_vec(rho_vec_final)
+
+    return rho_final
+
+def lindblad_evo_old(rho, ham, gamma, time):
     """
     Function to calculate final state after amplitude damping.
 
@@ -227,22 +260,30 @@ def test_main():
     ham = parametrized_ising(QUBIT_COUNT, H_VAL).matrix
 
     # Environment qubit is always in ZERO, and it is always only one qubit each
-    rho_env = np.outer(ZERO, ZERO.conj())
+    inv_temp = 10000000000
+    alpha, beta = 1, np.exp(-inv_temp) 
+    rho_env1 = (alpha * np.outer(ZERO, ZERO) + beta * np.outer(ONE, ONE)) / (alpha + beta)
 
     observable = overall_magnetization(QUBIT_COUNT).matrix
 
-    gamma = GAMMA
-    results = {"interaction": {}, "lindbladian": {}}
+    z = calculate_gamma(inv_temp)
+    gamma = 0.1
+
+    results = {"interaction": {}, "lindbladian": {}, "lindbladian_old": {}}
     times = np.linspace(TIME_RANGE[0], TIME_RANGE[1], TIME_COUNT)
     for time in times:
         neu = max(100, int(10 * (time**2) / EPS))
-        rho_ham = ham_evo(rho_sys, rho_env, ham, gamma, time, neu)
-        rho_lin = lindblad_evo(rho_sys, ham, gamma, time)
+        rho_ham = ham_evo(rho_sys, rho_env1, ham, gamma, time, neu)
+        rho_lin = lindblad_evo(rho_sys, ham, gamma, z, time)
+        rho_lin_old = lindblad_evo_old(rho_sys, ham, gamma, time)
 
-        rho_lin = rho_lin / global_phase(rho_lin)
         rho_ham = rho_ham / global_phase(rho_ham)
+        rho_lin = rho_lin / global_phase(rho_lin)
+        rho_lin_old = rho_lin_old / global_phase(rho_lin_old)
+
         results["interaction"][time] = np.trace(np.abs(observable @ rho_ham))
         results["lindbladian"][time] = np.trace(np.abs(observable @ rho_lin))
+        results["lindbladian_old"][time] = np.trace(np.abs(observable @ rho_lin_old))
 
     file_name = f"data/lindbladian/time_vs_magn/size_{QUBIT_COUNT}.json"
     with open(file_name, "w") as file:
