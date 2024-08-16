@@ -30,6 +30,7 @@ def test_main():
     time_labels = list(results["interaction"].keys())
     interaction = _get_value_time_order(results, time_labels, "interaction")
     lindbladian = _get_value_time_order(results, time_labels, "lindbladian")
+    sal = _get_value_time_order(results, time_labels, "sal")
 
     times = [_round(float(time_str)) for time_str in time_labels]
 
@@ -47,14 +48,13 @@ def test_main():
         color=COLORS[0],
     )
 
-    # trotter = _get_value_time_order(results, times, "trotter")
-    # ax = sns.scatterplot(
-    #     x=times,
-    #     y=trotter,
-    #     label=f"Trotterization",
-    #     s=35,
-    #     color=COLORS[2],
-    # )
+    ax = sns.scatterplot(
+        x=times,
+        y=sal,
+        label=f"Single Ancilla LCU",
+        s=35,
+        color=COLORS[2],
+    )
 
     # Remove the top and right border
     ax.spines["top"].set_visible(False)

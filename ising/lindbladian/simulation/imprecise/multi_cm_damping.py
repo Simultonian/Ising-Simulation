@@ -65,7 +65,7 @@ from ising.lindbladian.simulation.utils import save_interaction_hams, load_inter
 
 def test_main():
     np.random.seed(42)
-    results = {"interaction": {}, "lindbladian": {}}
+    results = {"interaction": {}, "lindbladian": {}, "sal": {}}
 
     gamma = GAMMA
     inv_temp = INV_TEMP
@@ -103,11 +103,11 @@ def test_main():
 
         print(f"Running for time:{time}, neu:{neu}")
         us = []
-        # taylors = []
+        taylors = []
         for ham_int in ham_ints_sparse:
-            ham_sparse = (np.sqrt(tau) * big_ham_sys.to_matrix() / QUBIT_COUNT) + ham_int.to_matrix()
+            ham_sparse = (np.sqrt(tau) * big_ham_sys / QUBIT_COUNT) + ham_int
 
-            eig_val, eig_vec = np.linalg.eig(ham_sparse)
+            eig_val, eig_vec = np.linalg.eig(ham_sparse.to_matrix())
             eig_vec_inv = np.linalg.inv(eig_vec)
 
             u = matrix_exp(eig_vec, eig_val, eig_vec_inv, time=np.sqrt(tau))
@@ -116,9 +116,9 @@ def test_main():
             """
             This is constructing the Taylor Circuits
             """
-            # taylor = Taylor(ham_sparse.paulis, ham_sparse.coeffs, ham_sim_error)
-            # taylor.setup_time(np.sqrt(tau))
-            # taylors.append(taylor)
+            taylor = Taylor(ham_sparse.paulis, ham_sparse.coeffs, ham_sim_error)
+            taylor.setup_time(np.sqrt(tau))
+            taylors.append(taylor)
 
         print("Ham operator calculation complete")
 
@@ -136,31 +136,31 @@ def test_main():
         results["interaction"][time] = np.trace(np.abs(observable.matrix @ rho_sys_exact))
 
         print("Exact complete, sampling from SAL now")
-        # with tqdm(total=SAL_RUNS, desc="SAL runs") as pbar:
-        #     sampling_results = []
-        #     for _ in range (SAL_RUNS):
-        #         pbar.update(1)
-        #         rho_sys_sal = rho_sys.copy()
-        #         with tqdm(total=neu, desc="Neu bar", leave=False) as pbar_inner:
-        #             for _ in range(neu):
-        #                 pbar_inner.update(1)
-        #                 for taylor in taylors:
-        #                     complete_rho = np.kron(rho_sys_sal, rho_env)
-        #                     complete_rho = np.kron(RHO_PLUS, complete_rho)
+        with tqdm(total=SAL_RUNS, desc="SAL runs") as pbar:
+            sampling_results = []
+            for _ in range (SAL_RUNS):
+                pbar.update(1)
+                rho_sys_sal = rho_sys.copy()
+                with tqdm(total=neu, desc="Neu bar", leave=False) as pbar_inner:
+                    for _ in range(neu):
+                        pbar_inner.update(1)
+                        for taylor in taylors:
+                            complete_rho = np.kron(rho_sys_sal, rho_env)
+                            complete_rho = np.kron(RHO_PLUS, complete_rho)
 
-        #                     u = taylor.sample_matrix()
+                            u = taylor.sample_matrix()
 
-        #                     rho_fin = (
-        #                         u @ complete_rho @ u.conj().T
-        #                     )
-        #                     rho_fin = partial_trace(rho_fin, [0])
+                            rho_fin = (
+                                u @ complete_rho @ u.conj().T
+                            )
+                            rho_fin = partial_trace(rho_fin, [0])
 
-        #                     rho_sys_sal = partial_trace(rho_fin, list(range(QUBIT_COUNT, QUBIT_COUNT + 1)))
+                            rho_sys_sal = partial_trace(rho_fin, list(range(QUBIT_COUNT, QUBIT_COUNT + 1)))
 
-        #         result = np.trace(np.abs(observable.matrix @ rho_sys_sal))
-        #         sampling_results.append(result)
+                result = np.trace(np.abs(observable.matrix @ rho_sys_sal))
+                sampling_results.append(result)
 
-        #     results["sal"][time] = calculate_mu(sampling_results, SAL_RUNS, [1])
+            results["sal"][time] = calculate_mu(sampling_results, SAL_RUNS, [1])
 
 
 
