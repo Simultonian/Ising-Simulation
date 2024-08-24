@@ -1,15 +1,15 @@
 import numpy as np
 import json
-from qiskit.quantum_info import Pauli, SparsePauliOp
+from qiskit.quantum_info import SparsePauliOp
 
 from ising.utils import global_phase
 from ising.utils.trace import partial_trace
-from ising.hamiltonian import parametrized_ising, Hamiltonian
+from ising.hamiltonian import parametrized_ising
 from ising.observables import overall_magnetization
-from ising.lindbladian.simulation.multi_cm_damping import lindblad_evo, interaction_hamiltonian
-from ising.lindbladian.simulation.imprecise import GroupedLieCircuit, Taylor
-
+from ising.lindbladian.simulation.multi_cm_damping import lindblad_evo
+from ising.lindbladian.simulation.imprecise import Taylor
 from ising.lindbladian.simulation.utils import load_interaction_hams
+
 from ising.simulation.taylor.utils import calculate_mu
 
 from tqdm import tqdm
@@ -58,11 +58,10 @@ def _get_thermal_state(beta):
 def _calculate_gamma(beta):
     return np.exp(-beta) / (1 + np.exp(-beta))
 
-from ising.lindbladian.simulation.utils import save_interaction_hams, load_interaction_hams, interaction_hamiltonian, interaction_hamiltonian_sparse
 
 def test_main():
     np.random.seed(42)
-    results = {"interaction": {}, "lindbladian": {}, "sal": {}}
+    results = {"lindbladian": {}, "sal": {}}
 
     gamma = GAMMA
     times = np.linspace(TIME_RANGE[0], TIME_RANGE[1], TIME_COUNT)
@@ -82,7 +81,6 @@ def test_main():
     big_ham_sys = SparsePauliOp([x.to_label() + "I" for x in ham_sys.paulis], ham_sys.coeffs)
     observable = overall_magnetization(QUBIT_COUNT)
 
-
     for time in times:
         results["lindbladian"][time] = {}
         for ind, z in enumerate(zs):
@@ -98,17 +96,10 @@ def test_main():
         ham_sim_error = EPS / (9 * QUBIT_COUNT * neu)
 
         print(f"Running for time:{time}, neu:{neu}")
-        us = []
         taylors = []
         for ham_int in ham_ints_sparse:
             ham_sparse = (np.sqrt(tau) * big_ham_sys / QUBIT_COUNT) + ham_int
 
-            eig_val, eig_vec = np.linalg.eig(ham_sparse.to_matrix())
-            eig_vec_inv = np.linalg.inv(eig_vec)
-
-            u = matrix_exp(eig_vec, eig_val, eig_vec_inv, time=np.sqrt(tau))
-            us.append(u)
-            
             """
             This is constructing the Taylor Circuits
             """
@@ -118,53 +109,37 @@ def test_main():
 
         print("Ham operator calculation complete")
 
-        rho_sys_exacts = [rho_sys.copy() for _ in INV_TEMPS]
-        with tqdm(total=neu) as pbar:
-            for _ in range(neu):
+        print("Exact complete, sampling from SAL now")
+        sampling_results = [[] for _ in INV_TEMPS]
+        with tqdm(total=SAL_RUNS, desc="SAL runs") as pbar:
+            for _ in range (SAL_RUNS):
                 pbar.update(1)
-                for u in us:
-                    for ind, rho_sys_exact in enumerate(rho_sys_exacts):
-                        complete_rho = np.kron(rho_sys_exact, rho_envs[ind])
-                        rho_fin = (
-                            u @ complete_rho @ u.conj().T
-                        )
-                        rho_sys_exacts[ind] = partial_trace(rho_fin, list(range(QUBIT_COUNT, QUBIT_COUNT + 1)))
+                rho_sys_sals = [rho_sys.copy() for _ in INV_TEMPS]
 
-        results["interaction"][time] = {}
+                with tqdm(total=neu, desc="Neu bar", leave=False) as pbar_inner:
+                    for _ in range(neu):
+                        pbar_inner.update(1)
+                        for taylor in taylors:
+                            for ind, rho_sys_sal in enumerate(rho_sys_sals):
+                                complete_rho = np.kron(rho_sys_sal, rho_envs[ind])
+                                complete_rho = np.kron(RHO_PLUS, complete_rho)
+
+                                u = taylor.sample_matrix()
+
+                                rho_fin = (
+                                    u @ complete_rho @ u.conj().T
+                                )
+                                rho_fin = partial_trace(rho_fin, [0])
+
+                                rho_sys_sals[ind] = partial_trace(rho_fin, list(range(QUBIT_COUNT, QUBIT_COUNT + 1)))
+
+                for ind, _ in enumerate(INV_TEMPS):
+                    result = np.trace(np.abs(observable.matrix @ rho_sys_sals[ind]))
+                    sampling_results[ind].append(result)
+
+        results["sal"][time] = {}
         for ind, beta in enumerate(INV_TEMPS):
-            results["interaction"][time][beta] = np.trace(np.abs(observable.matrix @ rho_sys_exacts[ind]))
-
-        # print("Exact complete, sampling from SAL now")
-        # sampling_results = [[] for _ in INV_TEMPS]
-        # with tqdm(total=SAL_RUNS, desc="SAL runs") as pbar:
-        #     for _ in range (SAL_RUNS):
-        #         pbar.update(1)
-        #         rho_sys_sals = [rho_sys.copy() for _ in INV_TEMPS]
-
-        #         with tqdm(total=neu, desc="Neu bar", leave=False) as pbar_inner:
-        #             for _ in range(neu):
-        #                 pbar_inner.update(1)
-        #                 for taylor in taylors:
-        #                     for ind, rho_sys_sal in enumerate(rho_sys_sals):
-        #                         complete_rho = np.kron(rho_sys_sal, rho_envs[ind])
-        #                         complete_rho = np.kron(RHO_PLUS, complete_rho)
-
-        #                         u = taylor.sample_matrix()
-
-        #                         rho_fin = (
-        #                             u @ complete_rho @ u.conj().T
-        #                         )
-        #                         rho_fin = partial_trace(rho_fin, [0])
-
-        #                         rho_sys_sals[ind] = partial_trace(rho_fin, list(range(QUBIT_COUNT, QUBIT_COUNT + 1)))
-
-        #         for ind, _ in enumerate(INV_TEMPS):
-        #             result = np.trace(np.abs(observable.matrix @ rho_sys_sals[ind]))
-        #             sampling_results[ind].append(result)
-
-        # results["sal"][time] = {}
-        # for ind, beta in enumerate(INV_TEMPS):
-        #     results["sal"][time][beta] = calculate_mu(sampling_results[ind], SAL_RUNS, [1])
+            results["sal"][time][beta] = calculate_mu(sampling_results[ind], SAL_RUNS, [1])
 
 
 

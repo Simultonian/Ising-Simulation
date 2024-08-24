@@ -30,9 +30,8 @@ def test_main():
 
     time_labels = list(results["interaction"].keys())
     for ind, inv_temp in enumerate(INV_TEMPS):
-        interaction = _get_value_time_order(results, inv_temp, time_labels, "interaction")
         lindbladian = _get_value_time_order(results, inv_temp, time_labels, "lindbladian")
-        # sal = _get_value_time_order(results, inv_temp, time_labels, "sal")
+        sal = _get_value_time_order(results, inv_temp, time_labels, "sal")
 
         times = [_round(float(time_str)) for time_str in time_labels]
 
@@ -40,23 +39,15 @@ def test_main():
             x=times,
             y=lindbladian,
             label=f"Lindbladian {inv_temp}",
-            color=COLORS[1 + 3*ind],
+            color=COLORS[ind],
         )
         ax = sns.scatterplot(
             x=times,
-            y=interaction,
-            label=f"Repeated Interaction {inv_temp}",
+            y=sal,
+            label=f"Single Ancilla LCU {inv_temp}",
             s=35,
-            color=COLORS[0 + 3*ind],
+            color=COLORS[ind],
         )
-
-        # ax = sns.scatterplot(
-        #     x=times,
-        #     y=sal,
-        #     label=f"Single Ancilla LCU {inv_temp}",
-        #     s=35,
-        #     color=COLORS[2 + 3*ind],
-        # )
 
     # Remove the top and right border
     ax.spines["top"].set_visible(False)
