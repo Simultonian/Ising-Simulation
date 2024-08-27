@@ -5,6 +5,7 @@ from .kron import control_version
 from .decompose import Decomposer
 from .phase import global_phase
 from .paulibasis import unitary_to_pauli_decomposition
+from .hache import hache
 
 MAXSIZE = 10000
 
