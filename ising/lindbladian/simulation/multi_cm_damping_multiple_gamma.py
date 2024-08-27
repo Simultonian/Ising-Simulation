@@ -23,10 +23,10 @@ def calculate_gamma(beta):
     return np.exp(-beta) / (1 + np.exp(-beta))
 
 
-QUBIT_COUNT = 3
-GAMMAS = [1, 0.1, 0.01, 0.001]
-TIME_RANGE = (0, 5)
-TIME_COUNT = 5
+QUBIT_COUNT = 5
+GAMMAS = [1, 0.5, 0.1]
+TIME_RANGE = (1, 10)
+TIME_COUNT = 9
 EPS = 0.1
 
 H_VAL = -0.1
@@ -233,9 +233,10 @@ def test_main():
     plt.ylabel(r"Overall Magnetization")
     plt.xlabel(r"Evolution time")
 
-    file_name = f"plots/lindbladian/simulation/size_{QUBIT_COUNT}_multi_cm_magn_gamma.png"
+    file_name = f"plots/lindbladian/simulation/size_{QUBIT_COUNT}_multi_cm_magn_gamma_no_legend.png"
 
-    plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.10), ncol=3, fontsize=10)
+    ax.get_legend().remove()
+    # plt.legend(loc="upper center", bbox_to_anchor=(0.48, 1.15), ncol=3, fontsize=10)
     plt.savefig(file_name, dpi=300)
     print(f"saved the plot to {file_name}")
 
