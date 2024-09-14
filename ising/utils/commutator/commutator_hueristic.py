@@ -4,6 +4,7 @@ from tqdm import tqdm
 
 from qiskit.quantum_info import SparsePauliOp, Pauli
 from functools import lru_cache
+from ising.utils import hache
 
 
 @lru_cache(maxsize=int(1e6))
@@ -54,6 +55,7 @@ def triple_commutator(
     return update
 
 
+@hache(blob_type=float, max_size=10000)
 def alpha_commutator_second_order(
     sorted_pairs: list[tuple[Pauli, float]], error: float, delta: float, cutoff_count
 ) -> float:
@@ -111,6 +113,7 @@ def _pauli_commute(a: Pauli, b: Pauli):
     return a_dot_b == b_dot_a
 
 
+@hache(blob_type=float, max_size=10000)
 def alpha_commutator_first_order(
     sorted_pairs: list[tuple[Pauli, float]], error: float, delta: float, cutoff_count
 ) -> float:
@@ -159,6 +162,7 @@ def alpha_commutator_first_order(
     return alpha_u
 
 
+@hache(blob_type=float, max_size=10000)
 def r_first_order(
     sorted_pairs: list[tuple[Pauli, float]], time: float, error: float, **kwargs
 ) -> int:
@@ -178,6 +182,7 @@ def r_first_order(
     return np.ceil(nr / dr)
 
 
+@hache(blob_type=float, max_size=10000)
 def r_second_order(
     sorted_pairs: list[tuple[Pauli, float]], time: float, error: float, **kwargs
 ) -> int:

@@ -1,34 +1,21 @@
-from typing import Optional
-from collections import defaultdict
 from functools import lru_cache
 import numpy as np
-from numpy.typing import NDArray
 
 from qiskit.quantum_info import PauliList
-from qiskit.circuit import Parameter
-from ising.utils.trace import partial_trace
 
-from ising.hamiltonian import Hamiltonian
-from ising.hamiltonian.hamiltonian import substitute_parameter
 from itertools import product as cartesian_product
 
 import numpy as np
-import numpy.testing as npt
 from collections import Counter
 
-from qiskit.quantum_info import SparsePauliOp, Pauli
+from qiskit.quantum_info import Pauli
 
-from ising.hamiltonian import Hamiltonian
-from ising.utils import MAXSIZE, control_version
+from ising.utils import control_version, hache
 from ising.simulation.taylor.utils import (
     get_cap_k,
     calculate_exp,
     get_alphas,
-    calculate_mu,
 )
-
-from ising.utils import global_phase
-from tqdm import tqdm
 
 PSI_PLUS = np.array([[1], [1]]) / np.sqrt(2)
 RHO_PLUS = np.outer(PSI_PLUS, PSI_PLUS.conj())
