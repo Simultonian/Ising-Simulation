@@ -66,9 +66,10 @@ def test_main():
 
     ax.invert_xaxis()
 
-    file_name = f"plots/benchmark/lines/lindi/error_size_{QUBIT_COUNT}.png"
+    file_name = f"plots/benchmark/lines/lindi/no_label_error_size_{QUBIT_COUNT}.png"
 
-    plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.15), ncol=2, fontsize=10)
+    ax.get_legend().remove()
+    # plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.15), ncol=2, fontsize=10)
     plt.savefig(file_name, dpi=300)
     print(f"saved the plot to {file_name}")
 

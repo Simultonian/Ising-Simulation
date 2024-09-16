@@ -23,7 +23,7 @@ QUBIT_COUNT = 5
 GAMMA = 0.5
 H_VAL = 0.1
 TIME = 0.1
-ERROR_RANGE = (-1, -5)
+ERROR_RANGE = (-1, -8)
 ERROR_COUNT = 10
 
 
@@ -36,7 +36,7 @@ def test_main():
     ham_sys = parametrized_ising(QUBIT_COUNT, H_VAL).sparse_repr
 
     # QUBIT_COUNT + 1 size Hamiltonians
-    ham_ints_sparse = load_interaction_hams(QUBIT_COUNT)
+    ham_ints_sparse = load_interaction_hams(QUBIT_COUNT, GAMMA)
 
     big_ham_sys = SparsePauliOp([x.to_label() + "I" for x in ham_sys.paulis], ham_sys.coeffs)
 
