@@ -23,7 +23,7 @@ def calculate_gamma(beta):
     return np.exp(-beta) / (1 + np.exp(-beta))
 
 
-QUBIT_COUNT = 5
+QUBIT_COUNT = 6
 GAMMAS = [1, 0.5, 0.1]
 TIME_RANGE = (1, 10)
 TIME_COUNT = 9
@@ -207,7 +207,7 @@ def test_main():
     for gamma_ind, gamma in enumerate(GAMMAS):
         interaction, lindbladian = [], []
         for time in times:
-            neu = max(100, int(10 * (time**2) / EPS))
+            neu = min(100, int(10 * (time**2) / EPS))
             interaction.append(ham_evo(rho_sys, rho_env1, ham, gamma, time, neu, observable))
             lindbladian.append(lindblad_evo(rho_sys, ham, gamma, z, time, observable))
 
