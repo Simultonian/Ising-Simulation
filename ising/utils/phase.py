@@ -13,6 +13,6 @@ def global_phase(a: NDArray):
                 if abs(theta) < 1e-6:
                     theta = 0
                 # phase is e^{i\theta}
-                phase = np.exp(0 + 1j * theta)
+                return np.exp(0 + 1j * theta)
 
     return phase
