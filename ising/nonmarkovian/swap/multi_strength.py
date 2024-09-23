@@ -28,11 +28,11 @@ QUBIT_COUNT = 4
 GAMMA = 0.5
 PS_COUNT = 5
 PS_STRENGTHS = np.linspace(np.pi/3, np.pi/2, PS_COUNT)
-PS_STRENGTHS = [np.pi/2 - 0.1]
-TIME_RANGE = (1, 20)
+PS_STRENGTHS = [np.pi/2 - 0.01]
+TIME_RANGE = (1, 10)
 TIME_COUNT = 50
-EPS = 0.1
-INV_TEMP = 10000000
+EPS = 1
+INV_TEMP = 100
 
 H_VAL = -0.1
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
@@ -302,12 +302,14 @@ def test_main():
     opacity = np.linspace(0, 0.8, len(PS_STRENGTHS))
     for ps_ind, ps in enumerate(PS_STRENGTHS):
         interaction = []
+        neus = []
         for time in times:
             neu = max(10, int(10 * (time**2) / EPS))
+            neus.append(neu)
             interaction.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, ps, GAMMA, time, neu, observable))
 
         ax = sns.lineplot(
-            x=times,
+            x=neus,
             y=interaction,
             label=f"Single Ancilla LCU {_round(ps)}",
             # s=35,
