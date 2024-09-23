@@ -26,9 +26,10 @@ def calculate_gamma(beta):
 
 QUBIT_COUNT = 4
 GAMMA = 0.5
-PS_COUNT = 10
-PS_STRENGTHS = np.linspace(0, np.pi/2, PS_COUNT)
-TIME_RANGE = (1, 10)
+PS_COUNT = 5
+PS_STRENGTHS = np.linspace(np.pi/3, np.pi/2, PS_COUNT)
+PS_STRENGTHS = [np.pi/2 - 0.1]
+TIME_RANGE = (1, 100)
 TIME_COUNT = 10
 EPS = 0.1
 INV_TEMP = 10000000
@@ -151,6 +152,12 @@ def make_valid_rho(rho):
     
     # Round again to ensure precision after normalization
     rho_normalized = np.round(rho_normalized, decimals=6)
+
+    for ind, d in enumerate(np.diag(rho)):
+        if d < 0:
+            if abs(d) < 1e-3:
+                rho_normalized[ind][ind] = abs(d)
+            
     
     return rho_normalized
 
@@ -285,12 +292,12 @@ def test_main():
     lindbladian = []
     for time in times:
         lindbladian.append(lindblad_evo(rho_sys, ham, GAMMA, z, time, observable))
-    ax = sns.lineplot(
-        x=times,
-        y=lindbladian,
-        label=f"Lindbladian {GAMMA}",
-        color=COLORS[0],
-    )
+    # ax = sns.lineplot(
+    #     x=times,
+    #     y=lindbladian,
+    #     label=f"Lindbladian {GAMMA}",
+    #     color=COLORS[0],
+    # )
 
     opacity = np.linspace(0, 0.8, len(PS_STRENGTHS))
     for ps_ind, ps in enumerate(PS_STRENGTHS):
@@ -316,7 +323,7 @@ def test_main():
     plt.ylabel(r"Overall Magnetization")
     plt.xlabel(r"Number of collisions")
 
-    file_name = f"plots/nonmarkovian/swap/size_{QUBIT_COUNT}.png"
+    file_name = f"plots/nonmarkovian/swap/single_size_{QUBIT_COUNT}.png"
 
     ax.get_legend().remove()
     # plt.legend(loc="upper center", bbox_to_anchor=(0.48, 1.15), ncol=3, fontsize=10)
