@@ -29,8 +29,8 @@ GAMMA = 0.5
 PS_COUNT = 5
 PS_STRENGTHS = np.linspace(np.pi/3, np.pi/2, PS_COUNT)
 PS_STRENGTHS = [np.pi/2 - 0.1]
-TIME_RANGE = (1, 100)
-TIME_COUNT = 10
+TIME_RANGE = (1, 20)
+TIME_COUNT = 50
 EPS = 0.1
 INV_TEMP = 10000000
 
@@ -162,7 +162,7 @@ def make_valid_rho(rho):
     return rho_normalized
 
 
-# @hache(blob_type=float, max_size=1000)
+@hache(blob_type=float, max_size=1000)
 def ham_evo_nonmarkovian(rho_sys, rho_env, ham_sys, partial_swap, gamma, time, neu, observable):
     """
     Perform nonmarkovian evolution with the addition of partial swap of 
@@ -306,13 +306,13 @@ def test_main():
             neu = max(10, int(10 * (time**2) / EPS))
             interaction.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, ps, GAMMA, time, neu, observable))
 
-        ax = sns.scatterplot(
+        ax = sns.lineplot(
             x=times,
             y=interaction,
             label=f"Single Ancilla LCU {_round(ps)}",
-            s=35,
+            # s=35,
             color=COLORS[0],
-            alpha = 1 - opacity[ps_ind]
+            # alpha = 1 - opacity[ps_ind]
         )
 
     # Remove the top and right border
@@ -323,7 +323,7 @@ def test_main():
     plt.ylabel(r"Overall Magnetization")
     plt.xlabel(r"Number of collisions")
 
-    file_name = f"plots/nonmarkovian/swap/single_size_{QUBIT_COUNT}.png"
+    file_name = f"plots/nonmarkovian/swap/line_size_{QUBIT_COUNT}.png"
 
     ax.get_legend().remove()
     # plt.legend(loc="upper center", bbox_to_anchor=(0.48, 1.15), ncol=3, fontsize=10)
