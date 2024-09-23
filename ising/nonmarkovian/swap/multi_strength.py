@@ -29,12 +29,12 @@ GAMMA = 0.5
 PS_COUNT = 5
 PS_STRENGTHS = np.linspace(np.pi/3, np.pi/2, PS_COUNT)
 PS_STRENGTHS = [np.pi/2 - 0.1]
-TIME_RANGE = (10, 15)
+TIME_RANGE = (10, 30)
 TIME_COUNT = 20
 EPS = 1
 # INV_TEMP = 1
 
-INV_TEMPS = [1, 20, 1000, 10000000]
+INV_TEMPS = [1]
 
 H_VAL = -0.1
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
@@ -295,18 +295,20 @@ def test_main():
         for time in times:
             lindbladian.append(lindblad_evo(rho_sys, ham, GAMMA, z, time, observable))
 
+        neus = []
         for time in times:
             neu = max(10, int(10 * (time**2) / EPS))
+            neus.append(neu)
             interaction.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, PS_STRENGTHS[0], GAMMA, time, neu, observable))
 
         ax = sns.lineplot(
-            x=times,
+            x=neus,
             y=lindbladian,
             label=f"Lind {_round(inv_temp)}",
             color=COLORS[ind],
         )
         ax = sns.scatterplot(
-            x=times,
+            x=neus,
             y=interaction,
             label=f"SAL inv_temp={_round(inv_temp)}",
             # s=35,
