@@ -35,7 +35,7 @@ EPS = 1
 # INV_TEMP = 1
 
 INV_TEMPS = [0.1, 0.5, 0.6, 0.8, 1]
-INV_TEMPS = [0.001]
+INV_TEMPS = [1e8]
 
 H_VAL = -0.1
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
