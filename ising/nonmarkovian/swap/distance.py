@@ -25,7 +25,7 @@ def calculate_gamma(beta):
 
 
 QUBIT_COUNT = 4
-GAMMA = 0.1
+GAMMA = 1
 PS_COUNT = 5
 PS_STRENGTHS = np.linspace(np.pi/3, np.pi/2, PS_COUNT)
 PS_STRENGTHS = [np.pi/2 - 0.1]
@@ -35,7 +35,7 @@ EPS = 1
 # INV_TEMP = 1
 
 INV_TEMPS = [0.1, 0.5, 0.6, 0.8, 1]
-INV_TEMPS = [1e8]
+INV_TEMPS = [1e-6]
 
 H_VAL = -0.1
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
