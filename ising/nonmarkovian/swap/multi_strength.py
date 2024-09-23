@@ -29,12 +29,12 @@ GAMMA = 0.5
 PS_COUNT = 5
 PS_STRENGTHS = np.linspace(np.pi/3, np.pi/2, PS_COUNT)
 PS_STRENGTHS = [np.pi/2 - 0.1]
-TIME_RANGE = (1, 15)
+TIME_RANGE = (1, 20)
 TIME_COUNT = 20
 EPS = 1
 # INV_TEMP = 1
 
-INV_TEMPS = [1, 5, 10, 15, 20]
+INV_TEMPS = [1, 20, 1000, 10000000]
 
 H_VAL = -0.1
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
