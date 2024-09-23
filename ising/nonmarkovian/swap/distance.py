@@ -35,7 +35,7 @@ EPS = 1
 # INV_TEMP = 1
 
 INV_TEMPS = [0.1, 0.5, 0.6, 0.8, 1]
-INV_TEMPS = [0.5]
+INV_TEMPS = [0.001]
 
 H_VAL = -0.1
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
@@ -74,7 +74,7 @@ def _kron_multi(ls):
     return prod
 
 
-@hache(blob_type=float, max_size=1000)
+# @hache(blob_type=float, max_size=1000)
 def lindblad_evo(rho1, rho2, ham, gamma, z, time, observable):
     """
     Function to calculate final state after amplitude damping.
@@ -168,14 +168,14 @@ def make_valid_rho(rho):
     # Round again to ensure precision after normalization
     rho_normalized = np.round(rho_normalized, decimals=6)
 
-    row_sums = np.sum(np.diag(rho))
+    row_sums = np.sum(np.diag(rho_normalized))
     rho_normalized = rho_normalized / row_sums
     
     
     return rho_normalized
 
 
-@hache(blob_type=float, max_size=1000)
+# @hache(blob_type=float, max_size=1000)
 def ham_evo_nonmarkovian(rho_sys1, rho_sys2, rho_env, ham_sys, partial_swap, gamma, time, neu, observable):
     """
     Perform nonmarkovian evolution with the addition of partial swap of 
