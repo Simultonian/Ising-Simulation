@@ -28,11 +28,13 @@ QUBIT_COUNT = 4
 GAMMA = 0.5
 PS_COUNT = 5
 PS_STRENGTHS = np.linspace(np.pi/3, np.pi/2, PS_COUNT)
-PS_STRENGTHS = [np.pi/2 - 0.01]
+PS_STRENGTHS = [np.pi/2 - 0.1]
 TIME_RANGE = (1, 15)
-TIME_COUNT = 50
+TIME_COUNT = 20
 EPS = 1
-INV_TEMP = 100
+# INV_TEMP = 1
+
+INV_TEMPS = [1, 5, 10, 15, 20]
 
 H_VAL = -0.1
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
@@ -279,41 +281,36 @@ def test_main():
     rho_sys = np.outer(psi, psi.conj())
     # ham = np.zeros_like(rho_sys)
     ham = parametrized_ising(QUBIT_COUNT, H_VAL).matrix
-
-    alpha, beta = 1, np.exp(-INV_TEMP) 
-    rho_env = (alpha * np.outer(ZERO, ZERO) + beta * np.outer(ONE, ONE)) / (alpha + beta)
-
     observable = overall_magnetization(QUBIT_COUNT).matrix
-
-    z = calculate_gamma(INV_TEMP)
-
     times = np.linspace(TIME_RANGE[0], TIME_RANGE[1], TIME_COUNT)
 
-    lindbladian = []
-    for time in times:
-        lindbladian.append(lindblad_evo(rho_sys, ham, GAMMA, z, time, observable))
-    # ax = sns.lineplot(
-    #     x=times,
-    #     y=lindbladian,
-    #     label=f"Lindbladian {GAMMA}",
-    #     color=COLORS[0],
-    # )
+    for ind, inv_temp in enumerate(INV_TEMPS):
+        alpha, beta = 1, np.exp(-inv_temp) 
+        rho_env = (alpha * np.outer(ZERO, ZERO) + beta * np.outer(ONE, ONE)) / (alpha + beta)
 
-    opacity = np.linspace(0, 0.8, len(PS_STRENGTHS))
-    for ps_ind, ps in enumerate(PS_STRENGTHS):
+        z = calculate_gamma(inv_temp)
+
         interaction = []
-        neus = []
+        lindbladian = []
+        for time in times:
+            lindbladian.append(lindblad_evo(rho_sys, ham, GAMMA, z, time, observable))
+
         for time in times:
             neu = max(10, int(10 * (time**2) / EPS))
-            neus.append(neu)
-            interaction.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, ps, GAMMA, time, neu, observable))
+            interaction.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, PS_STRENGTHS[0], GAMMA, time, neu, observable))
 
         ax = sns.lineplot(
-            x=neus,
+            x=times,
+            y=lindbladian,
+            label=f"Lind {_round(inv_temp)}",
+            color=COLORS[ind],
+        )
+        ax = sns.scatterplot(
+            x=times,
             y=interaction,
-            label=f"Single Ancilla LCU {_round(ps)}",
+            label=f"SAL inv_temp={_round(inv_temp)}",
             # s=35,
-            color=COLORS[0],
+            color=COLORS[ind],
             # alpha = 1 - opacity[ps_ind]
         )
 
@@ -325,10 +322,11 @@ def test_main():
     plt.ylabel(r"Overall Magnetization")
     plt.xlabel(r"Number of collisions")
 
-    file_name = f"plots/nonmarkovian/swap/line_size_{QUBIT_COUNT}.png"
+    file_name = f"plots/nonmarkovian/swap/inv_temp_{QUBIT_COUNT}.png"
 
-    ax.get_legend().remove()
-    # plt.legend(loc="upper center", bbox_to_anchor=(0.48, 1.15), ncol=3, fontsize=10)
+    # ax.get_legend().remove()
+    # plt.legend(loc="upper right", bbox_to_anchor=(0.48, 1.15), ncol=1, fontsize=10)
+    plt.legend(ncol=1, fontsize=7)
     plt.savefig(file_name, dpi=300)
     print(f"saved the plot to {file_name}")
 
