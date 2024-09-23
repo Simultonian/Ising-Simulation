@@ -34,7 +34,7 @@ TIME_COUNT = 20
 EPS = 1
 # INV_TEMP = 1
 
-INV_TEMPS = [1]
+INV_TEMPS = [0.1, 0.5, 0.6, 0.8, 1]
 
 H_VAL = -0.1
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
@@ -160,6 +160,12 @@ def make_valid_rho(rho):
             if abs(d) < 1e-3:
                 rho_normalized[ind][ind] = abs(d)
             
+    # Round again to ensure precision after normalization
+    rho_normalized = np.round(rho_normalized, decimals=6)
+
+    row_sums = np.sum(np.diag(rho))
+    rho_normalized = rho_normalized / row_sums
+    
     
     return rho_normalized
 
@@ -287,6 +293,7 @@ def test_main():
     for ind, inv_temp in enumerate(INV_TEMPS):
         alpha, beta = 1, np.exp(-inv_temp) 
         rho_env = (alpha * np.outer(ZERO, ZERO) + beta * np.outer(ONE, ONE)) / (alpha + beta)
+        rho_env = make_valid_rho(rho_env)
 
         z = calculate_gamma(inv_temp)
 
