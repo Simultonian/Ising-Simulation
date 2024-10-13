@@ -27,7 +27,7 @@ def calculate_gamma(beta):
 QUBIT_COUNT = 4
 GAMMA = 0.1
 PS_COUNT = 5
-PS_STRENGTH = [np.pi/2 - 0.2]
+PS_STRENGTH = np.pi/2 - 0.3
 TIME_RANGE = (10, 20)
 TIME_COUNT = 10
 EPS = 1
