@@ -27,13 +27,13 @@ def calculate_gamma(beta):
 QUBIT_COUNT = 4
 GAMMA = 0.1
 PS_COUNT = 5
-PS_STRENGTH = [np.pi/2 - 0.1]
+PS_STRENGTH = [np.pi/2 - 0.01]
 TIME_RANGE = (10, 20)
 TIME_COUNT = 10
 EPS = 1
 # INV_TEMP = 1
 
-INV_TEMPS = [1e2, 1e4, 1e6, 1e8]
+INV_TEMPS = [0.1]
 
 H_VAL = -0.1
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
@@ -72,7 +72,7 @@ def _kron_multi(ls):
     return prod
 
 
-# @hache(blob_type=float, max_size=1000)
+@hache(blob_type=float, max_size=1000)
 def lindblad_evo(rho, ham, gamma, z, time, observable):
     """
     Function to calculate final state after amplitude damping.
@@ -171,7 +171,7 @@ def make_valid_rho(rho):
     return rho_normalized
 
 
-# @hache(blob_type=float, max_size=1000)
+@hache(blob_type=float, max_size=1000)
 def ham_evo_nonmarkovian(rho_sys, rho_env, ham_sys, partial_swap, gamma, time, neu, observable):
     """
     Perform nonmarkovian evolution with the addition of partial swap of 
