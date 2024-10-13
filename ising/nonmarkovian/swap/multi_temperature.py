@@ -25,17 +25,15 @@ def calculate_gamma(beta):
 
 
 QUBIT_COUNT = 4
-GAMMA = 0.01
+GAMMA = 0.1
 PS_COUNT = 5
-PS_STRENGTHS = np.linspace(np.pi/3, np.pi/2, PS_COUNT)
-PS_STRENGTHS = [np.pi/2 - 0.1]
-TIME_RANGE = (0, 15)
+PS_STRENGTH = [np.pi/2 - 0.1]
+TIME_RANGE = (10, 20)
 TIME_COUNT = 10
 EPS = 1
 # INV_TEMP = 1
 
-INV_TEMPS = [0.1, 0.5, 0.6, 0.8, 1]
-INV_TEMPS = [1e-6]
+INV_TEMPS = [1e2, 1e4, 1e6, 1e8]
 
 H_VAL = -0.1
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
@@ -75,7 +73,7 @@ def _kron_multi(ls):
 
 
 # @hache(blob_type=float, max_size=1000)
-def lindblad_evo(rho1, rho2, ham, gamma, z, time, observable):
+def lindblad_evo(rho, ham, gamma, z, time, observable):
     """
     Function to calculate final state after amplitude damping.
 
@@ -86,26 +84,22 @@ def lindblad_evo(rho1, rho2, ham, gamma, z, time, observable):
         - time: evolution time
     """
     # columnize
-    answers = []
-   # Hamiltonian is zero
+    rho_vec = rho.reshape(-1, 1)
+
+    # Hamiltonian is zero
     l_op = lindbladian_operator(ham, thermal_lindbladians(QUBIT_COUNT, gamma=gamma, z=z))
 
     eig_val, eig_vec = np.linalg.eig(l_op)
     eig_vec_inv = np.linalg.inv(eig_vec)
 
     op_time_matrix = matrix_exp_no_i(eig_vec, eig_val, eig_vec_inv, time)
-    for rho in [rho1, rho2]:
-        rho_vec = rho.reshape(-1, 1)
-        rho_vec_final = op_time_matrix @ rho_vec
-        rho_final = reshape_vec(rho_vec_final)
+    rho_vec_final = op_time_matrix @ rho_vec
+    rho_final = reshape_vec(rho_vec_final)
 
-        rho_lin = np.round(rho_final, decimals=6)
-        rho_lin = rho_lin / global_phase(rho_lin)
-        answers.append(rho_lin)
+    rho_lin = np.round(rho_final, decimals=6)
+    rho_lin = rho_lin / global_phase(rho_lin)
 
-    trace_distance = 0.5 * np.trace(np.abs(answers[0] - answers[1]))
-
-    return trace_distance
+    return np.trace(np.abs(observable @ rho_lin))
 
 def interaction_hamiltonian(QUBIT_COUNT, gamma):
     """
@@ -160,7 +154,7 @@ def make_valid_rho(rho):
     # Round again to ensure precision after normalization
     rho_normalized = np.round(rho_normalized, decimals=6)
 
-    for ind, d in enumerate(np.diag(rho)):
+    for ind, d in enumerate(np.diag(rho_normalized)):
         if d < 0:
             if abs(d) < 1e-3:
                 rho_normalized[ind][ind] = abs(d)
@@ -170,13 +164,15 @@ def make_valid_rho(rho):
 
     row_sums = np.sum(np.diag(rho_normalized))
     rho_normalized = rho_normalized / row_sums
+
+    _is_valid_rho(rho_normalized)
     
     
     return rho_normalized
 
 
 # @hache(blob_type=float, max_size=1000)
-def ham_evo_nonmarkovian(rho_sys1, rho_sys2, rho_env, ham_sys, partial_swap, gamma, time, neu, observable):
+def ham_evo_nonmarkovian(rho_sys, rho_env, ham_sys, partial_swap, gamma, time, neu, observable):
     """
     Perform nonmarkovian evolution with the addition of partial swap of 
     post-interaction environment qubit and the fresh qubit before used in the
@@ -211,65 +207,61 @@ def ham_evo_nonmarkovian(rho_sys1, rho_sys2, rho_env, ham_sys, partial_swap, gam
         us.append(u)
 
     print("Ham operator calculation complete")
-    answers = []
-    for rho_sys in [rho_sys1, rho_sys2]:
-        cur_rho_sys = rho_sys
-        cur_rho_env = rho_env
+    cur_rho_sys = rho_sys
+    cur_rho_env = rho_env
 
-        _is_valid_rho(rho_sys)
-        _is_valid_rho(rho_env)
+    _is_valid_rho(rho_sys)
+    _is_valid_rho(rho_env)
 
-        # Scale the number of collisions with a factor of qubit_count to match evolution time
-        with tqdm(total=neu) as pbar:
-            for sys_ind in range(QUBIT_COUNT * neu):
-                pbar.update(1)
-                # pick interaction hamiltonian based on the collision number
-                u = us[sys_ind % QUBIT_COUNT]
+    # Scale the number of collisions with a factor of qubit_count to match evolution time
+    with tqdm(total=neu) as pbar:
+        for sys_ind in range(QUBIT_COUNT * neu):
+            pbar.update(1)
+            # pick interaction hamiltonian based on the collision number
+            u = us[sys_ind % QUBIT_COUNT]
+            udag = udags[sys_ind % QUBIT_COUNT]
+            complete_rho = np.kron(cur_rho_sys, cur_rho_env)
+            complete_rho = make_valid_rho(complete_rho)
+            _is_valid_rho(complete_rho)
+            rho_fin = (
+                u @ complete_rho @ udag
+            )
+            rho_fin = make_valid_rho(rho_fin)
+            _is_valid_rho(rho_fin)
 
-                complete_rho = make_valid_rho(complete_rho)
-                _is_valid_rho(complete_rho)
-                rho_fin = (
-                    u @ complete_rho @ udag
-                )
-                rho_fin = make_valid_rho(rho_fin)
-                _is_valid_rho(rho_fin)
+            """
+            The remaining loop consists of getting the system state and the
+            remains of the environment state. The environment state will
+            interact with the next fresh environment, let this be second 
+            environment. The interaction will be a partial swap. After the 
+            interaction we will use the second environment in the next run.
+            """
 
-                """
-                The remaining loop consists of getting the system state and the
-                remains of the environment state. The environment state will
-                interact with the next fresh environment, let this be second 
-                environment. The interaction will be a partial swap. After the 
-                interaction we will use the second environment in the next run.
-                """
+            cur_rho_sys = partial_trace(rho_fin, list(range(QUBIT_COUNT, QUBIT_COUNT + 1)))
+            cur_rho_sys = make_valid_rho(cur_rho_sys)
+            _is_valid_rho(cur_rho_sys)
+            # trace out the system and you get the environment qubit
+            new_rho_env = partial_trace(rho_fin, list(range(0, QUBIT_COUNT)))
+            new_rho_env = make_valid_rho(new_rho_env)
+            _is_valid_rho(new_rho_env)
 
-                cur_rho_sys = partial_trace(rho_fin, list(range(QUBIT_COUNT, QUBIT_COUNT + 1)))
-                cur_rho_sys = make_valid_rho(cur_rho_sys)
-                _is_valid_rho(cur_rho_sys)
-                # trace out the system and you get the environment qubit
-                new_rho_env = partial_trace(rho_fin, list(range(0, QUBIT_COUNT)))
-                new_rho_env = make_valid_rho(new_rho_env)
-                _is_valid_rho(new_rho_env)
+            # Bring in the fresh environment qubit and perform partial swap
+            rho_env_fin = ps_u @ np.kron(new_rho_env, rho_env) @ ps_u.conj().T
+            rho_env_fin = make_valid_rho(rho_env_fin )
+            _is_valid_rho(rho_env_fin)
+            # THe next environemnt qubit would be the second qubit after partial swap
+            cur_rho_env = partial_trace(rho_env_fin, [0])
+            cur_rho_env = make_valid_rho(cur_rho_env)
+            _is_valid_rho(cur_rho_env)
 
-                # Bring in the fresh environment qubit and perform partial swap
-                rho_env_fin = ps_u @ np.kron(new_rho_env, rho_env) @ ps_u.conj().T
-                rho_env_fin = make_valid_rho(rho_env_fin )
-                _is_valid_rho(rho_env_fin)
-                # THe next environemnt qubit would be the second qubit after partial swap
-                cur_rho_env = partial_trace(rho_env_fin, [0])
-                cur_rho_env = make_valid_rho(cur_rho_env)
-                _is_valid_rho(cur_rho_env)
+    # Get the final 
+    rho_ham = np.round(cur_rho_sys, decimals=6)
+    rho_ham = make_valid_rho(rho_ham)
+    _is_valid_rho(rho_ham)
+    rho_ham_norm = rho_ham / global_phase(rho_ham)
+    _is_valid_rho(rho_ham_norm)
 
-        # Get the final 
-        rho_ham = np.round(cur_rho_sys, decimals=6)
-        rho_ham = make_valid_rho(rho_ham)
-        _is_valid_rho(rho_ham)
-        rho_ham_norm = rho_ham / global_phase(rho_ham)
-        _is_valid_rho(rho_ham_norm)
-        answers.append(rho_ham_norm)
-
-    trace_distance = 0.5 * np.trace(np.abs(answers[0] - answers[1]))
-
-    return trace_distance
+    return np.trace(np.abs(observable @ rho_ham_norm))
 
 
 def _random_psi(num_qubits):
@@ -293,9 +285,7 @@ def test_main():
     np.random.seed(42)
 
     psi = _random_psi(QUBIT_COUNT)
-    rho_sys1 = np.outer(psi, psi.conj())
-    psi = _random_psi(QUBIT_COUNT)
-    rho_sys2 = np.outer(psi, psi.conj())
+    rho_sys = np.outer(psi, psi.conj())
     # ham = np.zeros_like(rho_sys)
     ham = parametrized_ising(QUBIT_COUNT, H_VAL).matrix
     observable = overall_magnetization(QUBIT_COUNT).matrix
@@ -311,15 +301,13 @@ def test_main():
         interaction = []
         lindbladian = []
         for time in times:
-            l1 = lindblad_evo(rho_sys1, rho_sys2, ham, GAMMA, z, time, observable)
-            lindbladian.append(l1)
+            lindbladian.append(lindblad_evo(rho_sys, ham, GAMMA, z, time, observable))
 
         neus = []
         for time in times:
             neu = max(10, int(10 * (time**2) / EPS))
             neus.append(neu)
-            h1 = ham_evo_nonmarkovian(rho_sys1, rho_sys2, rho_env, ham, PS_STRENGTHS[0], GAMMA, time, neu, observable)
-            interaction.append(h1)
+            interaction.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, PS_STRENGTH, GAMMA, time, neu, observable))
 
         ax = sns.lineplot(
             x=neus,
@@ -344,7 +332,7 @@ def test_main():
     plt.ylabel(r"Overall Magnetization")
     plt.xlabel(r"Number of collisions")
 
-    file_name = f"plots/nonmarkovian/swap/diff_{QUBIT_COUNT}.png"
+    file_name = f"plots/nonmarkovian/swap/multi_temp_{QUBIT_COUNT}.png"
 
     # ax.get_legend().remove()
     # plt.legend(loc="upper right", bbox_to_anchor=(0.48, 1.15), ncol=1, fontsize=10)
