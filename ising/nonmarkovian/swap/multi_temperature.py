@@ -29,7 +29,7 @@ GAMMA = 0.1
 PS_COUNT = 5
 PS_STRENGTH = np.pi/2 - 0.3
 TIME_RANGE = (10, 20)
-TIME_COUNT = 10
+TIME_COUNT = 20
 EPS = 1
 # INV_TEMP = 1
 
@@ -309,18 +309,22 @@ def test_main():
             neus.append(neu)
             interaction.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, PS_STRENGTH, GAMMA, time, neu, observable))
 
+
+        count = len(list(filter(lambda neu: neu < 3700, neus)))
+        print(neus, count)
+
         ax = sns.lineplot(
-            x=neus,
-            y=lindbladian,
+            x=neus[:count],
+            y=lindbladian[:count],
             label=f"Lind {_round(inv_temp)}",
-            color=COLORS[ind],
+            color=COLORS[0],
         )
-        ax = sns.scatterplot(
-            x=neus,
-            y=interaction,
+        ax = sns.lineplot(
+            x=neus[:count],
+            y=interaction[:count],
             label=f"SAL inv_temp={_round(inv_temp)}",
             # s=35,
-            color=COLORS[ind],
+            color=COLORS[1],
             # alpha = 1 - opacity[ps_ind]
         )
 
@@ -334,9 +338,9 @@ def test_main():
 
     file_name = f"plots/nonmarkovian/swap/multi_temp_{QUBIT_COUNT}.png"
 
-    # ax.get_legend().remove()
+    ax.get_legend().remove()
     # plt.legend(loc="upper right", bbox_to_anchor=(0.48, 1.15), ncol=1, fontsize=10)
-    plt.legend(ncol=1, fontsize=7)
+    # plt.legend(ncol=1, fontsize=7)
     plt.savefig(file_name, dpi=300)
     print(f"saved the plot to {file_name}")
 
