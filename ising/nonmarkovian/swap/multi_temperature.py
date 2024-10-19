@@ -24,12 +24,12 @@ def calculate_gamma(beta):
     return np.exp(-beta) / (1 + np.exp(-beta))
 
 
-QUBIT_COUNT = 7
+QUBIT_COUNT = 6
 GAMMA = 0.1
 PS_COUNT = 5
 PS_STRENGTH = np.pi/2 - 0.3
 TIME_RANGE = (10, 20)
-TIME_COUNT = 20
+TIME_COUNT = 10
 EPS = 1
 # INV_TEMP = 1
 
@@ -83,7 +83,6 @@ def lindblad_evo(rho, ham, gamma, z, time, observable):
         - gamma: Strength of amplitude damping
         - time: evolution time
     """
-    return 0
     # columnize
     rho_vec = rho.reshape(-1, 1)
 
