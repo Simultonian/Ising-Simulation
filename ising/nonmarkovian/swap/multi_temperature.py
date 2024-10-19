@@ -33,7 +33,7 @@ TIME_COUNT = 20
 EPS = 1
 # INV_TEMP = 1
 
-INV_TEMPS = [0.1]
+INV_TEMPS = [0.1, 1.0, 10, 1000]
 
 H_VAL = -0.1
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
@@ -310,21 +310,22 @@ def test_main():
             interaction.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, PS_STRENGTH, GAMMA, time, neu, observable))
 
 
-        count = len(list(filter(lambda neu: neu < 3700, neus)))
-        print(neus, count)
+        count = 20
+        # count = len(list(filter(lambda neu: neu < 3700, neus)))
+        # print(neus, count)
 
-        ax = sns.lineplot(
-            x=neus[:count],
-            y=lindbladian[:count],
-            label=f"Lind {_round(inv_temp)}",
-            color=COLORS[0],
-        )
+        # ax = sns.lineplot(
+        #     x=neus[:count],
+        #     y=lindbladian[:count],
+        #     label=f"Lind {_round(inv_temp)}",
+        #     color=COLORS[0],
+        # )
         ax = sns.lineplot(
             x=neus[:count],
             y=interaction[:count],
             label=f"SAL inv_temp={_round(inv_temp)}",
             # s=35,
-            color=COLORS[1],
+            color=COLORS[ind],
             # alpha = 1 - opacity[ps_ind]
         )
 
