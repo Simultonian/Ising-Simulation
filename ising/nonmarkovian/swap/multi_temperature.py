@@ -24,12 +24,12 @@ def calculate_gamma(beta):
     return np.exp(-beta) / (1 + np.exp(-beta))
 
 
-QUBIT_COUNT = 6
+QUBIT_COUNT = 7
 GAMMA = 0.1
 PS_COUNT = 5
 PS_STRENGTH = np.pi/2 - 0.3
 TIME_RANGE = (10, 20)
-TIME_COUNT = 10
+TIME_COUNT = 20
 EPS = 1
 # INV_TEMP = 1
 
@@ -301,27 +301,26 @@ def test_main():
 
         interaction = []
         lindbladian = []
-        for time in times:
-            lindbladian.append(lindblad_evo(rho_sys, ham, GAMMA, z, time, observable))
 
         neus = []
         for time in times:
             neu = max(10, int(10 * (time**2) / EPS))
             neus.append(neu)
+            lindbladian.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, 0, GAMMA, time, neu, observable))
             interaction.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, PS_STRENGTH, GAMMA, time, neu, observable))
 
         ax = sns.lineplot(
             x=neus,
             y=lindbladian,
             label=f"Lind {_round(inv_temp)}",
-            color=COLORS[ind],
+            color=COLORS[0],
         )
-        ax = sns.scatterplot(
+        ax = sns.lineplot(
             x=neus,
             y=interaction,
             label=f"SAL inv_temp={_round(inv_temp)}",
             # s=35,
-            color=COLORS[ind],
+            color=COLORS[1],
             # alpha = 1 - opacity[ps_ind]
         )
 
@@ -335,7 +334,7 @@ def test_main():
 
     file_name = f"plots/nonmarkovian/swap/multi_temp_{QUBIT_COUNT}.png"
 
-    # ax.get_legend().remove()
+    ax.get_legend().remove()
     # plt.legend(loc="upper right", bbox_to_anchor=(0.48, 1.15), ncol=1, fontsize=10)
     plt.legend(ncol=1, fontsize=7)
     plt.savefig(file_name, dpi=300)
