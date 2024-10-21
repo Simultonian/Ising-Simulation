@@ -334,10 +334,10 @@ def test_main():
     plt.ylabel(r"Overall Magnetization")
     plt.xlabel(r"Number of collisions")
 
-    file_name = f"plots/nonmarkovian/swap/multi_temp_{QUBIT_COUNT}.png"
+    file_name = f"plots/nonmarkovian/swap/no_label_multi_temp_{QUBIT_COUNT}.png"
 
-    # ax.get_legend().remove()
-    plt.legend(loc="upper right", bbox_to_anchor=(0.48, 1.15), ncol=1, fontsize=10)
+    ax.get_legend().remove()
+    # plt.legend(loc="upper right", bbox_to_anchor=(0.48, 1.15), ncol=1, fontsize=10)
     # plt.legend(ncol=1, fontsize=7)
     plt.savefig(file_name, dpi=450)
     print(f"saved the plot to {file_name}")
