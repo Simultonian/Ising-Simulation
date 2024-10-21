@@ -297,18 +297,14 @@ def test_main():
     times = np.linspace(TIME_RANGE[0], TIME_RANGE[1], TIME_COUNT)
 
     interaction_og = []
+    count = 20
+    plt.clf()
     for ind, inv_temp in enumerate(INV_TEMPS):
         alpha, beta = 1, np.exp(-inv_temp) 
         rho_env = (alpha * np.outer(ZERO, ZERO) + beta * np.outer(ONE, ONE)) / (alpha + beta)
         rho_env = make_valid_rho(rho_env)
 
-        z = calculate_gamma(inv_temp)
-
         interaction = []
-        lindbladian = []
-        for time in times:
-            lindbladian.append(lindblad_evo(rho_sys, ham, GAMMA, z, time, observable))
-
         neus = []
         for time in times:
             neu = max(10, int(10 * (time**2) / EPS))
@@ -320,19 +316,10 @@ def test_main():
             interaction_og = [interaction[0]]
 
 
-        count = 20
-        # count = len(list(filter(lambda neu: neu < 3700, neus)))
-        # print(neus, count)
-
-        # ax = sns.lineplot(
-        #     x=neus[:count],
-        #     y=lindbladian[:count],
-        #     label=f"Lind {_round(inv_temp)}",
-        #     color=COLORS[0],
-        # )
+        print(interaction_og + interaction[5:count])
         ax = sns.lineplot(
-            x=neus[:count],
-            y=interaction_og + interaction[1:count],
+            x=[0] + neus[5:count],
+            y=interaction_og + interaction[5:count],
             label=f"SAL inv_temp={_round(inv_temp)}",
             # s=35,
             color=COLORS[ind],
@@ -352,7 +339,7 @@ def test_main():
     # ax.get_legend().remove()
     plt.legend(loc="upper right", bbox_to_anchor=(0.48, 1.15), ncol=1, fontsize=10)
     # plt.legend(ncol=1, fontsize=7)
-    plt.savefig(file_name, dpi=300)
+    plt.savefig(file_name, dpi=450)
     print(f"saved the plot to {file_name}")
 
 
