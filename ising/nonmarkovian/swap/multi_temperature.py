@@ -28,12 +28,12 @@ QUBIT_COUNT = 4
 GAMMA = 0.1
 PS_COUNT = 5
 PS_STRENGTH = np.pi/2 - 0.3
-TIME_RANGE = (10, 20)
-TIME_COUNT = 20
+TIME_RANGE = (0, 20)
+TIME_COUNT = 40
 EPS = 1
 # INV_TEMP = 1
 
-INV_TEMPS = [0.1, 1.0, 10, 1000]
+INV_TEMPS = [0.1, 1, 2, 5]
 
 H_VAL = -0.1
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
@@ -186,6 +186,11 @@ def ham_evo_nonmarkovian(rho_sys, rho_env, ham_sys, partial_swap, gamma, time, n
         - gamma: Strength of amplitude damping
         - time: Evolution time to match
     """
+    if time == 0:
+        rho_sys_norm = rho_sys / global_phase(rho_sys)
+        _is_valid_rho(rho_sys_norm)
+        return np.trace(np.abs(observable @ rho_sys_norm))
+
     tau = time / neu
     big_ham_sys = np.kron(ham_sys, np.eye(2))
 
@@ -291,6 +296,7 @@ def test_main():
     observable = overall_magnetization(QUBIT_COUNT).matrix
     times = np.linspace(TIME_RANGE[0], TIME_RANGE[1], TIME_COUNT)
 
+    interaction_og = []
     for ind, inv_temp in enumerate(INV_TEMPS):
         alpha, beta = 1, np.exp(-inv_temp) 
         rho_env = (alpha * np.outer(ZERO, ZERO) + beta * np.outer(ONE, ONE)) / (alpha + beta)
@@ -310,6 +316,10 @@ def test_main():
             interaction.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, PS_STRENGTH, GAMMA, time, neu, observable))
 
 
+        if len(interaction_og) == 0:
+            interaction_og = [interaction[0]]
+
+
         count = 20
         # count = len(list(filter(lambda neu: neu < 3700, neus)))
         # print(neus, count)
@@ -322,7 +332,7 @@ def test_main():
         # )
         ax = sns.lineplot(
             x=neus[:count],
-            y=interaction[:count],
+            y=interaction_og + interaction[1:count],
             label=f"SAL inv_temp={_round(inv_temp)}",
             # s=35,
             color=COLORS[ind],
@@ -339,8 +349,8 @@ def test_main():
 
     file_name = f"plots/nonmarkovian/swap/multi_temp_{QUBIT_COUNT}.png"
 
-    ax.get_legend().remove()
-    # plt.legend(loc="upper right", bbox_to_anchor=(0.48, 1.15), ncol=1, fontsize=10)
+    # ax.get_legend().remove()
+    plt.legend(loc="upper right", bbox_to_anchor=(0.48, 1.15), ncol=1, fontsize=10)
     # plt.legend(ncol=1, fontsize=7)
     plt.savefig(file_name, dpi=300)
     print(f"saved the plot to {file_name}")
