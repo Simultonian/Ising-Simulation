@@ -109,15 +109,15 @@ def test_main():
         for taylor, lambd in zip(taylors, lambds):
             k = int(
                 np.floor(
-                    np.log(lambd * time / ham_sim_error) / np.log(np.log(lambd * time / ham_sim_error))
+                    np.log(lambd * evo_time / ham_sim_error) / np.log(np.log(lambd * evo_time / ham_sim_error))
                 )
             )
 
-            taylor_cx += taylor.simulation_gate_count(time, k).get("cx", 0)
+            taylor_cx += taylor.simulation_gate_count(evo_time, k).get("cx", 0)
 
         for qdrift, lambd in zip(qdrifts, lambds):
-            qdrift_rep = qdrift_count(lambd, time, ham_sim_error)
-            qdrift_cx += qdrift.simulation_gate_count(time, qdrift_rep).get("cx", 0)
+            qdrift_rep = qdrift_count(lambd, evo_time, ham_sim_error)
+            qdrift_cx += qdrift.simulation_gate_count(evo_time, qdrift_rep).get("cx", 0)
 
         results["sal"][time_str] = str(abs(taylor_cx * neu))
         results["trotter"][time_str] = str(abs(trotter_cx * neu))
