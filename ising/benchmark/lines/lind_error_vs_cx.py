@@ -19,11 +19,11 @@ import json
 from ising.lindbladian.simulation.utils import load_interaction_hams
 
 
-QUBIT_COUNT = 5
+QUBIT_COUNT = 10
 GAMMA = 0.5
 H_VAL = 0.1
-TIME = 0.1
-ERROR_RANGE = (-1, -8)
+TIME = 2
+ERROR_RANGE = (-1, -6)
 ERROR_COUNT = 10
 
 
@@ -124,7 +124,7 @@ def test_main():
         results["qdrift"][error_str] = str(abs(qdrift_cx * neu))
 
 
-    file_name = f"data/benchmark/line/lindi/error_size_{QUBIT_COUNT}.json"
+    file_name = f"data/benchmark/line/lindi/nolabel_error_size_{QUBIT_COUNT}.json"
     with open(file_name, "w") as file:
         json.dump(results, file)
 

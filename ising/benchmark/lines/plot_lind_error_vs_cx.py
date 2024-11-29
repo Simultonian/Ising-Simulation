@@ -4,7 +4,7 @@ import seaborn as sns
 import json
 
 
-QUBIT_COUNT = 5
+QUBIT_COUNT = 10
 
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
 MAP = {
@@ -68,8 +68,8 @@ def test_main():
 
     file_name = f"plots/benchmark/lines/lindi/no_label_error_size_{QUBIT_COUNT}.png"
 
-    ax.get_legend().remove()
-    # plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.15), ncol=2, fontsize=10)
+    # ax.get_legend().remove()
+    plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.15), ncol=2, fontsize=10)
     plt.savefig(file_name, dpi=300)
     print(f"saved the plot to {file_name}")
 
