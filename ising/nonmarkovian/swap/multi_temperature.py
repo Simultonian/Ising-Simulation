@@ -24,7 +24,7 @@ def calculate_gamma(beta):
     return np.exp(-beta) / (1 + np.exp(-beta))
 
 
-QUBIT_COUNT = 4
+QUBIT_COUNT = 6
 GAMMA = 0.1
 PS_COUNT = 5
 PS_STRENGTH = np.pi/2 - 0.3
@@ -305,10 +305,13 @@ def test_main():
         rho_env = make_valid_rho(rho_env)
 
         interaction = []
+        lindbladian = []
+
         neus = []
         for time in times:
             neu = max(10, int(10 * (time**2) / EPS))
             neus.append(neu)
+            lindbladian.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, 0, GAMMA, time, neu, observable))
             interaction.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, PS_STRENGTH, GAMMA, time, neu, observable))
 
 
@@ -318,11 +321,17 @@ def test_main():
 
         print(interaction_og + interaction[5:count])
         ax = sns.lineplot(
-            x=[0] + neus[5:count],
-            y=interaction_og + interaction[5:count],
+            x=neus,
+            y=lindbladian,
+            label=f"Lind {_round(inv_temp)}",
+            color=COLORS[0],
+        )
+        ax = sns.lineplot(
+            x=neus,
+            y=interaction,
             label=f"SAL inv_temp={_round(inv_temp)}",
             # s=35,
-            color=COLORS[ind],
+            color=COLORS[1],
             # alpha = 1 - opacity[ps_ind]
         )
 
