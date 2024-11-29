@@ -24,7 +24,7 @@ def calculate_gamma(beta):
     return np.exp(-beta) / (1 + np.exp(-beta))
 
 
-QUBIT_COUNT = 6
+QUBIT_COUNT = 4
 GAMMA = 0.1
 PS_COUNT = 5
 PS_STRENGTH = np.pi/2 - 0.3
@@ -39,67 +39,6 @@ H_VAL = -0.1
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
 
 
-
-def _round(mat):
-    return np.round(mat, decimals=3)
-
-
-def matrix_exp_no_i(eig_vec, eig_val, eig_vec_inv, time: float):
-    return eig_vec @ np.diag(np.exp(time * eig_val)) @ eig_vec_inv
-
-
-def matrix_exp(eig_vec, eig_val, eig_vec_inv, time: float):
-    return eig_vec @ np.diag(np.exp(complex(0, -1) * time * eig_val)) @ eig_vec_inv
-
-
-def reshape_vec(vec):
-    l = vec.shape[0]
-    assert vec.shape[1] == 1
-    d = int(np.sqrt(l))
-
-    rho = np.zeros((d, d), dtype=complex)
-
-    for i, x in enumerate(vec):
-        r, c = i % d, i // d
-        rho[r][c] = x[0]
-
-    return rho
-
-def _kron_multi(ls):
-    prod = ls[0]
-    for term in ls[1:]:
-        prod = np.kron(prod, term)
-    return prod
-
-
-@hache(blob_type=float, max_size=1000)
-def lindblad_evo(rho, ham, gamma, z, time, observable):
-    """
-    Function to calculate final state after amplitude damping.
-
-    Inputs:
-        - rho: Starting state of system
-        - ham: System Hamiltonian
-        - gamma: Strength of amplitude damping
-        - time: evolution time
-    """
-    # columnize
-    rho_vec = rho.reshape(-1, 1)
-
-    # Hamiltonian is zero
-    l_op = lindbladian_operator(ham, thermal_lindbladians(QUBIT_COUNT, gamma=gamma, z=z))
-
-    eig_val, eig_vec = np.linalg.eig(l_op)
-    eig_vec_inv = np.linalg.inv(eig_vec)
-
-    op_time_matrix = matrix_exp_no_i(eig_vec, eig_val, eig_vec_inv, time)
-    rho_vec_final = op_time_matrix @ rho_vec
-    rho_final = reshape_vec(rho_vec_final)
-
-    rho_lin = np.round(rho_final, decimals=6)
-    rho_lin = rho_lin / global_phase(rho_lin)
-
-    return np.trace(np.abs(observable @ rho_lin))
 
 def interaction_hamiltonian(QUBIT_COUNT, gamma):
     """
@@ -137,42 +76,8 @@ def interaction_hamiltonian(QUBIT_COUNT, gamma):
     return ham_ints
 
 
-def _is_valid_rho(rho):
-    assert np.allclose(np.sum(np.diag(rho)), 1)
-    assert np.all(np.diag(rho) >= 0)
-    assert not np.isnan(rho).any()
-
-
-def make_valid_rho(rho):
-    # Round to 6 decimal places
-    rho = np.round(rho, decimals=6)
-    
-    # Normalize the matrix
-    row_sums = np.sum(np.diag(rho))
-    rho_normalized = rho / row_sums
-    
-    # Round again to ensure precision after normalization
-    rho_normalized = np.round(rho_normalized, decimals=6)
-
-    for ind, d in enumerate(np.diag(rho_normalized)):
-        if d < 0:
-            if abs(d) < 1e-3:
-                rho_normalized[ind][ind] = abs(d)
-            
-    # Round again to ensure precision after normalization
-    rho_normalized = np.round(rho_normalized, decimals=6)
-
-    row_sums = np.sum(np.diag(rho_normalized))
-    rho_normalized = rho_normalized / row_sums
-
-    _is_valid_rho(rho_normalized)
-    
-    
-    return rho_normalized
-
-
 @hache(blob_type=float, max_size=1000)
-def ham_evo_nonmarkovian(rho_sys, rho_env, ham_sys, partial_swap, gamma, time, neu, observable):
+def ham_evo_nonmarkovian(ham_sys, partial_swap, gamma, time, neu, observable):
     """
     Perform nonmarkovian evolution with the addition of partial swap of 
     post-interaction environment qubit and the fresh qubit before used in the
@@ -269,23 +174,6 @@ def ham_evo_nonmarkovian(rho_sys, rho_env, ham_sys, partial_swap, gamma, time, n
     return np.trace(np.abs(observable @ rho_ham_norm))
 
 
-def _random_psi(num_qubits):
-    # Calculate the dimension of the state vector
-    dim = 2**num_qubits
-    
-    # Generate complex random numbers for real and imaginary parts
-    real_parts = np.random.randn(dim)
-    imag_parts = np.random.randn(dim)
-    
-    # Combine into a complex state vector
-    psi = real_parts + 1j * imag_parts
-    
-    # Normalize the state vector
-    psi = psi / np.linalg.norm(psi)
-    
-    return psi
-
-
 def test_main():
     np.random.seed(42)
 
@@ -305,13 +193,10 @@ def test_main():
         rho_env = make_valid_rho(rho_env)
 
         interaction = []
-        lindbladian = []
-
         neus = []
         for time in times:
             neu = max(10, int(10 * (time**2) / EPS))
             neus.append(neu)
-            lindbladian.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, 0, GAMMA, time, neu, observable))
             interaction.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, PS_STRENGTH, GAMMA, time, neu, observable))
 
 
@@ -321,17 +206,11 @@ def test_main():
 
         print(interaction_og + interaction[5:count])
         ax = sns.lineplot(
-            x=neus,
-            y=lindbladian,
-            label=f"Lind {_round(inv_temp)}",
-            color=COLORS[0],
-        )
-        ax = sns.lineplot(
-            x=neus,
-            y=interaction,
+            x=[0] + neus[5:count],
+            y=interaction_og + interaction[5:count],
             label=f"SAL inv_temp={_round(inv_temp)}",
             # s=35,
-            color=COLORS[1],
+            color=COLORS[ind],
             # alpha = 1 - opacity[ps_ind]
         )
 

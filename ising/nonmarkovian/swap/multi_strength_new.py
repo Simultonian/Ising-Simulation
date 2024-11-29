@@ -24,16 +24,15 @@ def calculate_gamma(beta):
     return np.exp(-beta) / (1 + np.exp(-beta))
 
 
-QUBIT_COUNT = 6
-GAMMA = 0.1
+QUBIT_COUNT = 4
+GAMMA = 0.5
 PS_COUNT = 5
-PS_STRENGTH = np.pi/2 - 0.3
-TIME_RANGE = (0, 20)
-TIME_COUNT = 40
-EPS = 1
-# INV_TEMP = 1
+TIME_RANGE = (0, 5)
+TIME_COUNT = 5
+EPS = 0.5
+INV_TEMP = 10000
 
-INV_TEMPS = [0.1, 1, 2, 5]
+PS_STRENGTHS = [0.1, np.pi]
 
 H_VAL = -0.1
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
@@ -296,42 +295,27 @@ def test_main():
     observable = overall_magnetization(QUBIT_COUNT).matrix
     times = np.linspace(TIME_RANGE[0], TIME_RANGE[1], TIME_COUNT)
 
-    interaction_og = []
-    count = 20
+    start, end = 0, TIME_COUNT
     plt.clf()
-    for ind, inv_temp in enumerate(INV_TEMPS):
-        alpha, beta = 1, np.exp(-inv_temp) 
+    for ind, ps_strength in enumerate(PS_STRENGTHS):
+        alpha, beta = 1, np.exp(-INV_TEMP) 
         rho_env = (alpha * np.outer(ZERO, ZERO) + beta * np.outer(ONE, ONE)) / (alpha + beta)
         rho_env = make_valid_rho(rho_env)
 
         interaction = []
-        lindbladian = []
-
         neus = []
         for time in times:
             neu = max(10, int(10 * (time**2) / EPS))
             neus.append(neu)
-            lindbladian.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, 0, GAMMA, time, neu, observable))
-            interaction.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, PS_STRENGTH, GAMMA, time, neu, observable))
+            interaction.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, ps_strength, GAMMA, time, neu, observable))
 
 
-        if len(interaction_og) == 0:
-            interaction_og = [interaction[0]]
-
-
-        print(interaction_og + interaction[5:count])
         ax = sns.lineplot(
-            x=neus,
-            y=lindbladian,
-            label=f"Lind {_round(inv_temp)}",
-            color=COLORS[0],
-        )
-        ax = sns.lineplot(
-            x=neus,
-            y=interaction,
-            label=f"SAL inv_temp={_round(inv_temp)}",
+            x=neus[start:end],
+            y=interaction[start:end],
+            label=f"SAL PS_STRENGTH={_round(ps_strength)}",
             # s=35,
-            color=COLORS[1],
+            color=COLORS[ind],
             # alpha = 1 - opacity[ps_ind]
         )
 
@@ -343,10 +327,10 @@ def test_main():
     plt.ylabel(r"Overall Magnetization")
     plt.xlabel(r"Number of collisions")
 
-    file_name = f"plots/nonmarkovian/swap/no_label_multi_temp_{QUBIT_COUNT}.png"
+    file_name = f"plots/nonmarkovian/swap/no_label_multi_strength_{QUBIT_COUNT}.png"
 
-    ax.get_legend().remove()
-    # plt.legend(loc="upper right", bbox_to_anchor=(0.48, 1.15), ncol=1, fontsize=10)
+    # ax.get_legend().remove()
+    plt.legend(loc="upper right", bbox_to_anchor=(0.48, 1.15), ncol=1, fontsize=10)
     # plt.legend(ncol=1, fontsize=7)
     plt.savefig(file_name, dpi=450)
     print(f"saved the plot to {file_name}")
