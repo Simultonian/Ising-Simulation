@@ -10,7 +10,7 @@ from ising.utils import global_phase, hache
 from ising.utils.trace import partial_trace
 from ising.hamiltonian import parametrized_ising
 from ising.observables import overall_magnetization
-from ising.nonmarkovian.swap import parameterized_swap
+from ising.nonmarkovian.swap import swap_channel
 
 from tqdm import tqdm
 
@@ -25,15 +25,17 @@ def calculate_gamma(beta):
 
 
 QUBIT_COUNT = 6
-GAMMA = 0.1
-PS_COUNT = 5
-PS_STRENGTH = np.pi/2 - 0.3
-TIME_RANGE = (0, 20)
-TIME_COUNT = 40
+TIME_RANGE = (0, 10)
+TIME_COUNT = 10
 EPS = 1
-# INV_TEMP = 1
 
-INV_TEMPS = [0.1, 1, 2, 5]
+GAMMAS = [0.01, 0.1, 0.5, 0.9, 2, 10]
+PS_STRENGTHS = [0.001, 0.1, 0.5, 0.9, 0.999, 1.0]
+INV_TEMPS = [0.001, 0.1, 0.5, 1, 100]
+
+# GAMMAS = [0.01, 0.1, 0.5]
+# PS_STRENGTHS = [0.001]
+# INV_TEMPS = [0.001]
 
 H_VAL = -0.1
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
@@ -197,8 +199,6 @@ def ham_evo_nonmarkovian(rho_sys, rho_env, ham_sys, partial_swap, gamma, time, n
 
     ham_ints = interaction_hamiltonian(QUBIT_COUNT, gamma=gamma)
 
-    ps_u = parameterized_swap(partial_swap)
-
     us = []
     udags = []
     print(f"Running for time:{time}, neu:{neu}")
@@ -251,8 +251,8 @@ def ham_evo_nonmarkovian(rho_sys, rho_env, ham_sys, partial_swap, gamma, time, n
             _is_valid_rho(new_rho_env)
 
             # Bring in the fresh environment qubit and perform partial swap
-            rho_env_fin = ps_u @ np.kron(new_rho_env, rho_env) @ ps_u.conj().T
-            rho_env_fin = make_valid_rho(rho_env_fin )
+            rho_env_fin = swap_channel(np.kron(new_rho_env, rho_env), partial_swap)
+            rho_env_fin = make_valid_rho(rho_env_fin)
             _is_valid_rho(rho_env_fin)
             # THe next environemnt qubit would be the second qubit after partial swap
             cur_rho_env = partial_trace(rho_env_fin, [0])
@@ -288,69 +288,74 @@ def _random_psi(num_qubits):
 
 def test_main():
     np.random.seed(42)
+    import json
+    import os
+    import hashlib
+    from datetime import datetime
 
-    psi = _random_psi(QUBIT_COUNT)
+    # Create directory if it doesn't exist
+    os.makedirs('plots/nonmarkovian/allplots', exist_ok=True)
+    
+    # Initialize parameter mapping dictionary
+    param_mapping = {}
+
+    psi = np.zeros(2 ** QUBIT_COUNT)
+    psi[0] = 1
     rho_sys = np.outer(psi, psi.conj())
-    # ham = np.zeros_like(rho_sys)
     ham = parametrized_ising(QUBIT_COUNT, H_VAL).matrix
     observable = overall_magnetization(QUBIT_COUNT).matrix
     times = np.linspace(TIME_RANGE[0], TIME_RANGE[1], TIME_COUNT)
 
-    interaction_og = []
-    count = 20
-    plt.clf()
-    for ind, inv_temp in enumerate(INV_TEMPS):
-        alpha, beta = 1, np.exp(-inv_temp) 
-        rho_env = (alpha * np.outer(ZERO, ZERO) + beta * np.outer(ONE, ONE)) / (alpha + beta)
-        rho_env = make_valid_rho(rho_env)
+    for gamma in GAMMAS:
+        for ps_strength in PS_STRENGTHS:
+            for inv_temp in INV_TEMPS:
+                plt.clf()  # Clear figure for new plot
+                
+                alpha, beta = 1, np.exp(-inv_temp) 
+                rho_env = (alpha * np.outer(ZERO, ZERO) + beta * np.outer(ONE, ONE)) / (alpha + beta)
+                rho_env = make_valid_rho(rho_env)
 
-        interaction = []
-        lindbladian = []
+                lindbladian = []
+                interaction = []
+                neus = []
 
-        neus = []
-        for time in times:
-            neu = max(10, int(10 * (time**2) / EPS))
-            neus.append(neu)
-            lindbladian.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, 0, GAMMA, time, neu, observable))
-            interaction.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, PS_STRENGTH, GAMMA, time, neu, observable))
+                for time in times:
+                    neu = max(10, int(10 * (time**2) / EPS))
+                    neus.append(neu)
+                    lindbladian.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, 0, gamma, time, neu, observable))
+                    interaction.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, ps_strength, gamma, time, neu, observable))
 
+                # Generate unique hash for this parameter combination
+                param_str = f"{gamma}_{ps_strength}_{inv_temp}_{datetime.now()}"
+                hash_id = hashlib.md5(param_str.encode()).hexdigest()[:8]
 
-        if len(interaction_og) == 0:
-            interaction_og = [interaction[0]]
+                # Create plot
+                ax = sns.lineplot(x=neus, y=lindbladian, label="Lindbladian", color=COLORS[0])
+                ax = sns.lineplot(x=neus, y=interaction, label="Interaction", color=COLORS[1])
+                
+                ax.spines["top"].set_visible(False)
+                ax.spines["right"].set_visible(False)
+                plt.ylabel(r"Overall Magnetization")
+                plt.xlabel(r"Number of collisions")
+                
+                # Save plot with hash
+                file_name = f"plots/nonmarkovian/allplots/plot_{hash_id}.png"
+                plt.savefig(file_name, dpi=450)
+                
+                # Store parameter mapping
+                param_mapping[hash_id] = {
+                    'gamma': float(gamma),
+                    'ps_strength': float(ps_strength),
+                    'inv_temp': float(inv_temp),
+                    'filename': file_name
+                }
+                
+                plt.close()
+            # Save parameter mapping to JSON
+            with open('plots/nonmarkovian/allplots/param_mapping.json', 'w') as f:
+                json.dump(param_mapping, f, indent=4)
 
-
-        print(interaction_og + interaction[5:count])
-        ax = sns.lineplot(
-            x=neus,
-            y=lindbladian,
-            label=f"Lind {_round(inv_temp)}",
-            color=COLORS[0],
-        )
-        ax = sns.lineplot(
-            x=neus,
-            y=interaction,
-            label=f"SAL inv_temp={_round(inv_temp)}",
-            # s=35,
-            color=COLORS[1],
-            # alpha = 1 - opacity[ps_ind]
-        )
-
-    # Remove the top and right border
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-
-    # Add labels for each group
-    plt.ylabel(r"Overall Magnetization")
-    plt.xlabel(r"Number of collisions")
-
-    file_name = f"plots/nonmarkovian/swap/no_label_multi_temp_{QUBIT_COUNT}.png"
-
-    ax.get_legend().remove()
-    # plt.legend(loc="upper right", bbox_to_anchor=(0.48, 1.15), ncol=1, fontsize=10)
-    # plt.legend(ncol=1, fontsize=7)
-    plt.savefig(file_name, dpi=450)
-    print(f"saved the plot to {file_name}")
-
+    print("Generated all plots and saved parameter mapping")
 
 if __name__ == "__main__":
     test_main()

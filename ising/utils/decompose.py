@@ -1,9 +1,10 @@
 from qiskit import transpile
-from qiskit import Aer
-from qiskit.providers.aer import AerSimulator
+from qiskit_aer import Aer
 from qiskit.transpiler.passes.synthesis import SolovayKitaev
 from qiskit.synthesis import generate_basic_approximations
-from qiskit.providers.fake_provider import FakeBackendV2
+from qiskit_aer import AerSimulator
+
+
 
 SINGLE_QUBIT_GATES = ["h", "t", "tdg"]
 # ALL_GATES = ["h", "t", "tdg", "s", "sdg", "cx", "rz"]
@@ -20,7 +21,7 @@ class Decomposer:
 
         # self.backend = AerSimulator()
 
-        self.backend = FakeBackendV2()
+        self.backend = AerSimulator()
         # self.backend = Aer.get_backend('aer_simulator')
 
         approx = generate_basic_approximations(self.single_qubit_gates, depth=3)
