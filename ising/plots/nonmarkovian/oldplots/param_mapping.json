@@ -1,0 +1,56 @@
+{
+    "039ca4fc": {
+        "gamma": 0.9,
+        "ps_strength": 0.999,
+        "inv_temp": 1.0,
+        "filename": "plots/nonmarkovian/allplots/plot_039ca4fc.png"
+    },
+    "ef417479": {
+        "gamma": 0.9,
+        "ps_strength": 0.999,
+        "inv_temp": 0.001,
+        "filename": "plots/nonmarkovian/allplots/plot_ef417479.png"
+    },
+    "7d2e4719": {
+        "gamma": 0.9,
+        "ps_strength": 0.999,
+        "inv_temp": 0.1,
+        "filename": "plots/nonmarkovian/allplots/plot_7d2e4719.png"
+    },
+    "066ada27": {
+        "gamma": 0.5,
+        "ps_strength": 0.999,
+        "inv_temp": 0.1,
+        "filename": "plots/nonmarkovian/allplots/plot_066ada27.png"
+    },
+    "f70edc37": {
+        "gamma": 0.5,
+        "ps_strength": 0.9,
+        "inv_temp": 0.5,
+        "filename": "plots/nonmarkovian/allplots/plot_f70edc37.png"
+    },
+    "fb84451f": {
+        "gamma": 10.0,
+        "ps_strength": 0.1,
+        "inv_temp": 100.0,
+        "filename": "plots/nonmarkovian/allplots/plot_fb84451f.png"
+    },
+    "a64e8847": {
+        "gamma": 0.5,
+        "ps_strength": 0.9,
+        "inv_temp": 0.001,
+        "filename": "plots/nonmarkovian/allplots/plot_a64e8847.png"
+    },
+    "7a495b93": {
+        "gamma": 2.0,
+        "ps_strength": 0.5,
+        "inv_temp": 100.0,
+        "filename": "plots/nonmarkovian/allplots/plot_7a495b93.png"
+    },
+    "248c4eb8": {
+        "gamma": 2.0,
+        "ps_strength": 0.999,
+        "inv_temp": 0.5,
+        "filename": "plots/nonmarkovian/allplots/plot_248c4eb8.png"
+    }
+}

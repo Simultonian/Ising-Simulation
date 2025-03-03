@@ -1,0 +1,182 @@
+{
+    "b3fb8b91": {
+        "gamma": 0.01,
+        "ps_strength": 0.001,
+        "filename": "plots/nonmarkovian/temperature/plot_b3fb8b91.png"
+    },
+    "4c7f9b43": {
+        "gamma": 0.01,
+        "ps_strength": 0.1,
+        "filename": "plots/nonmarkovian/temperature/plot_4c7f9b43.png"
+    },
+    "42b63e2f": {
+        "gamma": 0.01,
+        "ps_strength": 0.5,
+        "filename": "plots/nonmarkovian/temperature/plot_42b63e2f.png"
+    },
+    "dd32596a": {
+        "gamma": 0.01,
+        "ps_strength": 0.9,
+        "filename": "plots/nonmarkovian/temperature/plot_dd32596a.png"
+    },
+    "a8c0c5a0": {
+        "gamma": 0.01,
+        "ps_strength": 0.999,
+        "filename": "plots/nonmarkovian/temperature/plot_a8c0c5a0.png"
+    },
+    "59419741": {
+        "gamma": 0.01,
+        "ps_strength": 1.0,
+        "filename": "plots/nonmarkovian/temperature/plot_59419741.png"
+    },
+    "a4278c52": {
+        "gamma": 0.1,
+        "ps_strength": 0.001,
+        "filename": "plots/nonmarkovian/temperature/plot_a4278c52.png"
+    },
+    "6a6f4d58": {
+        "gamma": 0.1,
+        "ps_strength": 0.1,
+        "filename": "plots/nonmarkovian/temperature/plot_6a6f4d58.png"
+    },
+    "7d09ceb4": {
+        "gamma": 0.1,
+        "ps_strength": 0.5,
+        "filename": "plots/nonmarkovian/temperature/plot_7d09ceb4.png"
+    },
+    "8aaf636b": {
+        "gamma": 0.1,
+        "ps_strength": 0.9,
+        "filename": "plots/nonmarkovian/temperature/plot_8aaf636b.png"
+    },
+    "5c6d00c3": {
+        "gamma": 0.1,
+        "ps_strength": 0.999,
+        "filename": "plots/nonmarkovian/temperature/plot_5c6d00c3.png"
+    },
+    "8f8edb0e": {
+        "gamma": 0.1,
+        "ps_strength": 1.0,
+        "filename": "plots/nonmarkovian/temperature/plot_8f8edb0e.png"
+    },
+    "a2a5db32": {
+        "gamma": 0.5,
+        "ps_strength": 0.001,
+        "filename": "plots/nonmarkovian/temperature/plot_a2a5db32.png"
+    },
+    "d9a0150f": {
+        "gamma": 0.5,
+        "ps_strength": 0.1,
+        "filename": "plots/nonmarkovian/temperature/plot_d9a0150f.png"
+    },
+    "8658f791": {
+        "gamma": 0.5,
+        "ps_strength": 0.5,
+        "filename": "plots/nonmarkovian/temperature/plot_8658f791.png"
+    },
+    "0a38178e": {
+        "gamma": 0.5,
+        "ps_strength": 0.9,
+        "filename": "plots/nonmarkovian/temperature/plot_0a38178e.png"
+    },
+    "aa3a419d": {
+        "gamma": 0.5,
+        "ps_strength": 0.999,
+        "filename": "plots/nonmarkovian/temperature/plot_aa3a419d.png"
+    },
+    "97279c51": {
+        "gamma": 0.5,
+        "ps_strength": 1.0,
+        "filename": "plots/nonmarkovian/temperature/plot_97279c51.png"
+    },
+    "49cdaf35": {
+        "gamma": 0.9,
+        "ps_strength": 0.001,
+        "filename": "plots/nonmarkovian/temperature/plot_49cdaf35.png"
+    },
+    "19de9635": {
+        "gamma": 0.9,
+        "ps_strength": 0.1,
+        "filename": "plots/nonmarkovian/temperature/plot_19de9635.png"
+    },
+    "c361c103": {
+        "gamma": 0.9,
+        "ps_strength": 0.5,
+        "filename": "plots/nonmarkovian/temperature/plot_c361c103.png"
+    },
+    "e4482648": {
+        "gamma": 0.9,
+        "ps_strength": 0.9,
+        "filename": "plots/nonmarkovian/temperature/plot_e4482648.png"
+    },
+    "7623f3ec": {
+        "gamma": 0.9,
+        "ps_strength": 0.999,
+        "filename": "plots/nonmarkovian/temperature/plot_7623f3ec.png"
+    },
+    "3599ed7b": {
+        "gamma": 0.9,
+        "ps_strength": 1.0,
+        "filename": "plots/nonmarkovian/temperature/plot_3599ed7b.png"
+    },
+    "500460bc": {
+        "gamma": 2.0,
+        "ps_strength": 0.001,
+        "filename": "plots/nonmarkovian/temperature/plot_500460bc.png"
+    },
+    "4580707b": {
+        "gamma": 2.0,
+        "ps_strength": 0.1,
+        "filename": "plots/nonmarkovian/temperature/plot_4580707b.png"
+    },
+    "be6d3496": {
+        "gamma": 2.0,
+        "ps_strength": 0.5,
+        "filename": "plots/nonmarkovian/temperature/plot_be6d3496.png"
+    },
+    "3ce76f90": {
+        "gamma": 2.0,
+        "ps_strength": 0.9,
+        "filename": "plots/nonmarkovian/temperature/plot_3ce76f90.png"
+    },
+    "3e01d5ca": {
+        "gamma": 2.0,
+        "ps_strength": 0.999,
+        "filename": "plots/nonmarkovian/temperature/plot_3e01d5ca.png"
+    },
+    "f39e739d": {
+        "gamma": 2.0,
+        "ps_strength": 1.0,
+        "filename": "plots/nonmarkovian/temperature/plot_f39e739d.png"
+    },
+    "3f016f59": {
+        "gamma": 10.0,
+        "ps_strength": 0.001,
+        "filename": "plots/nonmarkovian/temperature/plot_3f016f59.png"
+    },
+    "d7a6491b": {
+        "gamma": 10.0,
+        "ps_strength": 0.1,
+        "filename": "plots/nonmarkovian/temperature/plot_d7a6491b.png"
+    },
+    "dc48ae57": {
+        "gamma": 10.0,
+        "ps_strength": 0.5,
+        "filename": "plots/nonmarkovian/temperature/plot_dc48ae57.png"
+    },
+    "b42759d2": {
+        "gamma": 10.0,
+        "ps_strength": 0.9,
+        "filename": "plots/nonmarkovian/temperature/plot_b42759d2.png"
+    },
+    "7a36699a": {
+        "gamma": 10.0,
+        "ps_strength": 0.999,
+        "filename": "plots/nonmarkovian/temperature/plot_7a36699a.png"
+    },
+    "5dbe7266": {
+        "gamma": 10.0,
+        "ps_strength": 1.0,
+        "filename": "plots/nonmarkovian/temperature/plot_5dbe7266.png"
+    }
+}

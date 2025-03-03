@@ -25,66 +25,24 @@ def calculate_gamma(beta):
 
 
 QUBIT_COUNT = 6
-TIME_RANGE = (0, 35)
-TIME_COUNT = 70
+TIME_RANGE = (0, 40)
+TIME_COUNT = 40
 EPS = 1
 
 # GAMMAS = [0.01, 0.1, 0.5, 0.9, 2, 10]
 # PS_STRENGTHS = [0.001, 0.1, 0.5, 0.9, 0.999, 1.0]
-# INV_TEMPS = [0.001, 0.1, 0.5, 1, 100]
+INV_TEMPS = [0.01, 0.1, 0.5, 1, 10]
 
 PARAMS = {
-    # "01da3975": {
-    #     "gamma": 0.9,
-    #     "ps_strength": 0.999,
-    #     "inv_temp": 1.0
-    # },
-    "2c747b16": {
-        "gamma": 0.9,
-        "ps_strength": 0.999,
-        "inv_temp": 0.001
-    },
-    "3b76a504": {
-        "gamma": 0.9,
-        "ps_strength": 0.999,
-        "inv_temp": 0.1
-    },
-    "9b8818e7": {
-        "gamma": 0.5,
-        "ps_strength": 0.999,
-        "inv_temp": 0.1
-    },
-    "926fa54d": {
-        "gamma": 0.5,
-        "ps_strength": 0.9,
-        "inv_temp": 0.5
-    },
-    "7344f16d": {
-        "gamma": 10.0,
-        "ps_strength": 0.1,
-        "inv_temp": 100.0
-    },
-    "a1c491b5": {
-        "gamma": 0.5,
-        "ps_strength": 0.9,
-        "inv_temp": 0.001
-    },
-    "b172e223": {
-        "gamma": 2.0,
-        "ps_strength": 0.5,
-        "inv_temp": 100.0
-    },
     "eee5673b": {
         "gamma": 2.0,
         "ps_strength": 0.999,
-        "inv_temp": 0.5
     }
 }
 
 
 H_VAL = -0.1
-COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF"]
-
+COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#FFD700", "#00CED1"]
 
 
 def _round(mat):
@@ -339,7 +297,7 @@ def test_main():
     from datetime import datetime
 
     # Create directory if it doesn't exist
-    os.makedirs('plots/nonmarkovian/allplots', exist_ok=True)
+    os.makedirs('plots/nonmarkovian/new_temperature', exist_ok=True)
     
     # Initialize parameter mapping dictionary
     param_mapping = {}
@@ -351,54 +309,49 @@ def test_main():
     observable = overall_magnetization(QUBIT_COUNT).matrix
     times = np.linspace(TIME_RANGE[0], TIME_RANGE[1], TIME_COUNT)
 
-    for param_id, params in PARAMS.items():
+    for params in PARAMS.values():
         gamma = params["gamma"]
         ps_strength = params["ps_strength"]
-        inv_temp = params["inv_temp"]
         plt.clf()  # Clear figure for new plot
         
-        alpha, beta = 1, np.exp(-inv_temp) 
-        rho_env = (alpha * np.outer(ZERO, ZERO) + beta * np.outer(ONE, ONE)) / (alpha + beta)
-        rho_env = make_valid_rho(rho_env)
+        for ind, inv_temp in enumerate(INV_TEMPS):
+            alpha, beta = 1, np.exp(-inv_temp) 
+            rho_env = (alpha * np.outer(ZERO, ZERO) + beta * np.outer(ONE, ONE)) / (alpha + beta)
+            rho_env = make_valid_rho(rho_env)
 
-        lindbladian = []
-        interaction = []
-        neus = []
+            interaction = []
+            neus = []
 
-        for time in times:
-            neu = max(10, int(10 * (time**2) / EPS))
-            neus.append(neu)
-            lindbladian.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, 0, gamma, time, neu, observable))
-            interaction.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, ps_strength, gamma, time, neu, observable))
+            for time in times:
+                neu = max(10, int(10 * (time**2) / EPS))
+                neus.append(neu)
+                interaction.append(ham_evo_nonmarkovian(rho_sys, rho_env, ham, ps_strength, gamma, time, neu, observable))
 
-        # Generate unique hash for this parameter combination
-        param_str = f"{gamma}_{ps_strength}_{inv_temp}_{datetime.now()}"
-        hash_id = hashlib.md5(param_str.encode()).hexdigest()[:8]
-
-        # Create plot
-        ax = sns.lineplot(x=neus, y=lindbladian, label="Lindbladian", color=COLORS[0])
-        ax = sns.lineplot(x=neus, y=interaction, label="Interaction", color=COLORS[1])
+            # Generate unique hash for this parameter combination
+            ax = sns.lineplot(x=neus, y=interaction, label=f"$\\beta = {inv_temp}$", color=COLORS[ind])
         
+        param_str = f"{gamma}_{ps_strength}_{datetime.now()}"
+        hash_id = hashlib.md5(param_str.encode()).hexdigest()[:8]
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
         plt.ylabel(r"Overall Magnetization")
         plt.xlabel(r"Number of collisions")
-        
+        plt.legend('', frameon=False)
+
         # Save plot with hash
-        file_name = f"plots/nonmarkovian/allplots/plot_{hash_id}.png"
+        file_name = f"plots/nonmarkovian/new_temperature/plot_{hash_id}.png"
         plt.savefig(file_name, dpi=450)
         
         # Store parameter mapping
         param_mapping[hash_id] = {
             'gamma': float(gamma),
             'ps_strength': float(ps_strength),
-            'inv_temp': float(inv_temp),
             'filename': file_name
         }
         
         plt.close()
         # Save parameter mapping to JSON after every run
-        with open('plots/nonmarkovian/allplots/param_mapping.json', 'w') as f:
+        with open('plots/nonmarkovian/new_temperature/param_mapping.json', 'w') as f:
             json.dump(param_mapping, f, indent=4)
 
     print("Generated all plots and saved parameter mapping")
