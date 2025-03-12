@@ -24,9 +24,9 @@ def calculate_gamma(beta):
 
 
 QUBIT_COUNT = 6
-GAMMAS = [1, 0.5, 0.1]
-TIME_RANGE = (1, 10)
-TIME_COUNT = 9
+GAMMAS = [1, 0.5, 0.1, 0.8, 10.0]
+TIME_RANGE = (0, 20)
+TIME_COUNT = 20
 EPS = 0.1
 
 H_VAL = -0.1
@@ -184,32 +184,62 @@ def _random_psi(qubit_count):
     norm = sum([np.abs(x) for x in real_psi]) ** 0.5
     return real_psi / norm
 
+import json
+import hashlib
+import time as time_lib
+import os
 
 def test_main():
+
     np.random.seed(42)
+
+    # Create a random hash based on current time
+    random_hash = hashlib.md5(str(time_lib.time()).encode()).hexdigest()[:8]
+    
+    # Create plots directory if it doesn't exist
+    os.makedirs("plots/lindbladian/simulation", exist_ok=True)
+
+    saved_dict = {}
 
     psi = _random_psi(qubit_count=QUBIT_COUNT)
     rho_sys = np.outer(psi, psi.conj())
     # ham = np.zeros_like(rho_sys)
     ham = parametrized_ising(QUBIT_COUNT, H_VAL).matrix
 
-    # Environment qubit is always in ZERO, and it is always only one qubit each
-    inv_temp = 10
+    inv_temp = 1000000
+    saved_dict["inv_temp"] = inv_temp
+    saved_dict["qubits"] = QUBIT_COUNT
+    saved_dict["h_val"] = H_VAL
+    saved_dict["eps"] = EPS
     alpha, beta = 1, np.exp(-inv_temp) 
+    saved_dict["beta"] = beta
     rho_env1 = (alpha * np.outer(ZERO, ZERO) + beta * np.outer(ONE, ONE)) / (alpha + beta)
 
     observable = overall_magnetization(QUBIT_COUNT).matrix
 
     z = calculate_gamma(inv_temp)
+    saved_dict["gamma"] = z
 
     times = np.linspace(TIME_RANGE[0], TIME_RANGE[1], TIME_COUNT)
+    saved_dict["times"] = times.tolist()  # Convert numpy array to list for JSON serialization
 
+    saved_dict["results"] = {}
     for gamma_ind, gamma in enumerate(GAMMAS):
+        gamma_key = str(gamma)  # Convert gamma to string for JSON key
+        saved_dict["results"][gamma_key] = {}
+        saved_dict["results"][gamma_key]["taus"] = {}
         interaction, lindbladian = [], []
         for time in times:
-            neu = min(100, int(10 * (time**2) / EPS))
-            interaction.append(ham_evo(rho_sys, rho_env1, ham, gamma, time, neu, observable))
-            lindbladian.append(lindblad_evo(rho_sys, ham, gamma, z, time, observable))
+            time_key = str(time)
+            neu = max(100, int(400 * (time**2) / EPS))
+            tau = time / neu
+
+            saved_dict["results"][gamma_key]["taus"][time_key] = tau
+
+            interaction.append(float(ham_evo(rho_sys, rho_env1, ham, gamma, time, neu, observable)))
+            lindbladian.append(float(lindblad_evo(rho_sys, ham, gamma, z, time, observable)))
+        saved_dict["results"][gamma_key]["interaction"] = interaction
+        saved_dict["results"][gamma_key]["lindbladian"] = lindbladian
 
         ax = sns.lineplot(
             x=times,
@@ -233,12 +263,23 @@ def test_main():
     plt.ylabel(r"Overall Magnetization")
     plt.xlabel(r"Evolution time")
 
-    file_name = f"plots/lindbladian/simulation/size_{QUBIT_COUNT}_multi_cm_magn_gamma_no_legend.png"
-
+    # Base filename with hash
+    base_file_name = f"plots/lindbladian/simulation/multi_cm_magn_gamma_{random_hash}"
+    
+    # Version with legend
+    plt.legend(loc="upper center", bbox_to_anchor=(0.48, 1.15), ncol=3, fontsize=10)
+    plt.savefig(f"{base_file_name}_with_legend.png", dpi=300)
+    print(f"Saved the plot with legend to {base_file_name}_with_legend.png")
+    
+    # Version without legend
     ax.get_legend().remove()
-    # plt.legend(loc="upper center", bbox_to_anchor=(0.48, 1.15), ncol=3, fontsize=10)
-    plt.savefig(file_name, dpi=300)
-    print(f"saved the plot to {file_name}")
+    plt.savefig(f"{base_file_name}_no_legend.png", dpi=300)
+    print(f"Saved the plot without legend to {base_file_name}_no_legend.png")
+    
+    # Save the dictionary as JSON
+    with open(f"{base_file_name}_data.json", "w") as f:
+        json.dump(saved_dict, f, indent=4)
+    print(f"Saved the dictionary to {base_file_name}_data.json")
 
 
 if __name__ == "__main__":
