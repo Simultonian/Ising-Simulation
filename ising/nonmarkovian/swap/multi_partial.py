@@ -266,23 +266,6 @@ def ham_evo_nonmarkovian(rho_sys, rho_env, ham_sys, partial_swap, gamma, time, n
     return np.trace(np.abs(observable @ rho_ham_norm))
 
 
-def _random_psi(num_qubits):
-    # Calculate the dimension of the state vector
-    dim = 2**num_qubits
-    
-    # Generate complex random numbers for real and imaginary parts
-    real_parts = np.random.randn(dim)
-    imag_parts = np.random.randn(dim)
-    
-    # Combine into a complex state vector
-    psi = real_parts + 1j * imag_parts
-    
-    # Normalize the state vector
-    psi = psi / np.linalg.norm(psi)
-    
-    return psi
-
-
 def test_main():
     np.random.seed(42)
     import json
