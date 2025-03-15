@@ -26,7 +26,7 @@ SIGMA_PLUS = np.array([[0, 0], [1, 0]]) # a_n
 
 QUBIT_COUNT = 6
 GAMMAS = [1, 0.5, 0.1, 0.8, 10.0]
-TIME_RANGE = (0, 20)
+TIME_RANGE = (0, 10)
 TIME_COUNT = 20
 EPS = 0.1
 
@@ -73,7 +73,7 @@ def _kron_multi(ls):
 
 
 @hache(blob_type=float, max_size=1000)
-def lindblad_evo(rho, ham, gamma, z, time, observable):
+def lindblad_evo(system_size, rho, ham, gamma, z, time, observable):
     """
     Function to calculate final state after amplitude damping.
 
@@ -87,7 +87,7 @@ def lindblad_evo(rho, ham, gamma, z, time, observable):
     rho_vec = rho.reshape(-1, 1)
 
     # Hamiltonian is zero
-    l_op = lindbladian_operator(ham, thermal_lindbladians(QUBIT_COUNT, gamma=gamma, z=z))
+    l_op = lindbladian_operator(ham, thermal_lindbladians(system_size, gamma=gamma, z=z))
 
     eig_val, eig_vec = np.linalg.eig(l_op)
     eig_vec_inv = np.linalg.inv(eig_vec)
@@ -138,7 +138,7 @@ def interaction_hamiltonian(QUBIT_COUNT, gamma):
 
 
 @hache(blob_type=float, max_size=1000)
-def ham_evo(rho_sys, rho_env, ham_sys, gamma, time, neu, observable):
+def ham_evo(system_size, rho_sys, rho_env, ham_sys, gamma, time, neu, observable):
     """
     Replicate the Lindbladian evolution of amplitude damping using
     interaction Hamiltonian dynamics.
@@ -154,12 +154,12 @@ def ham_evo(rho_sys, rho_env, ham_sys, gamma, time, neu, observable):
     big_ham_sys = np.kron(ham_sys, np.eye(2))
 
 
-    ham_ints = interaction_hamiltonian(QUBIT_COUNT, gamma=gamma)
+    ham_ints = interaction_hamiltonian(system_size, gamma=gamma)
 
     us = []
     print(f"Running for time:{time}, neu:{neu}")
     for ham_int in ham_ints:
-        ham = (np.sqrt(tau) * big_ham_sys / QUBIT_COUNT) + ham_int
+        ham = (np.sqrt(tau) * big_ham_sys / system_size) + ham_int
         eig_val, eig_vec = np.linalg.eig(ham)
         eig_vec_inv = np.linalg.inv(eig_vec)
 
@@ -177,7 +177,7 @@ def ham_evo(rho_sys, rho_env, ham_sys, gamma, time, neu, observable):
                 rho_fin = (
                     u @ complete_rho @ u.conj().T
                 )
-                cur_rho_sys = partial_trace(rho_fin, list(range(QUBIT_COUNT, QUBIT_COUNT + 1)))
+                cur_rho_sys = partial_trace(rho_fin, list(range(system_size, system_size + 1)))
 
     rho_ham = np.round(cur_rho_sys, decimals=6)
     rho_ham = rho_ham / global_phase(rho_ham)
@@ -187,7 +187,7 @@ def ham_evo(rho_sys, rho_env, ham_sys, gamma, time, neu, observable):
 
 def _random_psi(qubit_count):
     psi = np.zeros(2 ** qubit_count)
-    psi[0] = 1
+    psi[4] = 1
     return psi
 
 def test_main():
@@ -208,8 +208,10 @@ def test_main():
     ham = parametrized_ising(QUBIT_COUNT, H_VAL).matrix
 
     inv_temp = 1000000
+    system_size = QUBIT_COUNT
+
     saved_dict["inv_temp"] = inv_temp
-    saved_dict["qubits"] = QUBIT_COUNT
+    saved_dict["qubits"] = system_size
     saved_dict["h_val"] = H_VAL
     saved_dict["eps"] = EPS
     beta = np.exp(-inv_temp) 
@@ -232,27 +234,27 @@ def test_main():
         interaction, lindbladian = [], []
         for time in times:
             time_key = str(time)
-            neu = max(100, int(400 * (time**2) / EPS))
+            neu = max(100, int(4 * (time**2) / EPS))
             tau = time / neu
 
             saved_dict["results"][gamma_key]["taus"][time_key] = tau
 
-            interaction.append(float(ham_evo(rho_sys, rho_env1, ham, gamma, time, neu, observable)))
-            lindbladian.append(float(lindblad_evo(rho_sys, ham, gamma, z, time, observable)))
+            interaction.append(float(ham_evo(system_size, rho_sys, rho_env1, ham, gamma, time, neu, observable)))
+            lindbladian.append(float(lindblad_evo(system_size, rho_sys, ham, gamma, z, time, observable)))
         saved_dict["results"][gamma_key]["interaction"] = interaction
         saved_dict["results"][gamma_key]["lindbladian"] = lindbladian
 
         ax = sns.lineplot(
             x=times,
             y=lindbladian,
-            label=f"Lindbladian {gamma}",
+            label=fr"$\omega={gamma}$",
             color=COLORS[gamma_ind],
         )
         ax = sns.scatterplot(
             x=times,
             y=interaction,
-            label=f"Single Ancilla LCU {gamma}",
-            s=35,
+            # label=f"Single Ancilla LCU {gamma}",
+            s=25,
             color=COLORS[gamma_ind],
         )
 
@@ -270,18 +272,18 @@ def test_main():
     
     # Version with legend
     plt.legend(loc="upper center", bbox_to_anchor=(0.48, 1.15), ncol=3, fontsize=10)
-    plt.savefig(f"{base_dir}/{base_file_name}_with_legend.png", dpi=300)
-    print(f"Saved the plot with legend to {base_file_name}_with_legend.png")
+    plt.savefig(f"{base_dir}/plot_with_legend.png", dpi=300)
+    print(f"Saved the plot with legend to {base_dir}/plot_with_legend.png")
     
     # Version without legend
     ax.get_legend().remove()
-    plt.savefig(f"{base_file_name}_no_legend.png", dpi=300)
-    print(f"Saved the plot without legend to {base_file_name}_no_legend.png")
+    plt.savefig(f"{base_dir}/plot_no_legend.png", dpi=300)
+    print(f"Saved the plot without legend to {base_dir}/plot_no_legend.png")
     
     # Save the dictionary as JSON
-    with open(f"{base_file_name}_data.json", "w") as f:
+    with open(f"{base_dir}/data.json", "w") as f:
         json.dump(saved_dict, f, indent=4)
-    print(f"Saved the dictionary to {base_file_name}_data.json")
+    print(f"Saved the dictionary to {base_dir}/data.json")
 
 
 if __name__ == "__main__":
