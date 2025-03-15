@@ -25,7 +25,7 @@ SIGMA_MINUS = np.array([[0, 1], [0, 0]]) # a_dag
 SIGMA_PLUS = np.array([[0, 0], [1, 0]]) # a_n
 
 QUBIT_COUNT = 6
-GAMMAS = [1, 0.5, 0.1, 0.8, 10.0]
+GAMMAS = [1, 0.5, 0.1, 10.0]
 TIME_RANGE = (0, 10)
 TIME_COUNT = 20
 EPS = 0.1
