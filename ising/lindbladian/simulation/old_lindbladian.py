@@ -1,6 +1,12 @@
 import numpy as np
+import json
+import hashlib
+import time as time_lib
+import os
 import seaborn as sns
 from matplotlib import pyplot as plt
+from tqdm import tqdm
+
 from ising.lindbladian.simulation.unraveled import (
     thermal_lindbladians,
     lindbladian_operator,
@@ -11,7 +17,6 @@ from ising.utils.trace import partial_trace
 from ising.hamiltonian import parametrized_ising
 from ising.observables import overall_magnetization
 
-from tqdm import tqdm
 
 
 ZERO = np.array([[1], [0]])
@@ -30,7 +35,7 @@ COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF",
           "#3ABEFF", "#FFB743", "#00CC99", "#FF6B6B", "#845EC2", 
           "#F9F871", "#00C9A7", "#C34A36", "#4ECDC4", "#FF9671", 
           "#FFC75F", "#008080", "#D65DB1", "#4D8076", "#FF8066"]
-
+DIR = "plots/lindbladian/simulation/"
 
 def calculate_gamma(beta):
     return np.exp(-beta) / (1 + np.exp(-beta))
@@ -185,11 +190,6 @@ def _random_psi(qubit_count):
     psi[0] = 1
     return psi
 
-import json
-import hashlib
-import time as time_lib
-import os
-
 def test_main():
 
     np.random.seed(42)
@@ -198,7 +198,7 @@ def test_main():
     random_hash = hashlib.md5(str(time_lib.time()).encode()).hexdigest()[:8]
     
     # Create plots directory if it doesn't exist
-    os.makedirs("plots/lindbladian/simulation", exist_ok=True)
+    os.makedirs(DIR, exist_ok=True)
 
     saved_dict = {}
 
@@ -261,15 +261,16 @@ def test_main():
     ax.spines["right"].set_visible(False)
 
     # Add labels for each group
-    plt.ylabel(r"Overall Magnetization")
+    plt.ylabel(r"Average Magnetization")
     plt.xlabel(r"Evolution time")
 
     # Base filename with hash
-    base_file_name = f"plots/lindbladian/simulation/multi_cm_magn_gamma_{random_hash}"
+    base_dir = f"{DIR}/{random_hash}/"
+    os.makedirs(base_dir, exist_ok=True)
     
     # Version with legend
     plt.legend(loc="upper center", bbox_to_anchor=(0.48, 1.15), ncol=3, fontsize=10)
-    plt.savefig(f"{base_file_name}_with_legend.png", dpi=300)
+    plt.savefig(f"{base_dir}/{base_file_name}_with_legend.png", dpi=300)
     print(f"Saved the plot with legend to {base_file_name}_with_legend.png")
     
     # Version without legend

@@ -24,20 +24,20 @@ def calculate_gamma(beta):
 """
 Hamiltonian constants
 """
-QUBIT_COUNT = 5
+QUBIT_COUNT = 4
 H_VAL = -0.1
 
 """
 Environment constants
 """
-LAMBDAS = [x * 1e-4 for x in [0.5, 1.0, 2.5]]
+LAMBDAS = [x * 1e-4 for x in [1.0, 10, 50]]
 INV_TEMPS = [1000]
 
 """
 Simulation constants
 """
-TIME_RANGE = (0, 30)
-TIME_COUNT = 30
+TIME_RANGE = (0, 10)
+TIME_COUNT = 10
 EPS = 0.1
 
 
@@ -241,7 +241,7 @@ def get_interaction_hamiltonians(system_size, coupling_parameter):
     return ham_ints
 
 
-# @hache(blob_type=float, max_size=1000)
+@hache(blob_type=float, max_size=1000)
 def collision_simulation(
     system_size,
     rho_system,
@@ -315,7 +315,7 @@ def test_main():
         results[run_hash]["interaction lambda's"] = []
 
         for ind, interaction_strength in enumerate(LAMBDAS):
-            neu_max = max(((t_max ** 2) * (30 / EPS) * interaction_strength), 1)
+            neu_max = max(((t_max ** 2) * 3000 * interaction_strength), 1)
             delta_t = t_max / neu_max
             interaction_lambda = 1 / delta_t
 
@@ -360,9 +360,9 @@ def test_main():
             results[run_hash][interaction_string] = {}
             results[run_hash][interaction_string]["lindbladian"] = lindbladian_results
             results[run_hash][interaction_string]["interaction"] = interaction_results
-            ax = sns.lineplot(x=times, y=lindbladian_results, label=f"Lindbladian", color=COLORS[ind])
-            # ax = sns.scatterplot(x=times, y=interaction_results, color=COLORS[ind])
-            ax = sns.lineplot(x=times, y=interaction_results, label=rf"$\lambda={interaction_lambda}$", color=COLORS[ind])
+            ax = sns.lineplot(x=times, y=lindbladian_results, label=rf"$\lambda={interaction_lambda}$", color=COLORS[ind])
+            ax = sns.scatterplot(x=times, y=interaction_results, color=COLORS[ind])
+            # ax = sns.lineplot(x=times, y=interaction_results, label=rf"$\lambda={interaction_lambda}$", color=COLORS[ind])
 
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
