@@ -1,0 +1,58 @@
+{
+    "b8f2b247": {
+        "plot_hash": "b8f2b247",
+        "qubit_count": 5,
+        "h_val": -0.1,
+        "evolution_time": 4,
+        "gamma": 1.0,
+        "error_range": [
+            -1,
+            -6
+        ],
+        "error_count": 5,
+        "timestamp": 1742345313
+    },
+    "409c1bbd": {
+        "plot_hash": "409c1bbd",
+        "qubit_count": 5,
+        "h_val": -0.1,
+        "evolution_time": 4,
+        "gamma": 1.0,
+        "error_range": [
+            -1,
+            -6
+        ],
+        "error_count": 5,
+        "timestamp": 1742345412,
+        "results": {
+            "trotter": [
+                667940.0,
+                11358480.0,
+                199874500.0,
+                3545491810.0,
+                63011556300.0
+            ],
+            "ktrotter": [
+                10500.0,
+                19600.0,
+                39900.0,
+                81900.0,
+                167300.0
+            ],
+            "qdrift": [
+                1560.0,
+                1306.0,
+                0.0,
+                0.0,
+                0.0
+            ],
+            "taylor": [
+                200.0,
+                200.0,
+                200.0,
+                200.0,
+                200.0
+            ]
+        }
+    }
+}
