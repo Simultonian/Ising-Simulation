@@ -29,7 +29,7 @@ parameters = {
     "epsilon": 1e-1,            # Fixed error value
     "alpha_commutator_1st": 1.1114244518026801,  # Alpha commutator for 1st-order Trotter
     "alpha_commutator_2nd": 2.3818703023137573,  # Alpha commutator for 2nd-order Trotter
-    "time_values": np.linspace(0.1, 1000, 10).tolist()  # Time values
+    "time_values": np.linspace(10, 1000, 500).tolist()  # Time values
 }
 
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF", 
@@ -103,20 +103,20 @@ def generate_plots():
         # Plot 1st-order Trotter with clip_on=False to allow it to extend beyond the plot bounds
         ax.plot(time_values, trotter_counts, '-', color=COLORS[0], 
                 label='1st-order Trotter')
-        ax.scatter(time_values, trotter_counts, color=COLORS[0], s=50)
+        # ax.scatter(time_values, trotter_counts, color=COLORS[0], s=50)
         
         # Plot other algorithms with higher zorder to ensure they're visible
         ax.plot(time_values, qdrift_counts, '-', color=COLORS[1], 
                 label='QDrift', zorder=2)
-        ax.scatter(time_values, qdrift_counts, color=COLORS[1], s=50, zorder=2)
+        # ax.scatter(time_values, qdrift_counts, color=COLORS[1], s=50, zorder=2)
         
         ax.plot(time_values, trotter_2nd_counts, '-', color=COLORS[2], 
                 label='2nd-order Trotter', zorder=2)
-        ax.scatter(time_values, trotter_2nd_counts, color=COLORS[2], s=50, zorder=2)
+        # ax.scatter(time_values, trotter_2nd_counts, color=COLORS[2], s=50, zorder=2)
         
         ax.plot(time_values, single_ancilla_counts, '-', color=COLORS[3], 
                 label='Single-Ancilla LCU', zorder=2)
-        ax.scatter(time_values, single_ancilla_counts, color=COLORS[3], s=50, zorder=2)
+        # ax.scatter(time_values, single_ancilla_counts, color=COLORS[3], s=50, zorder=2)
         
         # Set the y-axis limit to focus on lower algorithms
         plt.ylim(0, y_limit)
