@@ -29,7 +29,7 @@ parameters = {
     "epsilon": 1e-1,            # Fixed error value
     "alpha_commutator_1st": 1.1114244518026801,  # Alpha commutator for 1st-order Trotter
     "alpha_commutator_2nd": 2.3818703023137573,  # Alpha commutator for 2nd-order Trotter
-    "time_values": np.linspace(0.1, 10, 10).tolist()  # Time values
+    "time_values": np.linspace(0.1, 100, 10).tolist()  # Time values
 }
 
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF", 
@@ -89,59 +89,73 @@ def generate_plots():
     trotter_2nd_counts = [trotter_2nd_order(t) for t in time_values]
     single_ancilla_counts = [single_ancilla_lcu(t) for t in time_values]
 
-    # Plot with legend
-    plt.figure(figsize=(10, 6))
-    ax = plt.gca()
+    # Find the maximum value of the lower algorithms to set the y-axis limit
+    lower_algos_max = max(max(qdrift_counts), max(trotter_2nd_counts), max(single_ancilla_counts))
     
-    ax = sns.lineplot(x=time_values, y=trotter_counts, label='1st-order Trotter', color=COLORS[0], ax=ax)
-    ax = sns.scatterplot(x=time_values, y=trotter_counts, color=COLORS[0], s=50, ax=ax)
-    
-    ax = sns.lineplot(x=time_values, y=qdrift_counts, label='QDrift', color=COLORS[1], ax=ax)
-    ax = sns.scatterplot(x=time_values, y=qdrift_counts, color=COLORS[1], s=50, ax=ax)
-    
-    ax = sns.lineplot(x=time_values, y=trotter_2nd_counts, label='2nd-order Trotter', color=COLORS[2], ax=ax)
-    ax = sns.scatterplot(x=time_values, y=trotter_2nd_counts, color=COLORS[2], s=50, ax=ax)
-    
-    ax = sns.lineplot(x=time_values, y=single_ancilla_counts, label='Single-Ancilla LCU', color=COLORS[3], ax=ax)
-    ax = sns.scatterplot(x=time_values, y=single_ancilla_counts, color=COLORS[3], s=50, ax=ax)
-    
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    
-    # plt.yscale('log')
-    plt.xlabel(r'Time ($t$)')
-    plt.ylabel(r'$\text{CNOT}$ Gate Count')
-    plt.title('Gate Count vs Time (With Legend)')
-    plt.tight_layout()
-    plt.savefig(os.path.join(DIR, f"gate_count_vs_time_with_legend_{param_hash}.png"))
-    plt.close()
+    # Add padding to the y-axis upper limit
+    y_limit = lower_algos_max * 1.2
 
-    # Plot without legend
-    plt.figure(figsize=(10, 6))
-    ax = plt.gca()
-    
-    ax = sns.lineplot(x=time_values, y=trotter_counts, color=COLORS[0], ax=ax)
-    ax = sns.scatterplot(x=time_values, y=trotter_counts, color=COLORS[0], s=50, ax=ax)
-    
-    ax = sns.lineplot(x=time_values, y=qdrift_counts, color=COLORS[1], ax=ax)
-    ax = sns.scatterplot(x=time_values, y=qdrift_counts, color=COLORS[1], s=50, ax=ax)
-    
-    ax = sns.lineplot(x=time_values, y=trotter_2nd_counts, color=COLORS[2], ax=ax)
-    ax = sns.scatterplot(x=time_values, y=trotter_2nd_counts, color=COLORS[2], s=50, ax=ax)
-    
-    ax = sns.lineplot(x=time_values, y=single_ancilla_counts, color=COLORS[3], ax=ax)
-    ax = sns.scatterplot(x=time_values, y=single_ancilla_counts, color=COLORS[3], s=50, ax=ax)
-    
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    
-    # plt.yscale('log')
-    plt.xlabel(r'Time ($t$)')
-    plt.ylabel(r'$\text{CNOT}$ Gate Count')
-    plt.title('')
-    plt.tight_layout()
-    plt.savefig(os.path.join(DIR, f"gate_count_vs_time_without_legend_{param_hash}.png"))
-    plt.close()
+    # Function to create plots with or without legend
+    def create_plot(with_legend=True):
+        plt.figure(figsize=(10, 6))
+        ax = plt.gca()
+        
+        # Plot 1st-order Trotter with clip_on=False to allow it to extend beyond the plot bounds
+        ax.plot(time_values, trotter_counts, '-', color=COLORS[0], 
+                label='1st-order Trotter', zorder=1, clip_on=False)
+        ax.scatter(time_values, trotter_counts, color=COLORS[0], s=50, zorder=1, clip_on=False)
+        
+        # Plot other algorithms with higher zorder to ensure they're visible
+        ax.plot(time_values, qdrift_counts, '-', color=COLORS[1], 
+                label='QDrift', zorder=2)
+        ax.scatter(time_values, qdrift_counts, color=COLORS[1], s=50, zorder=2)
+        
+        ax.plot(time_values, trotter_2nd_counts, '-', color=COLORS[2], 
+                label='2nd-order Trotter', zorder=2)
+        ax.scatter(time_values, trotter_2nd_counts, color=COLORS[2], s=50, zorder=2)
+        
+        ax.plot(time_values, single_ancilla_counts, '-', color=COLORS[3], 
+                label='Single-Ancilla LCU', zorder=2)
+        ax.scatter(time_values, single_ancilla_counts, color=COLORS[3], s=50, zorder=2)
+        
+        ax.plot(time_values, trotter_2k_counts, '-', color=COLORS[4], 
+                label='2k-order Trotter', zorder=2)
+        ax.scatter(time_values, trotter_2k_counts, color=COLORS[4], s=50, zorder=2)
+
+        # Set the y-axis limit to focus on lower algorithms
+        plt.ylim(0, y_limit)
+        
+        # Add annotation to indicate 1st-order Trotter continues off-scale
+        last_visible_index = next((i for i, y in enumerate(trotter_counts) if y > y_limit), len(trotter_counts)) - 1
+        if last_visible_index >= 0:
+            last_visible_x = time_values[last_visible_index]
+            plt.annotate("1st-order Trotter\ncontinues off-scale", 
+                        xy=(last_visible_x, y_limit * 0.95), 
+                        xytext=(last_visible_x + 1, y_limit * 0.7),
+                        arrowprops=dict(facecolor='black', shrink=0.05, width=1.5, headwidth=8),
+                        fontsize=9)
+        
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        
+        # Linear scale for y-axis as requested
+        plt.xlabel(r'Time ($t$)')
+        plt.ylabel(r'$\text{CNOT}$ Gate Count')
+        
+        if with_legend:
+            plt.title('Gate Count vs Time (With Legend)')
+            plt.legend()
+        else:
+            plt.title('')
+        
+        plt.tight_layout()
+        filename = f"gate_count_vs_time_{'with' if with_legend else 'without'}_legend_{param_hash}.png"
+        plt.savefig(os.path.join(DIR, filename), bbox_inches='tight')
+        plt.close()
+
+    # Create both plots
+    create_plot(with_legend=True)
+    create_plot(with_legend=False)
 
     print(f"Plots saved in {DIR} with hash {param_hash}")
 
