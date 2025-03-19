@@ -117,7 +117,7 @@ def new_gate_counts(system_size, h_val, evolution_time, precision, gamma):
     for qdrift, lambd in zip(qdrifts, lambds):
         qdrift_rep = qdrift_count(lambd, ham_evo_time, ham_sim_error)
         print(f"QDrift:: evo_time={ham_evo_time} rep={qdrift_rep} sim_error={ham_sim_error} lambda={lambd}")
-        qdrift_cx += nu * qdrift.simulation_gate_count(ham_evo_time, qdrift_rep).get("cx", 0)
+        qdrift_cx += nu * qdrift.controlled_gate_count(ham_evo_time, qdrift_rep).get("cx", 0)
 
     return np.array([trotter_cx, ktrotter_cx, qdrift_cx, taylor_cx])
 
