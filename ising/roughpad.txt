@@ -1,0 +1,302 @@
+!!!!!!!!!!!Trotter: Running controlled gate count for time: 0.05
+starting circuit
+circuit complete
+!Trotter: Running controlled gate count for time: 0.05
+starting circuit
+circuit complete
+!Trotter: Running controlled gate count for time: 0.05
+starting circuit
+circuit complete
+!Trotter: Running controlled gate count for time: 0.05
+starting circuit
+circuit complete
+!Trotter: Running controlled gate count for time: 0.05
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.05
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.05
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.05
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.05
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.05
+starting circuit
+circuit complete
+Taylor:: evo_time=0.05 k=4
+Taylor:: Running gate count for time: 0.05
+Taylor:: reps:20, k_max:4
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+Taylor:: evo_time=0.05 k=4
+Taylor:: Running gate count for time: 0.05
+Taylor:: reps:20, k_max:4
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+Taylor:: evo_time=0.05 k=4
+Taylor:: Running gate count for time: 0.05
+Taylor:: reps:20, k_max:4
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+Taylor:: evo_time=0.05 k=4
+Taylor:: Running gate count for time: 0.05
+Taylor:: reps:20, k_max:4
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+Taylor:: evo_time=0.05 k=4
+Taylor:: Running gate count for time: 0.05
+Taylor:: reps:20, k_max:4
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+QDrift:: evo_time=0.05 rep=3932 sim_error=1.388888888888889e-06 lambda=1.045
+QDrift: Running gate count for time: 0.05
+QDrift:: evo_time=0.05 rep=3932 sim_error=1.388888888888889e-06 lambda=1.045
+QDrift: Running gate count for time: 0.05
+QDrift:: evo_time=0.05 rep=3932 sim_error=1.388888888888889e-06 lambda=1.045
+QDrift: Running gate count for time: 0.05
+QDrift:: evo_time=0.05 rep=3932 sim_error=1.388888888888889e-06 lambda=1.045
+QDrift: Running gate count for time: 0.05
+QDrift:: evo_time=0.05 rep=3932 sim_error=1.388888888888889e-06 lambda=1.045
+QDrift: Running gate count for time: 0.05
+!!!!!!!!!!!Trotter: Running controlled gate count for time: 0.011856966576817519
+starting circuit
+circuit complete
+!Trotter: Running controlled gate count for time: 0.011856966576817519
+starting circuit
+circuit complete
+!Trotter: Running controlled gate count for time: 0.011856966576817519
+starting circuit
+circuit complete
+!Trotter: Running controlled gate count for time: 0.011856966576817519
+starting circuit
+circuit complete
+!Trotter: Running controlled gate count for time: 0.011856966576817519
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.011856966576817519
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.011856966576817519
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.011856966576817519
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.011856966576817519
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.011856966576817519
+starting circuit
+circuit complete
+Taylor:: evo_time=0.011856966576817519 k=5
+Taylor:: Running gate count for time: 0.011856966576817519
+Taylor:: reps:20, k_max:5
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+Taylor:: evo_time=0.011856966576817519 k=5
+Taylor:: Running gate count for time: 0.011856966576817519
+Taylor:: reps:20, k_max:5
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+Taylor:: evo_time=0.011856966576817519 k=5
+Taylor:: Running gate count for time: 0.011856966576817519
+Taylor:: reps:20, k_max:5
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+Taylor:: evo_time=0.011856966576817519 k=5
+Taylor:: Running gate count for time: 0.011856966576817519
+Taylor:: reps:20, k_max:5
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+Taylor:: evo_time=0.011856966576817519 k=5
+Taylor:: Running gate count for time: 0.011856966576817519
+Taylor:: reps:20, k_max:5
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+QDrift:: evo_time=0.011856966576817519 rep=65392 sim_error=4.392124944861124e-09 lambda=1.0106712699191358
+QDrift: Running gate count for time: 0.011856966576817519
+QDrift:: evo_time=0.011856966576817519 rep=65392 sim_error=4.392124944861124e-09 lambda=1.0106712699191358
+QDrift: Running gate count for time: 0.011856966576817519
+QDrift:: evo_time=0.011856966576817519 rep=65392 sim_error=4.392124944861124e-09 lambda=1.0106712699191358
+QDrift: Running gate count for time: 0.011856966576817519
+QDrift:: evo_time=0.011856966576817519 rep=65392 sim_error=4.392124944861124e-09 lambda=1.0106712699191358
+QDrift: Running gate count for time: 0.011856966576817519
+QDrift:: evo_time=0.011856966576817519 rep=65392 sim_error=4.392124944861124e-09 lambda=1.0106712699191358
+QDrift: Running gate count for time: 0.011856966576817519
+!!!!!!!!!!!Trotter: Running controlled gate count for time: 0.0028117078085831554
+starting circuit
+circuit complete
+!Trotter: Running controlled gate count for time: 0.0028117078085831554
+starting circuit
+circuit complete
+!Trotter: Running controlled gate count for time: 0.0028117078085831554
+starting circuit
+circuit complete
+!Trotter: Running controlled gate count for time: 0.0028117078085831554
+starting circuit
+circuit complete
+!Trotter: Running controlled gate count for time: 0.0028117078085831554
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.0028117078085831554
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.0028117078085831554
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.0028117078085831554
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.0028117078085831554
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.0028117078085831554
+starting circuit
+circuit complete
+Taylor:: evo_time=0.0028117078085831554 k=6
+Taylor:: Running gate count for time: 0.0028117078085831554
+Taylor:: reps:20, k_max:6
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+Taylor:: evo_time=0.0028117078085831554 k=6
+Taylor:: Running gate count for time: 0.0028117078085831554
+Taylor:: reps:20, k_max:6
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+Taylor:: evo_time=0.0028117078085831554 k=6
+Taylor:: Running gate count for time: 0.0028117078085831554
+Taylor:: reps:20, k_max:6
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+Taylor:: evo_time=0.0028117078085831554 k=6
+Taylor:: Running gate count for time: 0.0028117078085831554
+Taylor:: reps:20, k_max:6
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+Taylor:: evo_time=0.0028117078085831554 k=6
+Taylor:: Running gate count for time: 0.0028117078085831554
+Taylor:: reps:20, k_max:6
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+QDrift:: evo_time=0.0028117078085831554 rep=1144189 sim_error=1.3888900572497382e-11 lambda=1.0025305370277249
+QDrift: Running gate count for time: 0.0028117078085831554
+QDrift:: evo_time=0.0028117078085831554 rep=1144189 sim_error=1.3888900572497382e-11 lambda=1.0025305370277249
+QDrift: Running gate count for time: 0.0028117078085831554
+QDrift:: evo_time=0.0028117078085831554 rep=1144189 sim_error=1.3888900572497382e-11 lambda=1.0025305370277249
+QDrift: Running gate count for time: 0.0028117078085831554
+QDrift:: evo_time=0.0028117078085831554 rep=1144189 sim_error=1.3888900572497382e-11 lambda=1.0025305370277249
+QDrift: Running gate count for time: 0.0028117078085831554
+QDrift:: evo_time=0.0028117078085831554 rep=1144189 sim_error=1.3888900572497382e-11 lambda=1.0025305370277249
+QDrift: Running gate count for time: 0.0028117078085831554
+!!!!!!!!!!!Trotter: Running controlled gate count for time: 0.0006667607236050521
+starting circuit
+circuit complete
+!Trotter: Running controlled gate count for time: 0.0006667607236050521
+starting circuit
+circuit complete
+!Trotter: Running controlled gate count for time: 0.0006667607236050521
+starting circuit
+circuit complete
+!Trotter: Running controlled gate count for time: 0.0006667607236050521
+starting circuit
+circuit complete
+!Trotter: Running controlled gate count for time: 0.0006667607236050521
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.0006667607236050521
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.0006667607236050521
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.0006667607236050521
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.0006667607236050521
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.0006667607236050521
+starting circuit
+circuit complete
+Taylor:: evo_time=0.0006667607236050521 k=7
+Taylor:: Running gate count for time: 0.0006667607236050521
+Taylor:: reps:20, k_max:7
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+Taylor:: evo_time=0.0006667607236050521 k=7
+Taylor:: Running gate count for time: 0.0006667607236050521
+Taylor:: reps:20, k_max:7
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+Taylor:: evo_time=0.0006667607236050521 k=7
+Taylor:: Running gate count for time: 0.0006667607236050521
+Taylor:: reps:20, k_max:7
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+Taylor:: evo_time=0.0006667607236050521 k=7
+Taylor:: Running gate count for time: 0.0006667607236050521
+Taylor:: reps:20, k_max:7
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+Taylor:: evo_time=0.0006667607236050521 k=7
+Taylor:: Running gate count for time: 0.0006667607236050521
+Taylor:: reps:20, k_max:7
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+QDrift:: evo_time=0.0006667607236050521 rep=20268592 sim_error=4.392052404904803e-14 lambda=1.0006000846512446
+QDrift: Running gate count for time: 0.0006667607236050521
+QDrift:: evo_time=0.0006667607236050521 rep=20268592 sim_error=4.392052404904803e-14 lambda=1.0006000846512446
+QDrift: Running gate count for time: 0.0006667607236050521
+QDrift:: evo_time=0.0006667607236050521 rep=20268592 sim_error=4.392052404904803e-14 lambda=1.0006000846512446
+QDrift: Running gate count for time: 0.0006667607236050521
+QDrift:: evo_time=0.0006667607236050521 rep=20268592 sim_error=4.392052404904803e-14 lambda=1.0006000846512446
+QDrift: Running gate count for time: 0.0006667607236050521
+QDrift:: evo_time=0.0006667607236050521 rep=20268592 sim_error=4.392052404904803e-14 lambda=1.0006000846512446
+QDrift: Running gate count for time: 0.0006667607236050521
+!!!!!!!!!!!Trotter: Running controlled gate count for time: 0.00015811388300841897
+starting circuit
+circuit complete
+!Trotter: Running controlled gate count for time: 0.00015811388300841897
+starting circuit
+circuit complete
+!Trotter: Running controlled gate count for time: 0.00015811388300841897
+starting circuit
+circuit complete
+!Trotter: Running controlled gate count for time: 0.00015811388300841897
+starting circuit
+circuit complete
+!Trotter: Running controlled gate count for time: 0.00015811388300841897
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.00015811388300841897
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.00015811388300841897
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.00015811388300841897
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.00015811388300841897
+starting circuit
+circuit complete
+!KTrotter: Running controlled gate count for time: 0.00015811388300841897
+starting circuit
+circuit complete
+Taylor:: evo_time=0.00015811388300841897 k=8
+Taylor:: Running gate count for time: 0.00015811388300841897
+Taylor:: reps:20, k_max:8
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+Taylor:: evo_time=0.00015811388300841897 k=8
+Taylor:: Running gate count for time: 0.00015811388300841897
+Taylor:: reps:20, k_max:8
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+Taylor:: evo_time=0.00015811388300841897 k=8
+Taylor:: Running gate count for time: 0.00015811388300841897
+Taylor:: reps:20, k_max:8
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+Taylor:: evo_time=0.00015811388300841897 k=8
+Taylor:: Running gate count for time: 0.00015811388300841897
+Taylor:: reps:20, k_max:8
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+Taylor:: evo_time=0.00015811388300841897 k=8
+Taylor:: Running gate count for time: 0.00015811388300841897
+Taylor:: reps:20, k_max:8
+Taylor:: counter: {'u3': 3, 'cx': 2} reps: 20
+QDrift:: evo_time=0.00015811388300841897 rep=360102466 sim_error=1.3888888888888888e-16 lambda=1.0001423024947076
+QDrift: Running gate count for time: 0.00015811388300841897
+QDrift:: evo_time=0.00015811388300841897 rep=360102466 sim_error=1.3888888888888888e-16 lambda=1.0001423024947076
+QDrift: Running gate count for time: 0.00015811388300841897
+QDrift:: evo_time=0.00015811388300841897 rep=360102466 sim_error=1.3888888888888888e-16 lambda=1.0001423024947076
+QDrift: Running gate count for time: 0.00015811388300841897
+QDrift:: evo_time=0.00015811388300841897 rep=360102466 sim_error=1.3888888888888888e-16 lambda=1.0001423024947076
+QDrift: Running gate count for time: 0.00015811388300841897
+QDrift:: evo_time=0.00015811388300841897 rep=360102466 sim_error=1.3888888888888888e-16 lambda=1.0001423024947076
+QDrift: Running gate count for time: 0.00015811388300841897
+Plots saved with hash: 9e6f0515
+Parameters saved to: plots/newbenchmark/cx_vs_error/parameters.json

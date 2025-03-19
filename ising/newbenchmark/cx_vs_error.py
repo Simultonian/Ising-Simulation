@@ -41,9 +41,10 @@ COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF",
 DIR = "plots/newbenchmark/cx_vs_error/"
 
 
-@hache(blob_type=np.ndarray, max_size=1000)
+# @hache(blob_type=np.ndarray, max_size=1000)
 def new_gate_counts(system_size, h_val, evolution_time, precision, gamma):
     nu = max(1, int(10 * (evolution_time ** 2) / precision))
+    print(f"error={precision} nu={nu}")
     delta_t = evolution_time / nu
 
     ham_sys = parametrized_ising(system_size, h_val).sparse_repr
@@ -77,6 +78,8 @@ def new_gate_counts(system_size, h_val, evolution_time, precision, gamma):
         )
         alpha_com_seconds.append(alpha_com_second)
 
+        print(f"Commutators:: error={precision} first={alpha_com_first} second={alpha_com_second}")
+
 
         lambds.append(np.sum(np.abs(ham_sparse.coeffs)))
 
@@ -93,14 +96,14 @@ def new_gate_counts(system_size, h_val, evolution_time, precision, gamma):
         trotter_rep = r_first_order(
             sorted_pairs=[], time=ham_evo_time, error=ham_sim_error, alpha_com=alpha_com_first
         )
-        trotter_cx += trotter.controlled_gate_count(ham_evo_time, trotter_rep).get("cx", 0)
+        trotter_cx += nu * trotter.controlled_gate_count(ham_evo_time, trotter_rep).get("cx", 0)
 
     for ktrotter, alpha_com_second in zip(ktrotters, alpha_com_seconds):
         # If alpha_com is given then sorted_pairs are not needed
         ktrotter_rep = r_second_order(
             sorted_pairs=[], time=ham_evo_time, error=ham_sim_error, alpha_com=alpha_com_second
         )
-        ktrotter_cx += ktrotter.controlled_gate_count(ham_evo_time, ktrotter_rep).get("cx", 0)
+        ktrotter_cx += nu * ktrotter.controlled_gate_count(ham_evo_time, ktrotter_rep).get("cx", 0)
 
     for taylor, lambd in zip(taylors, lambds):
         k = int(
@@ -108,12 +111,13 @@ def new_gate_counts(system_size, h_val, evolution_time, precision, gamma):
                 np.log(lambd * ham_evo_time / ham_sim_error) / np.log(np.log(lambd * ham_evo_time / ham_sim_error))
             )
         )
-
-        taylor_cx += taylor.simulation_gate_count(ham_evo_time, k).get("cx", 0)
+        print(f"Taylor:: evo_time={ham_evo_time} k={k}")
+        taylor_cx += nu * taylor.simulation_gate_count(ham_evo_time, k).get("cx", 0)
 
     for qdrift, lambd in zip(qdrifts, lambds):
         qdrift_rep = qdrift_count(lambd, ham_evo_time, ham_sim_error)
-        qdrift_cx += qdrift.simulation_gate_count(ham_evo_time, qdrift_rep).get("cx", 0)
+        print(f"QDrift:: evo_time={ham_evo_time} rep={qdrift_rep} sim_error={ham_sim_error} lambda={lambd}")
+        qdrift_cx += nu * qdrift.simulation_gate_count(ham_evo_time, qdrift_rep).get("cx", 0)
 
     return np.array([trotter_cx, ktrotter_cx, qdrift_cx, taylor_cx])
 

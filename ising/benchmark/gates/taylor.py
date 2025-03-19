@@ -218,7 +218,7 @@ class TaylorBenchmarkTime:
         k_probs /= np.sum(k_probs)
 
         # Could be heavy operation for large reps.
-        print(f"reps:{reps}, k_max:{k_max}")
+        print(f"Taylor:: reps:{reps}, k_max:{k_max}")
         for _ in range(split):
             k = np.random.choice(k_max + 1, p=k_probs)
 
@@ -247,7 +247,7 @@ class TaylorBenchmarkTime:
         reps = max(20, int(10 * np.ceil(t_bar) ** 2))
 
         if gate == "cx":
-            print(f"Taylor: Counting cx for reps:{reps}")
+            print(f"Taylor:: Counting cx for reps:{reps}")
             total = 0
             # Each rep has only one Pauli exponentiation.
             samples = np.random.choice(self.indices, p=self.coeffs, size=reps)
@@ -260,7 +260,7 @@ class TaylorBenchmarkTime:
             return 0
 
     def simulation_gate_count(self, time: float, k: int) -> dict[str, int]:
-        print(f"Taylor: Running gate count for time: {time}")
+        print(f"Taylor:: Running gate count for time: {time}")
         t_bar = time * self.lambd
         reps = max(20, int(10 * np.ceil(t_bar) ** 2))
 
@@ -274,10 +274,11 @@ class TaylorBenchmarkTime:
 
         counter = Counter()
         counter.add(dict(dqc.count_ops()))
+        print(f"Taylor:: counter: {counter.times(1)} reps: {reps}")
         return counter.times(reps // split)
 
     def controlled_gate_count(self, time: float, k: int) -> dict[str, int]:
-        print(f"Taylor: Running controlled gate count for time: {time}")
+        print(f"Taylor:: Running controlled gate count for time: {time}")
         t_bar = time * self.lambd
         reps = max(20, int(10 * np.ceil(t_bar) ** 2))
 
