@@ -24,12 +24,12 @@ parameters = {
     "m": 10,                     # Number of sub-environments
     "O_norm": 9.0,              # Norm of observable O
     "H_norm": 1.0,              # Norm of Hamiltonian H
-    "Gamma": 1.0,               # Gamma parameter
+    "Gamma": 24.0,               # Gamma parameter
     "beta_max": 1.0,            # Maximum beta
     "alpha_commutator_1st": 1.1114244518026801,  # Alpha commutator for 1st-order Trotter
     "alpha_commutator_2nd": 2.3818703023137573,  # Alpha commutator for 2nd-order Trotter
     "alpha_commutator_2k": 1.0,   # Alpha commutator for 2k-order Trotter
-    "epsilon_values": np.logspace(-1, -6, 50).tolist()  # Error values
+    "epsilon_values": np.logspace(-1, -6, 10).tolist()  # Error values
 }
 
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF", 
@@ -90,11 +90,15 @@ def generate_plots():
     
     ax = sns.lineplot(x=epsilon_values, y=single_ancilla_counts, label='Single-Ancilla LCU', color=COLORS[3], ax=ax)
     ax = sns.scatterplot(x=epsilon_values, y=single_ancilla_counts, color=COLORS[3], s=50, ax=ax)
+
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    plt.gca().invert_xaxis()
     
     plt.xscale('log')
     plt.yscale('log')
-    plt.xlabel('Error (epsilon)')
-    plt.ylabel('Gate Count')
+    plt.xlabel(r'Error ($\epsilon$)')
+    plt.ylabel(r'$\text{CNOT}$ Gate Count')
     plt.title('Gate Count vs Error (With Legend)')
     plt.tight_layout()
     plt.savefig(os.path.join(DIR, f"gate_count_vs_error_with_legend_{param_hash}.png"))
@@ -115,12 +119,17 @@ def generate_plots():
     
     ax = sns.lineplot(x=epsilon_values, y=single_ancilla_counts, color=COLORS[3], ax=ax)
     ax = sns.scatterplot(x=epsilon_values, y=single_ancilla_counts, color=COLORS[3], s=50, ax=ax)
+
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    plt.title('')
+    plt.gca().invert_xaxis()
     
     plt.xscale('log')
     plt.yscale('log')
-    plt.xlabel('Error (epsilon)')
-    plt.ylabel('Gate Count')
-    plt.title('Gate Count vs Error (Without Legend)')
+    plt.xlabel(r'Error ($\epsilon$)')
+    plt.ylabel(r'$\text{CNOT}$ Gate Count')
+    plt.title('')
     plt.tight_layout()
     plt.savefig(os.path.join(DIR, f"gate_count_vs_error_without_legend_{param_hash}.png"))
     plt.close()
