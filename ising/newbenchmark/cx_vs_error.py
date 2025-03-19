@@ -26,12 +26,12 @@ from ising.lindbladian.simulation.utils import load_interaction_hams
 from ising.utils import hache
 
 
-QUBIT_COUNT = 5
+QUBIT_COUNT = 10
 GAMMA = 1.0
 H_VAL = -0.1
-TIME = 4
-ERROR_RANGE = (-1, -6)
-ERROR_COUNT = 5
+TIME = 1
+ERROR_RANGE = (-1, -5)
+ERROR_COUNT = 10
 
 
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF", 
