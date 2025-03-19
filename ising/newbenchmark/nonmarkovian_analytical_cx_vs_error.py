@@ -29,7 +29,7 @@ parameters = {
     "epsilon": 1e-1,            # Fixed error value
     "alpha_commutator_1st": 1.1114244518026801,  # Alpha commutator for 1st-order Trotter
     "alpha_commutator_2nd": 2.3818703023137573,  # Alpha commutator for 2nd-order Trotter
-    "time_values": np.linspace(0.1, 100, 10).tolist()  # Time values
+    "time_values": np.linspace(0.1, 1000, 10).tolist()  # Time values
 }
 
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF", 
@@ -90,7 +90,7 @@ def generate_plots():
     single_ancilla_counts = [single_ancilla_lcu(t) for t in time_values]
 
     # Find the maximum value of the lower algorithms to set the y-axis limit
-    lower_algos_max = max(max(qdrift_counts), max(trotter_2nd_counts), max(single_ancilla_counts))
+    lower_algos_max = max(max(trotter_2nd_counts), max(single_ancilla_counts))
     
     # Add padding to the y-axis upper limit
     y_limit = lower_algos_max * 1.2
@@ -102,8 +102,8 @@ def generate_plots():
         
         # Plot 1st-order Trotter with clip_on=False to allow it to extend beyond the plot bounds
         ax.plot(time_values, trotter_counts, '-', color=COLORS[0], 
-                label='1st-order Trotter', zorder=1, clip_on=False)
-        ax.scatter(time_values, trotter_counts, color=COLORS[0], s=50, zorder=1, clip_on=False)
+                label='1st-order Trotter')
+        ax.scatter(time_values, trotter_counts, color=COLORS[0], s=50)
         
         # Plot other algorithms with higher zorder to ensure they're visible
         ax.plot(time_values, qdrift_counts, '-', color=COLORS[1], 
@@ -118,22 +118,18 @@ def generate_plots():
                 label='Single-Ancilla LCU', zorder=2)
         ax.scatter(time_values, single_ancilla_counts, color=COLORS[3], s=50, zorder=2)
         
-        ax.plot(time_values, trotter_2k_counts, '-', color=COLORS[4], 
-                label='2k-order Trotter', zorder=2)
-        ax.scatter(time_values, trotter_2k_counts, color=COLORS[4], s=50, zorder=2)
-
         # Set the y-axis limit to focus on lower algorithms
         plt.ylim(0, y_limit)
         
         # Add annotation to indicate 1st-order Trotter continues off-scale
-        last_visible_index = next((i for i, y in enumerate(trotter_counts) if y > y_limit), len(trotter_counts)) - 1
-        if last_visible_index >= 0:
-            last_visible_x = time_values[last_visible_index]
-            plt.annotate("1st-order Trotter\ncontinues off-scale", 
-                        xy=(last_visible_x, y_limit * 0.95), 
-                        xytext=(last_visible_x + 1, y_limit * 0.7),
-                        arrowprops=dict(facecolor='black', shrink=0.05, width=1.5, headwidth=8),
-                        fontsize=9)
+        # last_visible_index = next((i for i, y in enumerate(trotter_counts) if y > y_limit), len(trotter_counts)) - 1
+        # if last_visible_index >= 0:
+        #     last_visible_x = time_values[last_visible_index]
+        #     plt.annotate("1st-order Trotter\ncontinues off-scale", 
+        #                 xy=(last_visible_x, y_limit * 0.95), 
+        #                 xytext=(last_visible_x + 1, y_limit * 0.7),
+        #                 arrowprops=dict(facecolor='black', shrink=0.05, width=1.5, headwidth=8),
+        #                 fontsize=9)
         
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
