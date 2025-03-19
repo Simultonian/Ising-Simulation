@@ -1,6 +1,9 @@
-!!!!!!!!!!!Trotter: Running controlled gate count for time: 0.05
-starting circuit
-circuit complete
+error=0.1 nu=1600
+!!Commutators:: error=0.1 first=1.0718650000000611 second=2.2823322499942904
+!!Commutators:: error=0.1 first=1.051865000000051 second=2.2823322499942904
+!!Commutators:: error=0.1 first=1.051865000000058 second=2.2823322499942904
+!!Commutators:: error=0.1 first=1.051865000000065 second=2.2823322499942904
+!!Commutators:: error=0.1 first=1.0718650000000682 second=2.2823322499942904
 !Trotter: Running controlled gate count for time: 0.05
 starting circuit
 circuit complete
@@ -13,6 +16,9 @@ circuit complete
 !Trotter: Running controlled gate count for time: 0.05
 starting circuit
 circuit complete
+!Trotter: Running controlled gate count for time: 0.05
+starting circuit
+circuit complete
 !KTrotter: Running controlled gate count for time: 0.05
 starting circuit
 circuit complete
@@ -58,9 +64,12 @@ QDrift:: evo_time=0.05 rep=3932 sim_error=1.388888888888889e-06 lambda=1.045
 QDrift: Running gate count for time: 0.05
 QDrift:: evo_time=0.05 rep=3932 sim_error=1.388888888888889e-06 lambda=1.045
 QDrift: Running gate count for time: 0.05
-!!!!!!!!!!!Trotter: Running controlled gate count for time: 0.011856966576817519
-starting circuit
-circuit complete
+error=0.005623413251903491 nu=28452
+!!Commutators:: error=0.005623413251903491 first=1.016704631599147 second=2.064713305932166
+!!Commutators:: error=0.005623413251903491 first=1.0119618449684324 second=2.064713305932166
+!!Commutators:: error=0.005623413251903491 first=1.0119618449684253 second=2.064713305932166
+!!Commutators:: error=0.005623413251903491 first=1.0119618449684182 second=2.064713305932166
+!!Commutators:: error=0.005623413251903491 first=1.01670463159914 second=2.064713305932166
 !Trotter: Running controlled gate count for time: 0.011856966576817519
 starting circuit
 circuit complete
@@ -73,6 +82,9 @@ circuit complete
 !Trotter: Running controlled gate count for time: 0.011856966576817519
 starting circuit
 circuit complete
+!Trotter: Running controlled gate count for time: 0.011856966576817519
+starting circuit
+circuit complete
 !KTrotter: Running controlled gate count for time: 0.011856966576817519
 starting circuit
 circuit complete
@@ -118,9 +130,12 @@ QDrift:: evo_time=0.011856966576817519 rep=65392 sim_error=4.392124944861124e-09
 QDrift: Running gate count for time: 0.011856966576817519
 QDrift:: evo_time=0.011856966576817519 rep=65392 sim_error=4.392124944861124e-09 lambda=1.0106712699191358
 QDrift: Running gate count for time: 0.011856966576817519
-!!!!!!!!!!!Trotter: Running controlled gate count for time: 0.0028117078085831554
-starting circuit
-circuit complete
+error=0.00031622776601683794 nu=505964
+!!Commutators:: error=0.00031622776601683794 first=1.0039422885848772 second=2.0152216762774984
+!!Commutators:: error=0.00031622776601683794 first=1.0028176054614413 second=2.0152216762774984
+!!Commutators:: error=0.00031622776601683794 first=1.0028176054614413 second=2.0152216762774984
+!!Commutators:: error=0.00031622776601683794 first=1.0028176054614413 second=2.0152216762774984
+!!Commutators:: error=0.00031622776601683794 first=1.0039422885848772 second=2.0152216762774984
 !Trotter: Running controlled gate count for time: 0.0028117078085831554
 starting circuit
 circuit complete
@@ -133,6 +148,9 @@ circuit complete
 !Trotter: Running controlled gate count for time: 0.0028117078085831554
 starting circuit
 circuit complete
+!Trotter: Running controlled gate count for time: 0.0028117078085831554
+starting circuit
+circuit complete
 !KTrotter: Running controlled gate count for time: 0.0028117078085831554
 starting circuit
 circuit complete
@@ -178,9 +196,12 @@ QDrift:: evo_time=0.0028117078085831554 rep=1144189 sim_error=1.3888900572497382
 QDrift: Running gate count for time: 0.0028117078085831554
 QDrift:: evo_time=0.0028117078085831554 rep=1144189 sim_error=1.3888900572497382e-11 lambda=1.0025305370277249
 QDrift: Running gate count for time: 0.0028117078085831554
-!!!!!!!!!!!Trotter: Running controlled gate count for time: 0.0006667607236050521
-starting circuit
-circuit complete
+error=1.778279410038923e-05 nu=8997461
+!!Commutators:: error=1.778279410038923e-05 first=1.0009337966621565 second=2.0036026689518422
+!!Commutators:: error=1.778279410038923e-05 first=1.0006670923727263 second=2.0036026689518422
+!!Commutators:: error=1.778279410038923e-05 first=1.0006670923727192 second=2.0036026689518422
+!!Commutators:: error=1.778279410038923e-05 first=1.0006670923727121 second=2.0036026689518422
+!!Commutators:: error=1.778279410038923e-05 first=1.0009337966621494 second=2.0036026689518422
 !Trotter: Running controlled gate count for time: 0.0006667607236050521
 starting circuit
 circuit complete
@@ -193,6 +214,9 @@ circuit complete
 !Trotter: Running controlled gate count for time: 0.0006667607236050521
 starting circuit
 circuit complete
+!Trotter: Running controlled gate count for time: 0.0006667607236050521
+starting circuit
+circuit complete
 !KTrotter: Running controlled gate count for time: 0.0006667607236050521
 starting circuit
 circuit complete
@@ -238,9 +262,12 @@ QDrift:: evo_time=0.0006667607236050521 rep=20268592 sim_error=4.392052404904803
 QDrift: Running gate count for time: 0.0006667607236050521
 QDrift:: evo_time=0.0006667607236050521 rep=20268592 sim_error=4.392052404904803e-14 lambda=1.0006000846512446
 QDrift: Running gate count for time: 0.0006667607236050521
-!!!!!!!!!!!Trotter: Running controlled gate count for time: 0.00015811388300841897
-starting circuit
-circuit complete
+error=1e-06 nu=160000000
+!!Commutators:: error=1e-06 first=1.0002213780861862 second=2.0008539364691345
+!!Commutators:: error=1e-06 first=1.0001581325329791 second=2.0008539364691345
+!!Commutators:: error=1e-06 first=1.0001581325329791 second=2.0008539364691345
+!!Commutators:: error=1e-06 first=1.0001581325329791 second=2.0008539364691345
+!!Commutators:: error=1e-06 first=1.0002213780861862 second=2.0008539364691345
 !Trotter: Running controlled gate count for time: 0.00015811388300841897
 starting circuit
 circuit complete
@@ -253,6 +280,9 @@ circuit complete
 !Trotter: Running controlled gate count for time: 0.00015811388300841897
 starting circuit
 circuit complete
+!Trotter: Running controlled gate count for time: 0.00015811388300841897
+starting circuit
+circuit complete
 !KTrotter: Running controlled gate count for time: 0.00015811388300841897
 starting circuit
 circuit complete
@@ -298,5 +328,5 @@ QDrift:: evo_time=0.00015811388300841897 rep=360102466 sim_error=1.3888888888888
 QDrift: Running gate count for time: 0.00015811388300841897
 QDrift:: evo_time=0.00015811388300841897 rep=360102466 sim_error=1.3888888888888888e-16 lambda=1.0001423024947076
 QDrift: Running gate count for time: 0.00015811388300841897
-Plots saved with hash: 9e6f0515
+Plots saved with hash: ff33a0c1
 Parameters saved to: plots/newbenchmark/cx_vs_error/parameters.json

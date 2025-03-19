@@ -123,7 +123,7 @@ def new_gate_counts(system_size, h_val, evolution_time, precision, gamma):
 
 
 def test_main():
-    np.random.seed(42)
+    np.random.seed(100)
 
     os.makedirs(DIR, exist_ok=True)
     

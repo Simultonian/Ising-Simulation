@@ -182,6 +182,7 @@ class QDriftBenchmarkTime:
 
         counter = Counter()
         counter.add(dict(dqc.count_ops()))
+        print(f"QDrift:: counter: {counter.times(1)} reps: {reps}")
         return counter.times(reps // split)
 
     def circuit_gate_count(self, gate: str, time: int) -> int:
