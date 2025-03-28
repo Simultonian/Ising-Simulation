@@ -157,7 +157,7 @@ def test_main():
         trotter_counts.append(trotter_cx)
         ktrotter_counts.append(ktrotter_cx)
         qdrift_counts.append(qdrift_cx)
-        taylor_counts.append(taylor_cx ** 0.8)
+        taylor_counts.append(taylor_cx)
     
     # Generate a unique hash for the plots
     timestamp = int(sys_time.time())
@@ -165,35 +165,35 @@ def test_main():
     plot_hash = hashlib.md5(hash_input.encode()).hexdigest()[:8]
     
     # Create parameter dictionary for JSON
-    parameters = {
-        "plot_hash": plot_hash,
-        "qubit_count": QUBIT_COUNT,
-        "h_val": H_VAL,
-        "error": ERROR,
-        "gamma": GAMMA,
-        "time_range": TIME_RANGE,
-        "time_count": TIME_COUNT,
-        "timestamp": timestamp,
-        "results": {
-                "trotter": trotter_counts,
-                "ktrotter": ktrotter_counts,
-                "qdrift": qdrift_counts,
-                "taylor": taylor_counts,
-        }
-    }
+    # parameters = {
+    #     "plot_hash": plot_hash,
+    #     "qubit_count": QUBIT_COUNT,
+    #     "h_val": H_VAL,
+    #     "error": ERROR,
+    #     "gamma": GAMMA,
+    #     "time_range": TIME_RANGE,
+    #     "time_count": TIME_COUNT,
+    #     "timestamp": timestamp,
+    #     "results": {
+    #             "trotter": trotter_counts,
+    #             "ktrotter": ktrotter_counts,
+    #             "qdrift": qdrift_counts,
+    #             "taylor": taylor_counts,
+    #     }
+    # }
     
-    # Update parameters.json
-    json_path = os.path.join(DIR, "parameters.json")
-    if os.path.exists(json_path):
-        with open(json_path, 'r') as f:
-            all_params = json.load(f)
-    else:
-        all_params = {}
+    # # Update parameters.json
+    # json_path = os.path.join(DIR, "parameters.json")
+    # if os.path.exists(json_path):
+    #     with open(json_path, 'r') as f:
+    #         all_params = json.load(f)
+    # else:
+    #     all_params = {}
     
-    all_params[plot_hash] = parameters
+    # all_params[plot_hash] = parameters
     
-    with open(json_path, 'w') as f:
-        json.dump(all_params, f, indent=4)
+    # with open(json_path, 'w') as f:
+    #     json.dump(all_params, f, indent=4)
     
     # Create plots with overlapping line and scatter
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -239,7 +239,7 @@ def test_main():
     plt.savefig(os.path.join(DIR, f"{plot_hash}_no_legend.png"), dpi=300)
     
     print(f"Plots saved with hash: {plot_hash}")
-    print(f"Parameters saved to: {json_path}")
+    # print(f"Parameters saved to: {json_path}")
 
 if __name__ == "__main__":
     test_main()
