@@ -4,6 +4,8 @@ import os
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+import mpl_toolkits.axes_grid1.inset_locator as mpl_il
+
 
 """
 Quantum Collision Model Benchmarking Tool
@@ -30,7 +32,7 @@ parameters = {
     "alpha_commutator_1st": 1.1114244518026801,  # Alpha commutator for 1st-order Trotter
     "alpha_commutator_2nd": 2.3818703023137573,  # Alpha commutator for 2nd-order Trotter
     "delta_t": 0.001,
-    "error_values": [10 ** x for x in np.linspace(-3, -8, 10).tolist()]  # Required precision
+    "error_values": [10 ** x for x in np.linspace(-3, -6, 10).tolist()]  # Required precision
 }
 
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF", 
@@ -62,7 +64,6 @@ def generate_plots():
         circuit_depth = alpha_commutator_1st * ((beta_max ** 2) * (K ** 2) * O_norm * (delta_t ** 2)) / epsilon
         return circuit_depth + 2 * K
 
-
     def qdrift(epsilon):
         circuit_depth = ((beta_max**2) * (K ** 2) * O_norm * (delta_t ** 2)) / epsilon
         return circuit_depth + 2 * K
@@ -91,51 +92,55 @@ def generate_plots():
     def create_plot(with_legend=True):
         plt.figure(figsize=(10, 6))
         ax = plt.gca()
-        
-        # Plot 1st-order Trotter with clip_on=False to allow it to extend beyond the plot bounds
-        ax.plot(error_values, trotter_counts, '-', color=COLORS[0], 
-                label='1st-order Trotter')
-        # ax.scatter(time_values, trotter_counts, color=COLORS[0], s=50)
-        
-        # Plot other algorithms with higher zorder to ensure they're visible
-        ax.plot(error_values, qdrift_counts, '-', color=COLORS[1], 
-                label='QDrift', zorder=2)
-        # ax.scatter(time_values, qdrift_counts, color=COLORS[1], s=50, zorder=2)
-        
-        ax.plot(error_values, trotter_2nd_counts, '-', color=COLORS[2], 
-                label='2nd-order Trotter', zorder=2)
-        # ax.scatter(time_values, trotter_2nd_counts, color=COLORS[2], s=50, zorder=2)
-        
-        ax.plot(error_values, single_ancilla_counts, '-', color=COLORS[3], 
+
+        # Create inset axes in top-left corner (40% width, 30% height of main plot)
+        ax_inset = mpl_il.inset_axes(ax, 
+                           width="50%", 
+                           height="40%",
+                           bbox_to_anchor=(0.1, 0.1, 1, 1),  # Fine-tune this tuple to adjust position
+                           bbox_transform=ax.transAxes,
+                           loc=2,
+                           borderpad=0)
+
+        # Main plot: Single-Ancilla and 2nd-order Trotter
+        ax.plot(error_values, single_ancilla_counts, '-', color=COLORS[3],
                 label='Single-Ancilla LCU', zorder=2)
-        # ax.scatter(time_values, single_ancilla_counts, color=COLORS[3], s=50, zorder=2)
-        
-        # Set the y-axis limit to focus on lower algorithms
-        # plt.ylim(0, y_limit)
-        
-        # Add annotation to indicate 1st-order Trotter continues off-scale
-        # last_visible_index = next((i for i, y in enumerate(trotter_counts) if y > y_limit), len(trotter_counts)) - 1
-        # if last_visible_index >= 0:
-        #     last_visible_x = time_values[last_visible_index]
-        #     plt.annotate("1st-order Trotter\ncontinues off-scale", 
-        #                 xy=(last_visible_x, y_limit * 0.95), 
-        #                 xytext=(last_visible_x + 1, y_limit * 0.7),
-        #                 arrowprops=dict(facecolor='black', shrink=0.05, width=1.5, headwidth=8),
-        #                 fontsize=9)
-        
-        ax.spines["top"].set_visible(False)
-        ax.spines["right"].set_visible(False)
-        plt.yscale('log')
-        plt.xscale('log')
-        plt.gca().invert_xaxis()
-        
+        ax.plot(error_values, trotter_2nd_counts, '-', color=COLORS[2],
+                label='2nd-order Trotter', zorder=2)
+        ax.scatter(error_values, single_ancilla_counts, s=25, color=COLORS[3],
+                zorder=2)
+        ax.scatter(error_values, trotter_2nd_counts, s=25, color=COLORS[2],
+                zorder=2)
+
+        # Inset plot: 1st-order Trotter and QDrift
+        ax_inset.plot(error_values, trotter_counts, '-', color=COLORS[0],
+                    label='1st-order Trotter')
+        ax_inset.plot(error_values, qdrift_counts, '-', color=COLORS[1],
+                    label='QDrift', zorder=2)
+        ax_inset.scatter(error_values, trotter_counts, s=25, color=COLORS[0])
+        ax_inset.scatter(error_values, qdrift_counts, s=25, color=COLORS[1])
+
+        # Shared formatting
+        for axis in [ax, ax_inset]:
+            axis.set_yscale('log')
+            axis.set_xscale('log')
+            axis.invert_xaxis()
+            axis.spines["top"].set_visible(False)
+            axis.spines["right"].set_visible(False)
+
+        # Inset-specific adjustments
+        ax_inset.tick_params(axis='both', labelsize=8)
+
         # Linear scale for y-axis as requested
-        plt.xlabel(r'Error ($\epsilon$)')
-        plt.ylabel(r'$\text{CNOT}$ Gate Count')
+        ax.set_xlabel(r'Error ($\epsilon$)')
+        ax.set_ylabel(r'$\text{CNOT}$ Gate Count')
         
         if with_legend:
+            # Main plot legend
+            ax.legend(loc='upper right')
+            ax_inset.legend(fontsize=8, frameon=False)
             plt.title('Gate Count vs Time (With Legend)')
-            plt.legend()
+            # plt.legend()
         else:
             plt.title('')
         

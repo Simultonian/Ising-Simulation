@@ -4,7 +4,7 @@ import seaborn as sns
 import os
 import json
 import hashlib
-import time
+import time as sys_time
 
 from qiskit.quantum_info import SparsePauliOp
 from ising.hamiltonian import Hamiltonian, parametrized_ising_power, parametrized_ising
@@ -29,19 +29,19 @@ from ising.utils import hache
 QUBIT_COUNT = 10
 GAMMA = 1.0
 H_VAL = -0.1
-TIME = 1
-ERROR_RANGE = (-1, -5)
-ERROR_COUNT = 10
+ERROR = 0.1
+TIME_RANGE = (1, 50)
+TIME_COUNT = 10
 
 
 COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF", 
           "#3ABEFF", "#FFB743", "#00CC99", "#FF6B6B", "#845EC2", 
           "#F9F871", "#00C9A7", "#C34A36", "#4ECDC4", "#FF9671", 
           "#FFC75F", "#008080", "#D65DB1", "#4D8076", "#FF8066"]
-DIR = "plots/newbenchmark/cx_vs_error/"
+DIR = "plots/newbenchmark/cx_vs_time/"
 
 
-@hache(blob_type=np.ndarray, max_size=1000)
+# @hache(blob_type=np.ndarray, max_size=1000)
 def new_gate_counts(system_size, h_val, evolution_time, precision, gamma):
     nu = max(1, int(10 * (evolution_time ** 2) / precision))
     print(f"error={precision} nu={nu}")
@@ -78,7 +78,7 @@ def new_gate_counts(system_size, h_val, evolution_time, precision, gamma):
         )
         alpha_com_seconds.append(alpha_com_second)
 
-        print(f"Commutators:: error={precision} first={alpha_com_first} second={alpha_com_second}")
+        # print(f"Commutators:: error={precision} first={alpha_com_first} second={alpha_com_second}")
 
 
         lambds.append(np.sum(np.abs(ham_sparse.coeffs)))
@@ -96,14 +96,18 @@ def new_gate_counts(system_size, h_val, evolution_time, precision, gamma):
         trotter_rep = r_first_order(
             sorted_pairs=[], time=ham_evo_time, error=ham_sim_error, alpha_com=alpha_com_first
         )
-        trotter_cx += nu * trotter.controlled_gate_count(ham_evo_time, trotter_rep).get("cx", 0)
+        count_trotter = trotter.simulation_gate_count(ham_evo_time, trotter_rep).get("cx", 0)
+        # print(f"Trotter:: evo_time={ham_evo_time} rep={trotter_rep} sim_error={ham_sim_error} lambda={alpha_com_first} count={count_trotter}")
+        trotter_cx += nu * count_trotter
 
     for ktrotter, alpha_com_second in zip(ktrotters, alpha_com_seconds):
         # If alpha_com is given then sorted_pairs are not needed
         ktrotter_rep = r_second_order(
             sorted_pairs=[], time=ham_evo_time, error=ham_sim_error, alpha_com=alpha_com_second
         )
-        ktrotter_cx += nu * ktrotter.controlled_gate_count(ham_evo_time, ktrotter_rep).get("cx", 0)
+        count_ktrotter = ktrotter.simulation_gate_count(ham_evo_time, ktrotter_rep).get("cx", 0)
+        print(f"KTrotter:: evo_time={ham_evo_time} rep={ktrotter_rep} sim_error={ham_sim_error} lambda={alpha_com_second} count={count_ktrotter}")
+        ktrotter_cx += nu * count_ktrotter
 
     for taylor, lambd in zip(taylors, lambds):
         k = int(
@@ -111,13 +115,15 @@ def new_gate_counts(system_size, h_val, evolution_time, precision, gamma):
                 np.log(lambd * ham_evo_time / ham_sim_error) / np.log(np.log(lambd * ham_evo_time / ham_sim_error))
             )
         )
-        print(f"Taylor:: evo_time={ham_evo_time} k={k}")
-        taylor_cx += nu * taylor.simulation_gate_count(ham_evo_time, k).get("cx", 0)
+        count_taylor = taylor.controlled_gate_count(ham_evo_time, k).get("cx", 0)
+        print(f"Taylor:: evo_time={ham_evo_time} k={k} sim_error={ham_sim_error} lambda={lambd} count={count_taylor}")
+        taylor_cx += nu * count_taylor
 
     for qdrift, lambd in zip(qdrifts, lambds):
         qdrift_rep = qdrift_count(lambd, ham_evo_time, ham_sim_error)
-        print(f"QDrift:: evo_time={ham_evo_time} rep={qdrift_rep} sim_error={ham_sim_error} lambda={lambd}")
-        qdrift_cx += nu * qdrift.controlled_gate_count(ham_evo_time, qdrift_rep).get("cx", 0)
+        qdrift_count_val = qdrift.controlled_gate_count(ham_evo_time, qdrift_rep).get("cx", 0)
+        # print(f"QDrift:: evo_time={ham_evo_time} rep={qdrift_rep} sim_error={ham_sim_error} lambda={lambd} count={qdrift_count_val}")
+        qdrift_cx += nu * qdrift_count_val
 
     return np.array([trotter_cx, ktrotter_cx, qdrift_cx, taylor_cx])
 
@@ -128,7 +134,7 @@ def test_main():
     os.makedirs(DIR, exist_ok=True)
     
     # Generate errors
-    errors = [10 ** x for x in np.linspace(ERROR_RANGE[0], ERROR_RANGE[1], ERROR_COUNT)]
+    times = [x for x in np.linspace(TIME_RANGE[0], TIME_RANGE[1], TIME_COUNT)]
     
     # Lists to store gate counts
     trotter_counts = []
@@ -137,12 +143,12 @@ def test_main():
     taylor_counts = []
     
     # Collect data
-    for error in errors:
+    for time in times:
         result_array = new_gate_counts(
             system_size=QUBIT_COUNT, 
             h_val=H_VAL, 
-            evolution_time=TIME, 
-            precision=error, 
+            evolution_time=time, 
+            precision=ERROR, 
             gamma=GAMMA
         )
         trotter_cx, ktrotter_cx, qdrift_cx, taylor_cx = result_array[0], result_array[1], result_array[2], result_array[3]
@@ -153,8 +159,8 @@ def test_main():
         taylor_counts.append(taylor_cx)
     
     # Generate a unique hash for the plots
-    timestamp = int(time.time())
-    hash_input = f"{timestamp}_{QUBIT_COUNT}_{H_VAL}_{TIME}_{GAMMA}"
+    timestamp = int(sys_time.time())
+    hash_input = f"{timestamp}_{QUBIT_COUNT}_{H_VAL}_{ERROR}_{GAMMA}"
     plot_hash = hashlib.md5(hash_input.encode()).hexdigest()[:8]
     
     # Create parameter dictionary for JSON
@@ -162,10 +168,10 @@ def test_main():
         "plot_hash": plot_hash,
         "qubit_count": QUBIT_COUNT,
         "h_val": H_VAL,
-        "evolution_time": TIME,
+        "error": ERROR,
         "gamma": GAMMA,
-        "error_range": ERROR_RANGE,
-        "error_count": ERROR_COUNT,
+        "time_range": TIME_RANGE,
+        "time_count": TIME_COUNT,
         "timestamp": timestamp,
         "results": {
                 "trotter": trotter_counts,
@@ -192,20 +198,20 @@ def test_main():
     fig, ax = plt.subplots(figsize=(10, 6))
     
     # Line and scatter plots overlapping
-    ax = sns.lineplot(x=errors, y=trotter_counts, label='Trotter', color=COLORS[0], ax=ax)
-    ax = sns.scatterplot(x=errors, y=trotter_counts, color=COLORS[0], s=50, ax=ax)
+    ax = sns.lineplot(x=times, y=trotter_counts, label='Trotter', color=COLORS[0], ax=ax)
+    ax = sns.scatterplot(x=times, y=trotter_counts, color=COLORS[0], s=50, ax=ax)
     
-    ax = sns.lineplot(x=errors, y=ktrotter_counts, label='K-Trotter', color=COLORS[1], ax=ax)
-    ax = sns.scatterplot(x=errors, y=ktrotter_counts, color=COLORS[1], s=50, ax=ax)
+    ax = sns.lineplot(x=times, y=ktrotter_counts, label='K-Trotter', color=COLORS[1], ax=ax)
+    ax = sns.scatterplot(x=times, y=ktrotter_counts, color=COLORS[1], s=50, ax=ax)
     
-    ax = sns.lineplot(x=errors, y=qdrift_counts, label='QDrift', color=COLORS[2], ax=ax)
-    ax = sns.scatterplot(x=errors, y=qdrift_counts, color=COLORS[2], s=50, ax=ax)
+    ax = sns.lineplot(x=times, y=qdrift_counts, label='QDrift', color=COLORS[2], ax=ax)
+    ax = sns.scatterplot(x=times, y=qdrift_counts, color=COLORS[2], s=50, ax=ax)
     
-    ax = sns.lineplot(x=errors, y=taylor_counts, label='Taylor', color=COLORS[3], ax=ax)
-    ax = sns.scatterplot(x=errors, y=taylor_counts, color=COLORS[3], s=50, ax=ax)
+    ax = sns.lineplot(x=times, y=taylor_counts, label='Taylor', color=COLORS[3], ax=ax)
+    ax = sns.scatterplot(x=times, y=taylor_counts, color=COLORS[3], s=50, ax=ax)
     
     # Set log scales
-    plt.xscale('log')
+    # plt.xscale('log')
     plt.yscale('log')
     
     # Remove the top and right border
@@ -213,11 +219,11 @@ def test_main():
     ax.spines["right"].set_visible(False)
     
     # Add labels
-    plt.xlabel('Error', fontsize=14)
+    plt.xlabel('Evolution time', fontsize=14)
     plt.ylabel('CNOT gate counts', fontsize=14)
-    plt.title(f'CX Gate Count vs Error (n={QUBIT_COUNT}, h={H_VAL}, t={TIME}, γ={GAMMA})')
+    plt.title(f'CX Gate Count vs Error (n={QUBIT_COUNT}, h={H_VAL}, error={ERROR}, γ={GAMMA})')
     # plt.grid(True, which="both", ls="--", alpha=0.3)
-    plt.gca().invert_xaxis()
+    # plt.gca().invert_xaxis()
     plt.tight_layout()
     plt.tick_params(axis='both', which='major', labelsize=12)
 
@@ -233,8 +239,6 @@ def test_main():
     
     print(f"Plots saved with hash: {plot_hash}")
     print(f"Parameters saved to: {json_path}")
-
-
 
 if __name__ == "__main__":
     test_main()

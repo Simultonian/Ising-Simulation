@@ -44,7 +44,7 @@ class KTrotterBenchmarkTime:
         """
         circuit = QuantumCircuit(self.ham.num_qubits)
 
-        print("creating circuit")
+        # print("creating circuit")
 
         evo = PauliEvolutionGate(
             self.ham.sparse_repr, time=time / reps, synthesis=self.synth
@@ -52,7 +52,7 @@ class KTrotterBenchmarkTime:
         circuit.append(evo, range(evo.num_qubits))
 
         # Could be heavy operation for large reps.
-        print("created circuit")
+        # print("created circuit")
         circuit = circuit.repeat(reps)
         return circuit
     
@@ -62,7 +62,7 @@ class KTrotterBenchmarkTime:
         Get the simulation circuit when controlled
         """
 
-        print("starting circuit")
+        # print("starting circuit")
         counter = Counter()
 
         # Coeff remains same for the system
@@ -90,7 +90,7 @@ class KTrotterBenchmarkTime:
             result = {"total": counter.count, "individual": data}
             if pauli_counter is not None:
                 pauli_counter.set_control_data(result)
-            print("circuit complete")
+            # print("circuit complete")
         else:
             print("Loaded from Pauli Counter")
             if pauli_counter is not None:
@@ -105,7 +105,7 @@ class KTrotterBenchmarkTime:
         Counts the gates analytically rather than via decomposition.
         """
         if gate == "cx":
-            print(f"Trotter: Counting cx for reps:{reps}")
+            # print(f"Trotter: Counting cx for reps:{reps}")
             total = 0
             # Moving ahead with terms
             for pauli in self.ham.paulis:
@@ -122,7 +122,7 @@ class KTrotterBenchmarkTime:
             return 1
 
     def simulation_gate_count(self, time: float, reps: int) -> dict[str, int]:
-        print(f"KTrotter: Running gate count for time: {time}")
+        # print(f"KTrotter: Running gate count for time: {time}")
 
         if reps < SPLIT_SIZE:
             split = 1
@@ -134,10 +134,11 @@ class KTrotterBenchmarkTime:
 
         counter = Counter()
         counter.add(dict(dqc.count_ops()))
+        print(f"KTrotter: reps:{reps} split:{split} count:{counter.times(1)}")
         return counter.times(reps // split)
 
     def controlled_gate_count(self, time: float, reps: int) -> dict[str, int]:
-        print(f"KTrotter: Running controlled gate count for time: {time}")
+        # print(f"KTrotter: Running controlled gate count for time: {time}")
 
         if reps < SPLIT_SIZE:
             split = 1

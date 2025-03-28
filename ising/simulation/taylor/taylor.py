@@ -129,11 +129,11 @@ class Taylor:
         obs_norm = 1
         self.cap_k = get_cap_k(t_bar, obs_norm=obs_norm, eps=self.error)
 
-        print(f"Computing decomposition for t_bar={t_bar} t={max_time} k={self.cap_k}")
+        # print(f"Computing decomposition for t_bar={t_bar} t={max_time} k={self.cap_k}")
         self.kth_paulis, self.kth_exps, self.kth_probs = sum_decomposition_k_fold(
             self.paulis, self.coeffs, self.cap_k
         )
-        print("Decomposition complete")
+        # print("Decomposition complete")
 
     def substitute_obs(self, obs: Hamiltonian):
         obs_x = SparsePauliOp(["X"], np.array([1.0]))

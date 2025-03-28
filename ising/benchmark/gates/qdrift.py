@@ -160,7 +160,7 @@ class QDriftBenchmarkTime:
         Calculates the gate depth for given time
         """
         evolution_time = self.lambd * time / reps
-        print(f"QDrift:: evolution_time={evolution_time} lambda={self.lambd} time={time} reps={reps}")
+        # print(f"QDrift:: evolution_time={evolution_time} lambda={self.lambd} time={time} reps={reps}")
         circuit = QuantumCircuit(self.ham.num_qubits)
 
         samples = np.random.choice(self.indices, p=self.coeffs / self.lambd, size=reps)
@@ -173,7 +173,7 @@ class QDriftBenchmarkTime:
         return circuit
 
     def simulation_gate_count(self, time: float, reps: int) -> dict[str, int]:
-        print(f"QDrift:: Running gate count for time={time} reps={reps}")
+        # print(f"QDrift:: Running gate count for time={time} reps={reps}")
         if reps < SPLIT_SIZE:
             split = 1
         else:
@@ -184,7 +184,7 @@ class QDriftBenchmarkTime:
 
         counter = Counter()
         counter.add(dict(dqc.count_ops()))
-        print(f"QDrift:: counter: {counter.times(1)} reps: {reps}")
+        # print(f"QDrift:: counter: {counter.times(1)} reps: {reps}")
         return counter.times(reps // split)
 
     def circuit_gate_count(self, gate: str, time: int) -> int:
@@ -195,7 +195,7 @@ class QDriftBenchmarkTime:
         reps = max(20, int(10 * np.ceil(t_bar) ** 2))
 
         if gate == "cx":
-            print(f"QDrift: Counting cx for reps:{reps}")
+            # print(f"QDrift: Counting cx for reps:{reps}")
             total = 0
             # Each rep has only one Pauli exponentiation.
             samples = np.random.choice(
@@ -210,7 +210,7 @@ class QDriftBenchmarkTime:
             return 0
 
     def controlled_gate_count(self, time: float, reps: int) -> dict[str, int]:
-        print(f"QDrift:: Running controlled gate count for time={time}")
+        # print(f"QDrift:: Running controlled gate count for time={time}")
         if reps < SPLIT_SIZE:
             split = 1
         else:

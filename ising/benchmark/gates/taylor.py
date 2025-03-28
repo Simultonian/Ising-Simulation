@@ -211,31 +211,30 @@ class TaylorBenchmarkTime:
         """
         Calculates the gate depth for given time
         """
-        circuit = QuantumCircuit(self.ham.num_qubits)
-
         alphas = get_alphas(t_bar, k_max, reps)
         k_probs = np.abs(alphas)
         k_probs /= np.sum(k_probs)
 
+        big_circ = QuantumCircuit(self.ham.num_qubits + 1)
         # Could be heavy operation for large reps.
         print(f"Taylor:: reps:{reps}, k_max:{k_max}")
         for _ in range(split):
-            k = np.random.choice(k_max + 1, p=k_probs)
+            for _ in range(2):
+                circuit = QuantumCircuit(self.ham.num_qubits)
+                k = np.random.choice(k_max + 1, p=k_probs)
 
-            samples = np.random.choice(self.indices, p=self.coeffs, size=k + 1)
+                samples = np.random.choice(self.indices, p=self.coeffs, size=k + 1)
 
-            for sample in samples[:-1]:
-                pauli = self.paulis[sample]
-                circuit.append(PauliGate(pauli.to_label()), range(self.num_qubits))
+                for sample in samples[:-1]:
+                    pauli = self.paulis[sample]
+                    circuit.append(PauliGate(pauli.to_label()), range(self.num_qubits))
 
-            evo = PauliEvolutionGate(
-                self.paulis[samples[-1]], time=theta_m(t_bar, reps, k)
-            )
-            circuit.append(evo, range(evo.num_qubits))
-
-        big_circ = QuantumCircuit(self.ham.num_qubits + 1)
-        controlled_gate = circuit.to_gate().control(1)
-        big_circ.append(controlled_gate, range(self.ham.num_qubits + 1))
+                evo = PauliEvolutionGate(
+                    self.paulis[samples[-1]], time=theta_m(t_bar, reps, k)
+                )
+                circuit.append(evo, range(evo.num_qubits))
+                controlled_gate = circuit.to_gate().control(1)
+                big_circ.append(controlled_gate, range(self.ham.num_qubits + 1))
 
         return big_circ
 
@@ -287,11 +286,11 @@ class TaylorBenchmarkTime:
         else:
             split = SPLIT_SIZE
 
-        big_circ = QuantumCircuit(self.ham.num_qubits + 1)
+        big_circ = QuantumCircuit(self.ham.num_qubits + 2)
         controlled_gate = (
             self.simulation_circuit(time, split, k, split).to_gate().control(1)
         )
-        big_circ.append(controlled_gate, range(self.ham.num_qubits + 1))
+        big_circ.append(controlled_gate, range(self.ham.num_qubits + 2))
         dqc = self.decomposer.decompose(big_circ)
 
         counter = Counter()
