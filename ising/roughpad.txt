@@ -1,712 +1,841 @@
-error=0.1 nu=100
-!!!!!!!!!!!!!!!!!!!!Trotter: Running gate count for time: 0.1
-OrderedDict({'u3': 19, 'cx': 18})
-Trotter: Running gate count for time: 0.1
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.1
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.1
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.1
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.1
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.1
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.1
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.1
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.1
-OrderedDict({'u3': 19, 'cx': 18})
-KTrotter: reps:16.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.1 rep=16.0 sim_error=1.1111111111111112e-05 lambda=2.661999999984886 count=576.0
-!KTrotter: reps:16.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.1 rep=16.0 sim_error=1.1111111111111112e-05 lambda=2.661999999984886 count=576.0
-!KTrotter: reps:16.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.1 rep=16.0 sim_error=1.1111111111111112e-05 lambda=2.661999999984886 count=576.0
-!KTrotter: reps:16.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.1 rep=16.0 sim_error=1.1111111111111112e-05 lambda=2.661999999984886 count=576.0
-!KTrotter: reps:16.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.1 rep=16.0 sim_error=1.1111111111111112e-05 lambda=2.661999999984886 count=576.0
-!KTrotter: reps:16.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.1 rep=16.0 sim_error=1.1111111111111112e-05 lambda=2.661999999984886 count=576.0
-!KTrotter: reps:16.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.1 rep=16.0 sim_error=1.1111111111111112e-05 lambda=2.661999999984886 count=576.0
-!KTrotter: reps:16.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.1 rep=16.0 sim_error=1.1111111111111112e-05 lambda=2.661999999984886 count=576.0
-!KTrotter: reps:16.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.1 rep=16.0 sim_error=1.1111111111111112e-05 lambda=2.661999999984886 count=576.0
-!KTrotter: reps:16.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.1 rep=16.0 sim_error=1.1111111111111112e-05 lambda=2.661999999984886 count=576.0
-Taylor:: Running controlled gate count for time: 0.1
-Taylor:: reps:1, k_max:4
-Taylor:: evo_time=0.1 k=4 sim_error=1.1111111111111112e-05 lambda=1.1 count=720
-Taylor:: Running controlled gate count for time: 0.1
-Taylor:: reps:1, k_max:4
-Taylor:: evo_time=0.1 k=4 sim_error=1.1111111111111112e-05 lambda=1.1 count=720
-Taylor:: Running controlled gate count for time: 0.1
-Taylor:: reps:1, k_max:4
-Taylor:: evo_time=0.1 k=4 sim_error=1.1111111111111112e-05 lambda=1.1 count=720
-Taylor:: Running controlled gate count for time: 0.1
-Taylor:: reps:1, k_max:4
-Taylor:: evo_time=0.1 k=4 sim_error=1.1111111111111112e-05 lambda=1.1 count=720
-Taylor:: Running controlled gate count for time: 0.1
-Taylor:: reps:1, k_max:4
-Taylor:: evo_time=0.1 k=4 sim_error=1.1111111111111112e-05 lambda=1.1 count=720
-Taylor:: Running controlled gate count for time: 0.1
-Taylor:: reps:1, k_max:4
-Taylor:: evo_time=0.1 k=4 sim_error=1.1111111111111112e-05 lambda=1.1 count=720
-Taylor:: Running controlled gate count for time: 0.1
-Taylor:: reps:1, k_max:4
-Taylor:: evo_time=0.1 k=4 sim_error=1.1111111111111112e-05 lambda=1.1 count=720
-Taylor:: Running controlled gate count for time: 0.1
-Taylor:: reps:1, k_max:4
-Taylor:: evo_time=0.1 k=4 sim_error=1.1111111111111112e-05 lambda=1.1 count=2840
-Taylor:: Running controlled gate count for time: 0.1
-Taylor:: reps:1, k_max:4
-Taylor:: evo_time=0.1 k=4 sim_error=1.1111111111111112e-05 lambda=1.1 count=720
-Taylor:: Running controlled gate count for time: 0.1
-Taylor:: reps:1, k_max:4
-Taylor:: evo_time=0.1 k=4 sim_error=1.1111111111111112e-05 lambda=1.1 count=2840
-error=0.1 nu=4153
-!!!!!!!!!!!!!!!!!!!!Trotter: Running gate count for time: 0.03939233970900543
-OrderedDict({'u3': 19, 'cx': 18})
-Trotter: Running gate count for time: 0.03939233970900543
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.03939233970900543
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.03939233970900543
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.03939233970900543
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.03939233970900543
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.03939233970900543
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.03939233970900543
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.03939233970900543
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.03939233970900543
-OrderedDict({'u3': 19, 'cx': 18})
-KTrotter: reps:23.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.03939233970900543 rep=23.0 sim_error=2.675442116809803e-07 lambda=2.245786831467143 count=828.0
-!KTrotter: reps:23.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.03939233970900543 rep=23.0 sim_error=2.675442116809803e-07 lambda=2.245786831467143 count=828.0
-!KTrotter: reps:23.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.03939233970900543 rep=23.0 sim_error=2.675442116809803e-07 lambda=2.245786831467143 count=828.0
-!KTrotter: reps:23.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.03939233970900543 rep=23.0 sim_error=2.675442116809803e-07 lambda=2.245786831467143 count=828.0
-!KTrotter: reps:23.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.03939233970900543 rep=23.0 sim_error=2.675442116809803e-07 lambda=2.245786831467143 count=828.0
-!KTrotter: reps:23.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.03939233970900543 rep=23.0 sim_error=2.675442116809803e-07 lambda=2.245786831467143 count=828.0
-!KTrotter: reps:23.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.03939233970900543 rep=23.0 sim_error=2.675442116809803e-07 lambda=2.245786831467143 count=828.0
-!KTrotter: reps:23.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.03939233970900543 rep=23.0 sim_error=2.675442116809803e-07 lambda=2.245786831467143 count=828.0
-!KTrotter: reps:23.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.03939233970900543 rep=23.0 sim_error=2.675442116809803e-07 lambda=2.245786831467143 count=828.0
-!KTrotter: reps:23.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.03939233970900543 rep=23.0 sim_error=2.675442116809803e-07 lambda=2.245786831467143 count=828.0
-Taylor:: Running controlled gate count for time: 0.03939233970900543
-Taylor:: reps:1, k_max:4
-Taylor:: evo_time=0.03939233970900543 k=4 sim_error=2.675442116809803e-07 lambda=1.0393923397090055 count=720
-Taylor:: Running controlled gate count for time: 0.03939233970900543
-Taylor:: reps:1, k_max:4
-Taylor:: evo_time=0.03939233970900543 k=4 sim_error=2.675442116809803e-07 lambda=1.0393923397090055 count=720
-Taylor:: Running controlled gate count for time: 0.03939233970900543
-Taylor:: reps:1, k_max:4
-Taylor:: evo_time=0.03939233970900543 k=4 sim_error=2.675442116809803e-07 lambda=1.0393923397090055 count=720
-Taylor:: Running controlled gate count for time: 0.03939233970900543
-Taylor:: reps:1, k_max:4
-Taylor:: evo_time=0.03939233970900543 k=4 sim_error=2.675442116809803e-07 lambda=1.0393923397090055 count=720
-Taylor:: Running controlled gate count for time: 0.03939233970900543
-Taylor:: reps:1, k_max:4
-Taylor:: evo_time=0.03939233970900543 k=4 sim_error=2.675442116809803e-07 lambda=1.0393923397090055 count=720
-Taylor:: Running controlled gate count for time: 0.03939233970900543
-Taylor:: reps:1, k_max:4
-Taylor:: evo_time=0.03939233970900543 k=4 sim_error=2.675442116809803e-07 lambda=1.0393923397090055 count=720
-Taylor:: Running controlled gate count for time: 0.03939233970900543
-Taylor:: reps:1, k_max:4
-Taylor:: evo_time=0.03939233970900543 k=4 sim_error=2.675442116809803e-07 lambda=1.0393923397090055 count=720
-Taylor:: Running controlled gate count for time: 0.03939233970900543
-Taylor:: reps:1, k_max:4
-Taylor:: evo_time=0.03939233970900543 k=4 sim_error=2.675442116809803e-07 lambda=1.0393923397090055 count=720
-Taylor:: Running controlled gate count for time: 0.03939233970900543
-Taylor:: reps:1, k_max:4
-Taylor:: evo_time=0.03939233970900543 k=4 sim_error=2.675442116809803e-07 lambda=1.0393923397090055 count=720
-Taylor:: Running controlled gate count for time: 0.03939233970900543
-Taylor:: reps:1, k_max:4
-Taylor:: evo_time=0.03939233970900543 k=4 sim_error=2.675442116809803e-07 lambda=1.0393923397090055 count=720
-error=0.1 nu=14134
-!!!!!!!!!!!!!!!!!!!!Trotter: Running gate count for time: 0.02900267731463893
-OrderedDict({'u3': 19, 'cx': 18})
-Trotter: Running gate count for time: 0.02900267731463893
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.02900267731463893
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.02900267731463893
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.02900267731463893
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.02900267731463893
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.02900267731463893
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.02900267731463893
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.02900267731463893
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.02900267731463893
-OrderedDict({'u3': 19, 'cx': 18})
-KTrotter: reps:27.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02900267731463893 rep=27.0 sim_error=7.861264405767023e-08 lambda=2.1791117871349854 count=972.0
-!KTrotter: reps:27.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02900267731463893 rep=27.0 sim_error=7.861264405767023e-08 lambda=2.1791117871349854 count=972.0
-!KTrotter: reps:27.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02900267731463893 rep=27.0 sim_error=7.861264405767023e-08 lambda=2.1791117871349854 count=972.0
-!KTrotter: reps:27.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02900267731463893 rep=27.0 sim_error=7.861264405767023e-08 lambda=2.1791117871349854 count=972.0
-!KTrotter: reps:27.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02900267731463893 rep=27.0 sim_error=7.861264405767023e-08 lambda=2.1791117871349854 count=972.0
-!KTrotter: reps:27.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02900267731463893 rep=27.0 sim_error=7.861264405767023e-08 lambda=2.1791117871349854 count=972.0
-!KTrotter: reps:27.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02900267731463893 rep=27.0 sim_error=7.861264405767023e-08 lambda=2.1791117871349854 count=972.0
-!KTrotter: reps:27.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02900267731463893 rep=27.0 sim_error=7.861264405767023e-08 lambda=2.1791117871349854 count=972.0
-!KTrotter: reps:27.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02900267731463893 rep=27.0 sim_error=7.861264405767023e-08 lambda=2.1791117871349854 count=972.0
-!KTrotter: reps:27.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02900267731463893 rep=27.0 sim_error=7.861264405767023e-08 lambda=2.1791117871349854 count=972.0
-Taylor:: Running controlled gate count for time: 0.02900267731463893
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02900267731463893 k=5 sim_error=7.861264405767023e-08 lambda=1.0290026773146388 count=720
-Taylor:: Running controlled gate count for time: 0.02900267731463893
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02900267731463893 k=5 sim_error=7.861264405767023e-08 lambda=1.0290026773146388 count=720
-Taylor:: Running controlled gate count for time: 0.02900267731463893
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02900267731463893 k=5 sim_error=7.861264405767023e-08 lambda=1.0290026773146388 count=720
-Taylor:: Running controlled gate count for time: 0.02900267731463893
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02900267731463893 k=5 sim_error=7.861264405767023e-08 lambda=1.0290026773146388 count=720
-Taylor:: Running controlled gate count for time: 0.02900267731463893
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02900267731463893 k=5 sim_error=7.861264405767023e-08 lambda=1.0290026773146388 count=720
-Taylor:: Running controlled gate count for time: 0.02900267731463893
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02900267731463893 k=5 sim_error=7.861264405767023e-08 lambda=1.0290026773146388 count=720
-Taylor:: Running controlled gate count for time: 0.02900267731463893
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02900267731463893 k=5 sim_error=7.861264405767023e-08 lambda=1.0290026773146388 count=720
-Taylor:: Running controlled gate count for time: 0.02900267731463893
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02900267731463893 k=5 sim_error=7.861264405767023e-08 lambda=1.0290026773146388 count=720
-Taylor:: Running controlled gate count for time: 0.02900267731463893
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02900267731463893 k=5 sim_error=7.861264405767023e-08 lambda=1.0290026773146388 count=720
-Taylor:: Running controlled gate count for time: 0.02900267731463893
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02900267731463893 k=5 sim_error=7.861264405767023e-08 lambda=1.0290026773146388 count=720
-error=0.1 nu=30044
-!!!!!!!!!!!!!!!!!!!!Trotter: Running gate count for time: 0.02401940072970952
-OrderedDict({'u3': 19, 'cx': 18})
-Trotter: Running gate count for time: 0.02401940072970952
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.02401940072970952
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.02401940072970952
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.02401940072970952
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.02401940072970952
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.02401940072970952
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.02401940072970952
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.02401940072970952
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.02401940072970952
-OrderedDict({'u3': 19, 'cx': 18})
-KTrotter: reps:29.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02401940072970952 rep=29.0 sim_error=3.698279560348526e-08 lambda=2.1476057090849565 count=1044.0
-!KTrotter: reps:29.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02401940072970952 rep=29.0 sim_error=3.698279560348526e-08 lambda=2.1476057090849565 count=1044.0
-!KTrotter: reps:29.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02401940072970952 rep=29.0 sim_error=3.698279560348526e-08 lambda=2.1476057090849565 count=1044.0
-!KTrotter: reps:29.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02401940072970952 rep=29.0 sim_error=3.698279560348526e-08 lambda=2.1476057090849565 count=1044.0
-!KTrotter: reps:29.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02401940072970952 rep=29.0 sim_error=3.698279560348526e-08 lambda=2.1476057090849565 count=1044.0
-!KTrotter: reps:29.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02401940072970952 rep=29.0 sim_error=3.698279560348526e-08 lambda=2.1476057090849565 count=1044.0
-!KTrotter: reps:29.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02401940072970952 rep=29.0 sim_error=3.698279560348526e-08 lambda=2.1476057090849565 count=1044.0
-!KTrotter: reps:29.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02401940072970952 rep=29.0 sim_error=3.698279560348526e-08 lambda=2.1476057090849565 count=1044.0
-!KTrotter: reps:29.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02401940072970952 rep=29.0 sim_error=3.698279560348526e-08 lambda=2.1476057090849565 count=1044.0
-!KTrotter: reps:29.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02401940072970952 rep=29.0 sim_error=3.698279560348526e-08 lambda=2.1476057090849565 count=1044.0
-Taylor:: Running controlled gate count for time: 0.02401940072970952
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02401940072970952 k=5 sim_error=3.698279560348526e-08 lambda=1.0240194007297094 count=720
-Taylor:: Running controlled gate count for time: 0.02401940072970952
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02401940072970952 k=5 sim_error=3.698279560348526e-08 lambda=1.0240194007297094 count=720
-Taylor:: Running controlled gate count for time: 0.02401940072970952
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02401940072970952 k=5 sim_error=3.698279560348526e-08 lambda=1.0240194007297094 count=720
-Taylor:: Running controlled gate count for time: 0.02401940072970952
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02401940072970952 k=5 sim_error=3.698279560348526e-08 lambda=1.0240194007297094 count=720
-Taylor:: Running controlled gate count for time: 0.02401940072970952
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02401940072970952 k=5 sim_error=3.698279560348526e-08 lambda=1.0240194007297094 count=720
-Taylor:: Running controlled gate count for time: 0.02401940072970952
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02401940072970952 k=5 sim_error=3.698279560348526e-08 lambda=1.0240194007297094 count=720
-Taylor:: Running controlled gate count for time: 0.02401940072970952
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02401940072970952 k=5 sim_error=3.698279560348526e-08 lambda=1.0240194007297094 count=720
-Taylor:: Running controlled gate count for time: 0.02401940072970952
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02401940072970952 k=5 sim_error=3.698279560348526e-08 lambda=1.0240194007297094 count=720
-Taylor:: Running controlled gate count for time: 0.02401940072970952
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02401940072970952 k=5 sim_error=3.698279560348526e-08 lambda=1.0240194007297094 count=720
-Taylor:: Running controlled gate count for time: 0.02401940072970952
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02401940072970952 k=5 sim_error=3.698279560348526e-08 lambda=1.0240194007297094 count=720
-error=0.1 nu=51882
-!!!!!!!!!!!!!!!!!!!!Trotter: Running gate count for time: 0.02095305346336623
-OrderedDict({'u3': 19, 'cx': 18})
-Trotter: Running gate count for time: 0.02095305346336623
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.02095305346336623
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.02095305346336623
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.02095305346336623
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.02095305346336623
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.02095305346336623
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.02095305346336623
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.02095305346336623
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.02095305346336623
-OrderedDict({'u3': 19, 'cx': 18})
-KTrotter: reps:31.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02095305346336623 rep=31.0 sim_error=2.1416119484813832e-08 lambda=2.128370901584418 count=1116.0
-!KTrotter: reps:31.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02095305346336623 rep=31.0 sim_error=2.1416119484813832e-08 lambda=2.128370901584418 count=1116.0
-!KTrotter: reps:31.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02095305346336623 rep=31.0 sim_error=2.1416119484813832e-08 lambda=2.128370901584418 count=1116.0
-!KTrotter: reps:31.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02095305346336623 rep=31.0 sim_error=2.1416119484813832e-08 lambda=2.128370901584418 count=1116.0
-!KTrotter: reps:31.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02095305346336623 rep=31.0 sim_error=2.1416119484813832e-08 lambda=2.128370901584418 count=1116.0
-!KTrotter: reps:31.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02095305346336623 rep=31.0 sim_error=2.1416119484813832e-08 lambda=2.128370901584418 count=1116.0
-!KTrotter: reps:31.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02095305346336623 rep=31.0 sim_error=2.1416119484813832e-08 lambda=2.128370901584418 count=1116.0
-!KTrotter: reps:31.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02095305346336623 rep=31.0 sim_error=2.1416119484813832e-08 lambda=2.128370901584418 count=1116.0
-!KTrotter: reps:31.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02095305346336623 rep=31.0 sim_error=2.1416119484813832e-08 lambda=2.128370901584418 count=1116.0
-!KTrotter: reps:31.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.02095305346336623 rep=31.0 sim_error=2.1416119484813832e-08 lambda=2.128370901584418 count=1116.0
-Taylor:: Running controlled gate count for time: 0.02095305346336623
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02095305346336623 k=5 sim_error=2.1416119484813832e-08 lambda=1.0209530534633662 count=720
-Taylor:: Running controlled gate count for time: 0.02095305346336623
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02095305346336623 k=5 sim_error=2.1416119484813832e-08 lambda=1.0209530534633662 count=720
-Taylor:: Running controlled gate count for time: 0.02095305346336623
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02095305346336623 k=5 sim_error=2.1416119484813832e-08 lambda=1.0209530534633662 count=2840
-Taylor:: Running controlled gate count for time: 0.02095305346336623
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02095305346336623 k=5 sim_error=2.1416119484813832e-08 lambda=1.0209530534633662 count=720
-Taylor:: Running controlled gate count for time: 0.02095305346336623
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02095305346336623 k=5 sim_error=2.1416119484813832e-08 lambda=1.0209530534633662 count=720
-Taylor:: Running controlled gate count for time: 0.02095305346336623
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02095305346336623 k=5 sim_error=2.1416119484813832e-08 lambda=1.0209530534633662 count=720
-Taylor:: Running controlled gate count for time: 0.02095305346336623
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02095305346336623 k=5 sim_error=2.1416119484813832e-08 lambda=1.0209530534633662 count=720
-Taylor:: Running controlled gate count for time: 0.02095305346336623
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02095305346336623 k=5 sim_error=2.1416119484813832e-08 lambda=1.0209530534633662 count=720
-Taylor:: Running controlled gate count for time: 0.02095305346336623
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02095305346336623 k=5 sim_error=2.1416119484813832e-08 lambda=1.0209530534633662 count=720
-Taylor:: Running controlled gate count for time: 0.02095305346336623
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.02095305346336623 k=5 sim_error=2.1416119484813832e-08 lambda=1.0209530534633662 count=720
-error=0.1 nu=79649
-!!!!!!!!!!!!!!!!!!!!Trotter: Running gate count for time: 0.018823719378275337
-OrderedDict({'u3': 19, 'cx': 18})
-Trotter: Running gate count for time: 0.018823719378275337
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.018823719378275337
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.018823719378275337
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.018823719378275337
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.018823719378275337
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.018823719378275337
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.018823719378275337
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.018823719378275337
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.018823719378275337
-OrderedDict({'u3': 19, 'cx': 18})
-KTrotter: reps:32.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.018823719378275337 rep=32.0 sim_error=1.3950094930396002e-08 lambda=2.115081650435627 count=1152.0
-!KTrotter: reps:32.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.018823719378275337 rep=32.0 sim_error=1.3950094930396002e-08 lambda=2.115081650435627 count=1152.0
-!KTrotter: reps:32.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.018823719378275337 rep=32.0 sim_error=1.3950094930396002e-08 lambda=2.115081650435627 count=1152.0
-!KTrotter: reps:32.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.018823719378275337 rep=32.0 sim_error=1.3950094930396002e-08 lambda=2.115081650435627 count=1152.0
-!KTrotter: reps:32.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.018823719378275337 rep=32.0 sim_error=1.3950094930396002e-08 lambda=2.115081650435627 count=1152.0
-!KTrotter: reps:32.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.018823719378275337 rep=32.0 sim_error=1.3950094930396002e-08 lambda=2.115081650435627 count=1152.0
-!KTrotter: reps:32.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.018823719378275337 rep=32.0 sim_error=1.3950094930396002e-08 lambda=2.115081650435627 count=1152.0
-!KTrotter: reps:32.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.018823719378275337 rep=32.0 sim_error=1.3950094930396002e-08 lambda=2.115081650435627 count=1152.0
-!KTrotter: reps:32.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.018823719378275337 rep=32.0 sim_error=1.3950094930396002e-08 lambda=2.115081650435627 count=1152.0
-!KTrotter: reps:32.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.018823719378275337 rep=32.0 sim_error=1.3950094930396002e-08 lambda=2.115081650435627 count=1152.0
-Taylor:: Running controlled gate count for time: 0.018823719378275337
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.018823719378275337 k=5 sim_error=1.3950094930396002e-08 lambda=1.0188237193782754 count=720
-Taylor:: Running controlled gate count for time: 0.018823719378275337
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.018823719378275337 k=5 sim_error=1.3950094930396002e-08 lambda=1.0188237193782754 count=720
-Taylor:: Running controlled gate count for time: 0.018823719378275337
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.018823719378275337 k=5 sim_error=1.3950094930396002e-08 lambda=1.0188237193782754 count=720
-Taylor:: Running controlled gate count for time: 0.018823719378275337
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.018823719378275337 k=5 sim_error=1.3950094930396002e-08 lambda=1.0188237193782754 count=720
-Taylor:: Running controlled gate count for time: 0.018823719378275337
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.018823719378275337 k=5 sim_error=1.3950094930396002e-08 lambda=1.0188237193782754 count=720
-Taylor:: Running controlled gate count for time: 0.018823719378275337
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.018823719378275337 k=5 sim_error=1.3950094930396002e-08 lambda=1.0188237193782754 count=720
-Taylor:: Running controlled gate count for time: 0.018823719378275337
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.018823719378275337 k=5 sim_error=1.3950094930396002e-08 lambda=1.0188237193782754 count=720
-Taylor:: Running controlled gate count for time: 0.018823719378275337
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.018823719378275337 k=5 sim_error=1.3950094930396002e-08 lambda=1.0188237193782754 count=720
-Taylor:: Running controlled gate count for time: 0.018823719378275337
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.018823719378275337 k=5 sim_error=1.3950094930396002e-08 lambda=1.0188237193782754 count=720
-Taylor:: Running controlled gate count for time: 0.018823719378275337
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.018823719378275337 k=5 sim_error=1.3950094930396002e-08 lambda=1.0188237193782754 count=720
-error=0.1 nu=113344
-!!!!!!!!!!!!!!!!!!!!Trotter: Running gate count for time: 0.017234583478664103
-OrderedDict({'u3': 19, 'cx': 18})
-Trotter: Running gate count for time: 0.017234583478664103
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.017234583478664103
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.017234583478664103
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.017234583478664103
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.017234583478664103
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.017234583478664103
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.017234583478664103
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.017234583478664103
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.017234583478664103
-OrderedDict({'u3': 19, 'cx': 18})
-KTrotter: reps:34.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.017234583478664103 rep=34.0 sim_error=9.802998933433717e-09 lambda=2.1051999246350306 count=1224.0
-!KTrotter: reps:34.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.017234583478664103 rep=34.0 sim_error=9.802998933433717e-09 lambda=2.1051999246350306 count=1224.0
-!KTrotter: reps:34.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.017234583478664103 rep=34.0 sim_error=9.802998933433717e-09 lambda=2.1051999246350306 count=1224.0
-!KTrotter: reps:34.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.017234583478664103 rep=34.0 sim_error=9.802998933433717e-09 lambda=2.1051999246350306 count=1224.0
-!KTrotter: reps:34.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.017234583478664103 rep=34.0 sim_error=9.802998933433717e-09 lambda=2.1051999246350306 count=1224.0
-!KTrotter: reps:34.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.017234583478664103 rep=34.0 sim_error=9.802998933433717e-09 lambda=2.1051999246350306 count=1224.0
-!KTrotter: reps:34.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.017234583478664103 rep=34.0 sim_error=9.802998933433717e-09 lambda=2.1051999246350306 count=1224.0
-!KTrotter: reps:34.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.017234583478664103 rep=34.0 sim_error=9.802998933433717e-09 lambda=2.1051999246350306 count=1224.0
-!KTrotter: reps:34.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.017234583478664103 rep=34.0 sim_error=9.802998933433717e-09 lambda=2.1051999246350306 count=1224.0
-!KTrotter: reps:34.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.017234583478664103 rep=34.0 sim_error=9.802998933433717e-09 lambda=2.1051999246350306 count=1224.0
-Taylor:: Running controlled gate count for time: 0.017234583478664103
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.017234583478664103 k=5 sim_error=9.802998933433717e-09 lambda=1.0172345834786642 count=720
-Taylor:: Running controlled gate count for time: 0.017234583478664103
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.017234583478664103 k=5 sim_error=9.802998933433717e-09 lambda=1.0172345834786642 count=720
-Taylor:: Running controlled gate count for time: 0.017234583478664103
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.017234583478664103 k=5 sim_error=9.802998933433717e-09 lambda=1.0172345834786642 count=720
-Taylor:: Running controlled gate count for time: 0.017234583478664103
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.017234583478664103 k=5 sim_error=9.802998933433717e-09 lambda=1.0172345834786642 count=720
-Taylor:: Running controlled gate count for time: 0.017234583478664103
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.017234583478664103 k=5 sim_error=9.802998933433717e-09 lambda=1.0172345834786642 count=720
-Taylor:: Running controlled gate count for time: 0.017234583478664103
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.017234583478664103 k=5 sim_error=9.802998933433717e-09 lambda=1.0172345834786642 count=720
-Taylor:: Running controlled gate count for time: 0.017234583478664103
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.017234583478664103 k=5 sim_error=9.802998933433717e-09 lambda=1.0172345834786642 count=720
-Taylor:: Running controlled gate count for time: 0.017234583478664103
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.017234583478664103 k=5 sim_error=9.802998933433717e-09 lambda=1.0172345834786642 count=720
-Taylor:: Running controlled gate count for time: 0.017234583478664103
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.017234583478664103 k=5 sim_error=9.802998933433717e-09 lambda=1.0172345834786642 count=720
-Taylor:: Running controlled gate count for time: 0.017234583478664103
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.017234583478664103 k=5 sim_error=9.802998933433717e-09 lambda=1.0172345834786642 count=720
-error=0.1 nu=152967
-!!!!!!!!!!!!!!!!!!!!Trotter: Running gate count for time: 0.015990100830843366
-OrderedDict({'u3': 19, 'cx': 18})
-Trotter: Running gate count for time: 0.015990100830843366
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.015990100830843366
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.015990100830843366
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.015990100830843366
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.015990100830843366
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.015990100830843366
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.015990100830843366
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.015990100830843366
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.015990100830843366
-OrderedDict({'u3': 19, 'cx': 18})
-KTrotter: reps:35.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.015990100830843366 rep=35.0 sim_error=7.2637308119470944e-09 lambda=2.0974828816907234 count=1260.0
-!KTrotter: reps:35.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.015990100830843366 rep=35.0 sim_error=7.2637308119470944e-09 lambda=2.0974828816907234 count=1260.0
-!KTrotter: reps:35.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.015990100830843366 rep=35.0 sim_error=7.2637308119470944e-09 lambda=2.0974828816907234 count=1260.0
-!KTrotter: reps:35.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.015990100830843366 rep=35.0 sim_error=7.2637308119470944e-09 lambda=2.0974828816907234 count=1260.0
-!KTrotter: reps:35.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.015990100830843366 rep=35.0 sim_error=7.2637308119470944e-09 lambda=2.0974828816907234 count=1260.0
-!KTrotter: reps:35.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.015990100830843366 rep=35.0 sim_error=7.2637308119470944e-09 lambda=2.0974828816907234 count=1260.0
-!KTrotter: reps:35.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.015990100830843366 rep=35.0 sim_error=7.2637308119470944e-09 lambda=2.0974828816907234 count=1260.0
-!KTrotter: reps:35.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.015990100830843366 rep=35.0 sim_error=7.2637308119470944e-09 lambda=2.0974828816907234 count=1260.0
-!KTrotter: reps:35.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.015990100830843366 rep=35.0 sim_error=7.2637308119470944e-09 lambda=2.0974828816907234 count=1260.0
-!KTrotter: reps:35.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.015990100830843366 rep=35.0 sim_error=7.2637308119470944e-09 lambda=2.0974828816907234 count=1260.0
-Taylor:: Running controlled gate count for time: 0.015990100830843366
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.015990100830843366 k=5 sim_error=7.2637308119470944e-09 lambda=1.0159901008308434 count=720
-Taylor:: Running controlled gate count for time: 0.015990100830843366
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.015990100830843366 k=5 sim_error=7.2637308119470944e-09 lambda=1.0159901008308434 count=720
-Taylor:: Running controlled gate count for time: 0.015990100830843366
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.015990100830843366 k=5 sim_error=7.2637308119470944e-09 lambda=1.0159901008308434 count=720
-Taylor:: Running controlled gate count for time: 0.015990100830843366
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.015990100830843366 k=5 sim_error=7.2637308119470944e-09 lambda=1.0159901008308434 count=720
-Taylor:: Running controlled gate count for time: 0.015990100830843366
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.015990100830843366 k=5 sim_error=7.2637308119470944e-09 lambda=1.0159901008308434 count=720
-Taylor:: Running controlled gate count for time: 0.015990100830843366
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.015990100830843366 k=5 sim_error=7.2637308119470944e-09 lambda=1.0159901008308434 count=720
-Taylor:: Running controlled gate count for time: 0.015990100830843366
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.015990100830843366 k=5 sim_error=7.2637308119470944e-09 lambda=1.0159901008308434 count=720
-Taylor:: Running controlled gate count for time: 0.015990100830843366
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.015990100830843366 k=5 sim_error=7.2637308119470944e-09 lambda=1.0159901008308434 count=720
-Taylor:: Running controlled gate count for time: 0.015990100830843366
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.015990100830843366 k=5 sim_error=7.2637308119470944e-09 lambda=1.0159901008308434 count=720
-Taylor:: Running controlled gate count for time: 0.015990100830843366
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.015990100830843366 k=5 sim_error=7.2637308119470944e-09 lambda=1.0159901008308434 count=720
-error=0.1 nu=198519
-!!!!!!!!!!!!!!!!!!!!Trotter: Running gate count for time: 0.014981313499066519
-OrderedDict({'u3': 19, 'cx': 18})
-Trotter: Running gate count for time: 0.014981313499066519
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.014981313499066519
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.014981313499066519
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.014981313499066519
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.014981313499066519
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.014981313499066519
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.014981313499066519
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.014981313499066519
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.014981313499066519
-OrderedDict({'u3': 19, 'cx': 18})
-KTrotter: reps:36.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.014981313499066519 rep=36.0 sim_error=5.597001350556426e-09 lambda=2.09124124443764 count=1296.0
-!KTrotter: reps:36.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.014981313499066519 rep=36.0 sim_error=5.597001350556426e-09 lambda=2.09124124443764 count=1296.0
-!KTrotter: reps:36.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.014981313499066519 rep=36.0 sim_error=5.597001350556426e-09 lambda=2.09124124443764 count=1296.0
-!KTrotter: reps:36.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.014981313499066519 rep=36.0 sim_error=5.597001350556426e-09 lambda=2.09124124443764 count=1296.0
-!KTrotter: reps:36.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.014981313499066519 rep=36.0 sim_error=5.597001350556426e-09 lambda=2.09124124443764 count=1296.0
-!KTrotter: reps:36.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.014981313499066519 rep=36.0 sim_error=5.597001350556426e-09 lambda=2.09124124443764 count=1296.0
-!KTrotter: reps:36.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.014981313499066519 rep=36.0 sim_error=5.597001350556426e-09 lambda=2.09124124443764 count=1296.0
-!KTrotter: reps:36.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.014981313499066519 rep=36.0 sim_error=5.597001350556426e-09 lambda=2.09124124443764 count=1296.0
-!KTrotter: reps:36.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.014981313499066519 rep=36.0 sim_error=5.597001350556426e-09 lambda=2.09124124443764 count=1296.0
-!KTrotter: reps:36.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.014981313499066519 rep=36.0 sim_error=5.597001350556426e-09 lambda=2.09124124443764 count=1296.0
-Taylor:: Running controlled gate count for time: 0.014981313499066519
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.014981313499066519 k=5 sim_error=5.597001350556426e-09 lambda=1.0149813134990664 count=720
-Taylor:: Running controlled gate count for time: 0.014981313499066519
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.014981313499066519 k=5 sim_error=5.597001350556426e-09 lambda=1.0149813134990664 count=720
-Taylor:: Running controlled gate count for time: 0.014981313499066519
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.014981313499066519 k=5 sim_error=5.597001350556426e-09 lambda=1.0149813134990664 count=720
-Taylor:: Running controlled gate count for time: 0.014981313499066519
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.014981313499066519 k=5 sim_error=5.597001350556426e-09 lambda=1.0149813134990664 count=720
-Taylor:: Running controlled gate count for time: 0.014981313499066519
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.014981313499066519 k=5 sim_error=5.597001350556426e-09 lambda=1.0149813134990664 count=720
-Taylor:: Running controlled gate count for time: 0.014981313499066519
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.014981313499066519 k=5 sim_error=5.597001350556426e-09 lambda=1.0149813134990664 count=720
-Taylor:: Running controlled gate count for time: 0.014981313499066519
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.014981313499066519 k=5 sim_error=5.597001350556426e-09 lambda=1.0149813134990664 count=2840
-Taylor:: Running controlled gate count for time: 0.014981313499066519
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.014981313499066519 k=5 sim_error=5.597001350556426e-09 lambda=1.0149813134990664 count=720
-Taylor:: Running controlled gate count for time: 0.014981313499066519
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.014981313499066519 k=5 sim_error=5.597001350556426e-09 lambda=1.0149813134990664 count=720
-Taylor:: Running controlled gate count for time: 0.014981313499066519
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.014981313499066519 k=5 sim_error=5.597001350556426e-09 lambda=1.0149813134990664 count=720
-error=0.1 nu=250000
-!!!!!!!!!!!!!!!!!!!!Trotter: Running gate count for time: 0.01414213562373095
-OrderedDict({'u3': 19, 'cx': 18})
-Trotter: Running gate count for time: 0.01414213562373095
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.01414213562373095
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.01414213562373095
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.01414213562373095
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.01414213562373095
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.01414213562373095
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.01414213562373095
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.01414213562373095
-OrderedDict({'u3': 19, 'cx': 18})
-!Trotter: Running gate count for time: 0.01414213562373095
-OrderedDict({'u3': 19, 'cx': 18})
-KTrotter: reps:37.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.01414213562373095 rep=37.0 sim_error=4.444444444444445e-09 lambda=2.086058470688215 count=1332.0
-!KTrotter: reps:37.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.01414213562373095 rep=37.0 sim_error=4.444444444444445e-09 lambda=2.086058470688215 count=1332.0
-!KTrotter: reps:37.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.01414213562373095 rep=37.0 sim_error=4.444444444444445e-09 lambda=2.086058470688215 count=1332.0
-!KTrotter: reps:37.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.01414213562373095 rep=37.0 sim_error=4.444444444444445e-09 lambda=2.086058470688215 count=1332.0
-!KTrotter: reps:37.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.01414213562373095 rep=37.0 sim_error=4.444444444444445e-09 lambda=2.086058470688215 count=1332.0
-!KTrotter: reps:37.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.01414213562373095 rep=37.0 sim_error=4.444444444444445e-09 lambda=2.086058470688215 count=1332.0
-!KTrotter: reps:37.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.01414213562373095 rep=37.0 sim_error=4.444444444444445e-09 lambda=2.086058470688215 count=1332.0
-!KTrotter: reps:37.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.01414213562373095 rep=37.0 sim_error=4.444444444444445e-09 lambda=2.086058470688215 count=1332.0
-!KTrotter: reps:37.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.01414213562373095 rep=37.0 sim_error=4.444444444444445e-09 lambda=2.086058470688215 count=1332.0
-!KTrotter: reps:37.0 split:1 count:{'cx': 36, 'u3': 28}
-KTrotter:: evo_time=0.01414213562373095 rep=37.0 sim_error=4.444444444444445e-09 lambda=2.086058470688215 count=1332.0
-Taylor:: Running controlled gate count for time: 0.01414213562373095
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.01414213562373095 k=5 sim_error=4.444444444444445e-09 lambda=1.014142135623731 count=720
-Taylor:: Running controlled gate count for time: 0.01414213562373095
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.01414213562373095 k=5 sim_error=4.444444444444445e-09 lambda=1.014142135623731 count=720
-Taylor:: Running controlled gate count for time: 0.01414213562373095
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.01414213562373095 k=5 sim_error=4.444444444444445e-09 lambda=1.014142135623731 count=720
-Taylor:: Running controlled gate count for time: 0.01414213562373095
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.01414213562373095 k=5 sim_error=4.444444444444445e-09 lambda=1.014142135623731 count=720
-Taylor:: Running controlled gate count for time: 0.01414213562373095
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.01414213562373095 k=5 sim_error=4.444444444444445e-09 lambda=1.014142135623731 count=720
-Taylor:: Running controlled gate count for time: 0.01414213562373095
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.01414213562373095 k=5 sim_error=4.444444444444445e-09 lambda=1.014142135623731 count=720
-Taylor:: Running controlled gate count for time: 0.01414213562373095
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.01414213562373095 k=5 sim_error=4.444444444444445e-09 lambda=1.014142135623731 count=720
-Taylor:: Running controlled gate count for time: 0.01414213562373095
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.01414213562373095 k=5 sim_error=4.444444444444445e-09 lambda=1.014142135623731 count=720
-Taylor:: Running controlled gate count for time: 0.01414213562373095
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.01414213562373095 k=5 sim_error=4.444444444444445e-09 lambda=1.014142135623731 count=720
-Taylor:: Running controlled gate count for time: 0.01414213562373095
-Taylor:: reps:1, k_max:5
-Taylor:: evo_time=0.01414213562373095 k=5 sim_error=4.444444444444445e-09 lambda=1.014142135623731 count=720
-Plots saved with hash: fd1f67fc
+error=0.01 nu=1000
+!!!!!!!!!!!!!!!!!!!!Trotter: Running gate count for time: 0.001
+OrderedDict({'u3': 19, 'cx': 18})
+Trotter: Running gate count for time: 0.001
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 0.001
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 0.001
+OrderedDict({'u3': 19, 'cx': 18})
+Trotter: Running gate count for time: 0.001
+OrderedDict({'u3': 19, 'cx': 18})
+Trotter: Running gate count for time: 0.001
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 0.001
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 0.001
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 0.001
+OrderedDict({'u3': 19, 'cx': 18})
+Trotter: Running gate count for time: 0.001
+OrderedDict({'u3': 19, 'cx': 18})
+KTrotter: reps:24.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=0.001 rep=24.0 sim_error=1.1111111111111111e-07 lambda=63251.55340020143 count=864.0
+!KTrotter: reps:24.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=0.001 rep=24.0 sim_error=1.1111111111111111e-07 lambda=63251.55340020143 count=864.0
+!KTrotter: reps:24.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=0.001 rep=24.0 sim_error=1.1111111111111111e-07 lambda=63251.55340020143 count=864.0
+!KTrotter: reps:24.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=0.001 rep=24.0 sim_error=1.1111111111111111e-07 lambda=63251.55340020143 count=864.0
+!KTrotter: reps:24.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=0.001 rep=24.0 sim_error=1.1111111111111111e-07 lambda=63251.55340020143 count=864.0
+!KTrotter: reps:24.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=0.001 rep=24.0 sim_error=1.1111111111111111e-07 lambda=63251.55340020143 count=864.0
+!KTrotter: reps:24.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=0.001 rep=24.0 sim_error=1.1111111111111111e-07 lambda=63251.55340020143 count=864.0
+!KTrotter: reps:24.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=0.001 rep=24.0 sim_error=1.1111111111111111e-07 lambda=63251.55340020143 count=864.0
+!KTrotter: reps:24.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=0.001 rep=24.0 sim_error=1.1111111111111111e-07 lambda=63251.55340020143 count=864.0
+!KTrotter: reps:24.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=0.001 rep=24.0 sim_error=1.1111111111111111e-07 lambda=63251.55340020143 count=864.0
+Taylor:: Running gate count for time: 0.001
+Taylor:: reps:100000, k_max:4
+Taylor:: counter: {'u3': 401, 'cx': 400} reps: 100000
+Taylor:: evo_time=0.001 k=4 sim_error=1.1111111111111111e-07 lambda=31.623776601683794 count=400000
+Taylor:: Running gate count for time: 0.001
+Taylor:: reps:100000, k_max:4
+Taylor:: counter: {'u3': 401, 'cx': 400} reps: 100000
+Taylor:: evo_time=0.001 k=4 sim_error=1.1111111111111111e-07 lambda=31.623776601683794 count=400000
+Taylor:: Running gate count for time: 0.001
+Taylor:: reps:100000, k_max:4
+Taylor:: counter: {'u3': 401, 'cx': 400} reps: 100000
+Taylor:: evo_time=0.001 k=4 sim_error=1.1111111111111111e-07 lambda=31.623776601683794 count=400000
+Taylor:: Running gate count for time: 0.001
+Taylor:: reps:100000, k_max:4
+Taylor:: counter: {'u3': 401, 'cx': 400} reps: 100000
+Taylor:: evo_time=0.001 k=4 sim_error=1.1111111111111111e-07 lambda=31.623776601683794 count=400000
+Taylor:: Running gate count for time: 0.001
+Taylor:: reps:100000, k_max:4
+Taylor:: counter: {'u3': 401, 'cx': 400} reps: 100000
+Taylor:: evo_time=0.001 k=4 sim_error=1.1111111111111111e-07 lambda=31.623776601683794 count=400000
+Taylor:: Running gate count for time: 0.001
+Taylor:: reps:100000, k_max:4
+Taylor:: counter: {'u3': 417, 'cx': 412} reps: 100000
+Taylor:: evo_time=0.001 k=4 sim_error=1.1111111111111111e-07 lambda=31.623776601683794 count=412000
+Taylor:: Running gate count for time: 0.001
+Taylor:: reps:100000, k_max:4
+Taylor:: counter: {'u3': 401, 'cx': 400} reps: 100000
+Taylor:: evo_time=0.001 k=4 sim_error=1.1111111111111111e-07 lambda=31.623776601683794 count=400000
+Taylor:: Running gate count for time: 0.001
+Taylor:: reps:100000, k_max:4
+Taylor:: counter: {'u3': 401, 'cx': 400} reps: 100000
+Taylor:: evo_time=0.001 k=4 sim_error=1.1111111111111111e-07 lambda=31.623776601683794 count=400000
+Taylor:: Running gate count for time: 0.001
+Taylor:: reps:100000, k_max:4
+Taylor:: counter: {'u3': 401, 'cx': 400} reps: 100000
+Taylor:: evo_time=0.001 k=4 sim_error=1.1111111111111111e-07 lambda=31.623776601683794 count=400000
+Taylor:: Running gate count for time: 0.001
+Taylor:: reps:100000, k_max:4
+Taylor:: counter: {'u3': 401, 'cx': 400} reps: 100000
+Taylor:: evo_time=0.001 k=4 sim_error=1.1111111111111111e-07 lambda=31.623776601683794 count=400000
+error=0.01 nu=41530
+!!!!!!!!!!!!!!!!!!!!Trotter: Running gate count for time: 0.00015517564277496858
+OrderedDict({'u3': 19, 'cx': 18})
+Trotter: Running gate count for time: 0.00015517564277496858
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 0.00015517564277496858
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 0.00015517564277496858
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 0.00015517564277496858
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 0.00015517564277496858
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 0.00015517564277496858
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 0.00015517564277496858
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 0.00015517564277496858
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 0.00015517564277496858
+OrderedDict({'u3': 19, 'cx': 18})
+KTrotter: reps:39.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=0.00015517564277496858 rep=39.0 sim_error=2.675442116809803e-09 lambda=1034658.8684134077 count=1404.0
+!KTrotter: reps:39.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=0.00015517564277496858 rep=39.0 sim_error=2.675442116809803e-09 lambda=1034658.8684134077 count=1404.0
+!KTrotter: reps:39.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=0.00015517564277496858 rep=39.0 sim_error=2.675442116809803e-09 lambda=1034658.8684134077 count=1404.0
+!KTrotter: reps:39.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=0.00015517564277496858 rep=39.0 sim_error=2.675442116809803e-09 lambda=1034658.8684134077 count=1404.0
+!KTrotter: reps:39.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=0.00015517564277496858 rep=39.0 sim_error=2.675442116809803e-09 lambda=1034658.8684134077 count=1404.0
+!KTrotter: reps:39.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=0.00015517564277496858 rep=39.0 sim_error=2.675442116809803e-09 lambda=1034658.8684134077 count=1404.0
+!KTrotter: reps:39.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=0.00015517564277496858 rep=39.0 sim_error=2.675442116809803e-09 lambda=1034658.8684134077 count=1404.0
+!KTrotter: reps:39.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=0.00015517564277496858 rep=39.0 sim_error=2.675442116809803e-09 lambda=1034658.8684134077 count=1404.0
+!KTrotter: reps:39.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=0.00015517564277496858 rep=39.0 sim_error=2.675442116809803e-09 lambda=1034658.8684134077 count=1404.0
+!KTrotter: reps:39.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=0.00015517564277496858 rep=39.0 sim_error=2.675442116809803e-09 lambda=1034658.8684134077 count=1404.0
+Taylor:: Running gate count for time: 0.00015517564277496858
+Taylor:: reps:4153000, k_max:5
+Taylor:: counter: {'cx': 400} reps: 4153000
+Taylor:: evo_time=0.00015517564277496858 k=5 sim_error=2.675442116809803e-09 lambda=80.27661713571912 count=16612000
+Taylor:: Running gate count for time: 0.00015517564277496858
+Taylor:: reps:4153000, k_max:5
+Taylor:: counter: {'cx': 400} reps: 4153000
+Taylor:: evo_time=0.00015517564277496858 k=5 sim_error=2.675442116809803e-09 lambda=80.27661713571912 count=16612000
+Taylor:: Running gate count for time: 0.00015517564277496858
+Taylor:: reps:4153000, k_max:5
+Taylor:: counter: {'cx': 400} reps: 4153000
+Taylor:: evo_time=0.00015517564277496858 k=5 sim_error=2.675442116809803e-09 lambda=80.27661713571912 count=16612000
+Taylor:: Running gate count for time: 0.00015517564277496858
+Taylor:: reps:4153000, k_max:5
+Taylor:: counter: {'cx': 400} reps: 4153000
+Taylor:: evo_time=0.00015517564277496858 k=5 sim_error=2.675442116809803e-09 lambda=80.27661713571912 count=16612000
+Taylor:: Running gate count for time: 0.00015517564277496858
+Taylor:: reps:4153000, k_max:5
+Taylor:: counter: {'cx': 400} reps: 4153000
+Taylor:: evo_time=0.00015517564277496858 k=5 sim_error=2.675442116809803e-09 lambda=80.27661713571912 count=16612000
+Taylor:: Running gate count for time: 0.00015517564277496858
+Taylor:: reps:4153000, k_max:5
+Taylor:: counter: {'cx': 400} reps: 4153000
+Taylor:: evo_time=0.00015517564277496858 k=5 sim_error=2.675442116809803e-09 lambda=80.27661713571912 count=16612000
+Taylor:: Running gate count for time: 0.00015517564277496858
+Taylor:: reps:4153000, k_max:5
+Taylor:: counter: {'cx': 400} reps: 4153000
+Taylor:: evo_time=0.00015517564277496858 k=5 sim_error=2.675442116809803e-09 lambda=80.27661713571912 count=16612000
+Taylor:: Running gate count for time: 0.00015517564277496858
+Taylor:: reps:4153000, k_max:5
+Taylor:: counter: {'cx': 400} reps: 4153000
+Taylor:: evo_time=0.00015517564277496858 k=5 sim_error=2.675442116809803e-09 lambda=80.27661713571912 count=16612000
+Taylor:: Running gate count for time: 0.00015517564277496858
+Taylor:: reps:4153000, k_max:5
+Taylor:: counter: {'cx': 400} reps: 4153000
+Taylor:: evo_time=0.00015517564277496858 k=5 sim_error=2.675442116809803e-09 lambda=80.27661713571912 count=16612000
+Taylor:: Running gate count for time: 0.00015517564277496858
+Taylor:: reps:4153000, k_max:5
+Taylor:: counter: {'cx': 400} reps: 4153000
+Taylor:: evo_time=0.00015517564277496858 k=5 sim_error=2.675442116809803e-09 lambda=80.27661713571912 count=16612000
+error=0.01 nu=141345
+!!!!!!!!!!!!!!!!!!!!Trotter: Running gate count for time: 8.411255360210046e-05
+OrderedDict({'u3': 19, 'cx': 18})
+Trotter: Running gate count for time: 8.411255360210046e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 8.411255360210046e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 8.411255360210046e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 8.411255360210046e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 8.411255360210046e-05
+OrderedDict({'u3': 19, 'cx': 18})
+Trotter: Running gate count for time: 8.411255360210046e-05
+OrderedDict({'u3': 19, 'cx': 18})
+Trotter: Running gate count for time: 8.411255360210046e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 8.411255360210046e-05
+OrderedDict({'u3': 19, 'cx': 18})
+Trotter: Running gate count for time: 8.411255360210046e-05
+OrderedDict({'u3': 19, 'cx': 18})
+KTrotter: reps:45.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=8.411255360210046e-05 rep=45.0 sim_error=7.860986317953314e-10 lambda=2592625.4121679626 count=1620.0
+!KTrotter: reps:45.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=8.411255360210046e-05 rep=45.0 sim_error=7.860986317953314e-10 lambda=2592625.4121679626 count=1620.0
+!KTrotter: reps:45.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=8.411255360210046e-05 rep=45.0 sim_error=7.860986317953314e-10 lambda=2592625.4121679626 count=1620.0
+!KTrotter: reps:45.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=8.411255360210046e-05 rep=45.0 sim_error=7.860986317953314e-10 lambda=2592625.4121679626 count=1620.0
+!KTrotter: reps:45.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=8.411255360210046e-05 rep=45.0 sim_error=7.860986317953314e-10 lambda=2592625.4121679626 count=1620.0
+!KTrotter: reps:45.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=8.411255360210046e-05 rep=45.0 sim_error=7.860986317953314e-10 lambda=2592625.4121679626 count=1620.0
+!KTrotter: reps:45.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=8.411255360210046e-05 rep=45.0 sim_error=7.860986317953314e-10 lambda=2592625.4121679626 count=1620.0
+!KTrotter: reps:45.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=8.411255360210046e-05 rep=45.0 sim_error=7.860986317953314e-10 lambda=2592625.4121679626 count=1620.0
+!KTrotter: reps:45.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=8.411255360210046e-05 rep=45.0 sim_error=7.860986317953314e-10 lambda=2592625.4121679626 count=1620.0
+!KTrotter: reps:45.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=8.411255360210046e-05 rep=45.0 sim_error=7.860986317953314e-10 lambda=2592625.4121679626 count=1620.0
+Taylor:: Running gate count for time: 8.411255360210046e-05
+Taylor:: reps:14134500, k_max:5
+Taylor:: counter: {'cx': 400} reps: 14134500
+Taylor:: evo_time=8.411255360210046e-05 k=5 sim_error=7.860986317953314e-10 lambda=109.03600377071459 count=56538000
+Taylor:: Running gate count for time: 8.411255360210046e-05
+Taylor:: reps:14134500, k_max:5
+Taylor:: counter: {'cx': 400} reps: 14134500
+Taylor:: evo_time=8.411255360210046e-05 k=5 sim_error=7.860986317953314e-10 lambda=109.03600377071459 count=56538000
+Taylor:: Running gate count for time: 8.411255360210046e-05
+Taylor:: reps:14134500, k_max:5
+Taylor:: counter: {'cx': 400} reps: 14134500
+Taylor:: evo_time=8.411255360210046e-05 k=5 sim_error=7.860986317953314e-10 lambda=109.03600377071459 count=56538000
+Taylor:: Running gate count for time: 8.411255360210046e-05
+Taylor:: reps:14134500, k_max:5
+Taylor:: counter: {'cx': 400} reps: 14134500
+Taylor:: evo_time=8.411255360210046e-05 k=5 sim_error=7.860986317953314e-10 lambda=109.03600377071459 count=56538000
+Taylor:: Running gate count for time: 8.411255360210046e-05
+Taylor:: reps:14134500, k_max:5
+Taylor:: counter: {'cx': 400} reps: 14134500
+Taylor:: evo_time=8.411255360210046e-05 k=5 sim_error=7.860986317953314e-10 lambda=109.03600377071459 count=56538000
+Taylor:: Running gate count for time: 8.411255360210046e-05
+Taylor:: reps:14134500, k_max:5
+Taylor:: counter: {'cx': 400} reps: 14134500
+Taylor:: evo_time=8.411255360210046e-05 k=5 sim_error=7.860986317953314e-10 lambda=109.03600377071459 count=56538000
+Taylor:: Running gate count for time: 8.411255360210046e-05
+Taylor:: reps:14134500, k_max:5
+Taylor:: counter: {'cx': 400} reps: 14134500
+Taylor:: evo_time=8.411255360210046e-05 k=5 sim_error=7.860986317953314e-10 lambda=109.03600377071459 count=56538000
+Taylor:: Running gate count for time: 8.411255360210046e-05
+Taylor:: reps:14134500, k_max:5
+Taylor:: counter: {'cx': 400} reps: 14134500
+Taylor:: evo_time=8.411255360210046e-05 k=5 sim_error=7.860986317953314e-10 lambda=109.03600377071459 count=56538000
+Taylor:: Running gate count for time: 8.411255360210046e-05
+Taylor:: reps:14134500, k_max:5
+Taylor:: counter: {'cx': 400} reps: 14134500
+Taylor:: evo_time=8.411255360210046e-05 k=5 sim_error=7.860986317953314e-10 lambda=109.03600377071459 count=56538000
+Taylor:: Running gate count for time: 8.411255360210046e-05
+Taylor:: reps:14134500, k_max:5
+Taylor:: counter: {'cx': 400} reps: 14134500
+Taylor:: evo_time=8.411255360210046e-05 k=5 sim_error=7.860986317953314e-10 lambda=109.03600377071459 count=56538000
+error=0.01 nu=300444
+!!!!!!!!!!!!!!!!!!!!Trotter: Running gate count for time: 5.769239303608438e-05
+OrderedDict({'u3': 19, 'cx': 18})
+Trotter: Running gate count for time: 5.769239303608438e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 5.769239303608438e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 5.769239303608438e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 5.769239303608438e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 5.769239303608438e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 5.769239303608438e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 5.769239303608438e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 5.769239303608438e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 5.769239303608438e-05
+OrderedDict({'u3': 19, 'cx': 18})
+KTrotter: reps:49.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=5.769239303608438e-05 rep=49.0 sim_error=3.6982303228259216e-10 lambda=4564074.619734071 count=1764.0
+!KTrotter: reps:49.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=5.769239303608438e-05 rep=49.0 sim_error=3.6982303228259216e-10 lambda=4564074.619734071 count=1764.0
+!KTrotter: reps:49.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=5.769239303608438e-05 rep=49.0 sim_error=3.6982303228259216e-10 lambda=4564074.619734071 count=1764.0
+!KTrotter: reps:49.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=5.769239303608438e-05 rep=49.0 sim_error=3.6982303228259216e-10 lambda=4564074.619734071 count=1764.0
+!KTrotter: reps:49.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=5.769239303608438e-05 rep=49.0 sim_error=3.6982303228259216e-10 lambda=4564074.619734071 count=1764.0
+!KTrotter: reps:49.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=5.769239303608438e-05 rep=49.0 sim_error=3.6982303228259216e-10 lambda=4564074.619734071 count=1764.0
+!KTrotter: reps:49.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=5.769239303608438e-05 rep=49.0 sim_error=3.6982303228259216e-10 lambda=4564074.619734071 count=1764.0
+!KTrotter: reps:49.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=5.769239303608438e-05 rep=49.0 sim_error=3.6982303228259216e-10 lambda=4564074.619734071 count=1764.0
+!KTrotter: reps:49.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=5.769239303608438e-05 rep=49.0 sim_error=3.6982303228259216e-10 lambda=4564074.619734071 count=1764.0
+!KTrotter: reps:49.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=5.769239303608438e-05 rep=49.0 sim_error=3.6982303228259216e-10 lambda=4564074.619734071 count=1764.0
+Taylor:: Running gate count for time: 5.769239303608438e-05
+Taylor:: reps:30044400, k_max:5
+Taylor:: counter: {'cx': 400} reps: 30044400
+Taylor:: evo_time=5.769239303608438e-05 k=5 sim_error=3.6982303228259216e-10 lambda=131.6560780344484 count=120177600
+Taylor:: Running gate count for time: 5.769239303608438e-05
+Taylor:: reps:30044400, k_max:5
+Taylor:: counter: {'cx': 400} reps: 30044400
+Taylor:: evo_time=5.769239303608438e-05 k=5 sim_error=3.6982303228259216e-10 lambda=131.6560780344484 count=120177600
+Taylor:: Running gate count for time: 5.769239303608438e-05
+Taylor:: reps:30044400, k_max:5
+Taylor:: counter: {'cx': 400} reps: 30044400
+Taylor:: evo_time=5.769239303608438e-05 k=5 sim_error=3.6982303228259216e-10 lambda=131.6560780344484 count=120177600
+Taylor:: Running gate count for time: 5.769239303608438e-05
+Taylor:: reps:30044400, k_max:5
+Taylor:: counter: {'cx': 400} reps: 30044400
+Taylor:: evo_time=5.769239303608438e-05 k=5 sim_error=3.6982303228259216e-10 lambda=131.6560780344484 count=120177600
+Taylor:: Running gate count for time: 5.769239303608438e-05
+Taylor:: reps:30044400, k_max:5
+Taylor:: counter: {'cx': 400} reps: 30044400
+Taylor:: evo_time=5.769239303608438e-05 k=5 sim_error=3.6982303228259216e-10 lambda=131.6560780344484 count=120177600
+Taylor:: Running gate count for time: 5.769239303608438e-05
+Taylor:: reps:30044400, k_max:5
+Taylor:: counter: {'cx': 400} reps: 30044400
+Taylor:: evo_time=5.769239303608438e-05 k=5 sim_error=3.6982303228259216e-10 lambda=131.6560780344484 count=120177600
+Taylor:: Running gate count for time: 5.769239303608438e-05
+Taylor:: reps:30044400, k_max:5
+Taylor:: counter: {'cx': 400} reps: 30044400
+Taylor:: evo_time=5.769239303608438e-05 k=5 sim_error=3.6982303228259216e-10 lambda=131.6560780344484 count=120177600
+Taylor:: Running gate count for time: 5.769239303608438e-05
+Taylor:: reps:30044400, k_max:5
+Taylor:: counter: {'cx': 400} reps: 30044400
+Taylor:: evo_time=5.769239303608438e-05 k=5 sim_error=3.6982303228259216e-10 lambda=131.6560780344484 count=120177600
+Taylor:: Running gate count for time: 5.769239303608438e-05
+Taylor:: reps:30044400, k_max:5
+Taylor:: counter: {'cx': 400} reps: 30044400
+Taylor:: evo_time=5.769239303608438e-05 k=5 sim_error=3.6982303228259216e-10 lambda=131.6560780344484 count=120177600
+Taylor:: Running gate count for time: 5.769239303608438e-05
+Taylor:: reps:30044400, k_max:5
+Taylor:: counter: {'cx': 400} reps: 30044400
+Taylor:: evo_time=5.769239303608438e-05 k=5 sim_error=3.6982303228259216e-10 lambda=131.6560780344484 count=120177600
+error=0.01 nu=518827
+!!!!!!!!!!!!!!!!!!!!Trotter: Running gate count for time: 4.390245260516083e-05
+OrderedDict({'u3': 19, 'cx': 18})
+Trotter: Running gate count for time: 4.390245260516083e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 4.390245260516083e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 4.390245260516083e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 4.390245260516083e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 4.390245260516083e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 4.390245260516083e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 4.390245260516083e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 4.390245260516083e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 4.390245260516083e-05
+OrderedDict({'u3': 19, 'cx': 18})
+KTrotter: reps:53.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=4.390245260516083e-05 rep=53.0 sim_error=2.1415830539102845e-10 lambda=6875387.821793802 count=1908.0
+!KTrotter: reps:53.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=4.390245260516083e-05 rep=53.0 sim_error=2.1415830539102845e-10 lambda=6875387.821793802 count=1908.0
+!KTrotter: reps:53.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=4.390245260516083e-05 rep=53.0 sim_error=2.1415830539102845e-10 lambda=6875387.821793802 count=1908.0
+!KTrotter: reps:53.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=4.390245260516083e-05 rep=53.0 sim_error=2.1415830539102845e-10 lambda=6875387.821793802 count=1908.0
+!KTrotter: reps:53.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=4.390245260516083e-05 rep=53.0 sim_error=2.1415830539102845e-10 lambda=6875387.821793802 count=1908.0
+!KTrotter: reps:53.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=4.390245260516083e-05 rep=53.0 sim_error=2.1415830539102845e-10 lambda=6875387.821793802 count=1908.0
+!KTrotter: reps:53.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=4.390245260516083e-05 rep=53.0 sim_error=2.1415830539102845e-10 lambda=6875387.821793802 count=1908.0
+!KTrotter: reps:53.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=4.390245260516083e-05 rep=53.0 sim_error=2.1415830539102845e-10 lambda=6875387.821793802 count=1908.0
+!KTrotter: reps:53.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=4.390245260516083e-05 rep=53.0 sim_error=2.1415830539102845e-10 lambda=6875387.821793802 count=1908.0
+!KTrotter: reps:53.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=4.390245260516083e-05 rep=53.0 sim_error=2.1415830539102845e-10 lambda=6875387.821793802 count=1908.0
+Taylor:: Running gate count for time: 4.390245260516083e-05
+Taylor:: reps:51882700, k_max:6
+Taylor:: counter: {'cx': 400} reps: 51882700
+Taylor:: evo_time=4.390245260516083e-05 k=6 sim_error=2.1415830539102845e-10 lambda=150.923106194825 count=207530800
+Taylor:: Running gate count for time: 4.390245260516083e-05
+Taylor:: reps:51882700, k_max:6
+Taylor:: counter: {'cx': 400} reps: 51882700
+Taylor:: evo_time=4.390245260516083e-05 k=6 sim_error=2.1415830539102845e-10 lambda=150.923106194825 count=207530800
+Taylor:: Running gate count for time: 4.390245260516083e-05
+Taylor:: reps:51882700, k_max:6
+Taylor:: counter: {'cx': 400} reps: 51882700
+Taylor:: evo_time=4.390245260516083e-05 k=6 sim_error=2.1415830539102845e-10 lambda=150.923106194825 count=207530800
+Taylor:: Running gate count for time: 4.390245260516083e-05
+Taylor:: reps:51882700, k_max:6
+Taylor:: counter: {'cx': 400} reps: 51882700
+Taylor:: evo_time=4.390245260516083e-05 k=6 sim_error=2.1415830539102845e-10 lambda=150.923106194825 count=207530800
+Taylor:: Running gate count for time: 4.390245260516083e-05
+Taylor:: reps:51882700, k_max:6
+Taylor:: counter: {'cx': 400} reps: 51882700
+Taylor:: evo_time=4.390245260516083e-05 k=6 sim_error=2.1415830539102845e-10 lambda=150.923106194825 count=207530800
+Taylor:: Running gate count for time: 4.390245260516083e-05
+Taylor:: reps:51882700, k_max:6
+Taylor:: counter: {'cx': 400} reps: 51882700
+Taylor:: evo_time=4.390245260516083e-05 k=6 sim_error=2.1415830539102845e-10 lambda=150.923106194825 count=207530800
+Taylor:: Running gate count for time: 4.390245260516083e-05
+Taylor:: reps:51882700, k_max:6
+Taylor:: counter: {'cx': 400} reps: 51882700
+Taylor:: evo_time=4.390245260516083e-05 k=6 sim_error=2.1415830539102845e-10 lambda=150.923106194825 count=207530800
+Taylor:: Running gate count for time: 4.390245260516083e-05
+Taylor:: reps:51882700, k_max:6
+Taylor:: counter: {'cx': 400} reps: 51882700
+Taylor:: evo_time=4.390245260516083e-05 k=6 sim_error=2.1415830539102845e-10 lambda=150.923106194825 count=207530800
+Taylor:: Running gate count for time: 4.390245260516083e-05
+Taylor:: reps:51882700, k_max:6
+Taylor:: counter: {'cx': 400} reps: 51882700
+Taylor:: evo_time=4.390245260516083e-05 k=6 sim_error=2.1415830539102845e-10 lambda=150.923106194825 count=207530800
+Taylor:: Running gate count for time: 4.390245260516083e-05
+Taylor:: reps:51882700, k_max:6
+Taylor:: counter: {'cx': 400} reps: 51882700
+Taylor:: evo_time=4.390245260516083e-05 k=6 sim_error=2.1415830539102845e-10 lambda=150.923106194825 count=207530800
+error=0.01 nu=796493
+!!!!!!!!!!!!!!!!!!!!Trotter: Running gate count for time: 3.5433107663497635e-05
+OrderedDict({'u3': 19, 'cx': 18})
+Trotter: Running gate count for time: 3.5433107663497635e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 3.5433107663497635e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 3.5433107663497635e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 3.5433107663497635e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 3.5433107663497635e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 3.5433107663497635e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 3.5433107663497635e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 3.5433107663497635e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 3.5433107663497635e-05
+OrderedDict({'u3': 19, 'cx': 18})
+KTrotter: reps:55.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=3.5433107663497635e-05 rep=55.0 sim_error=1.3950042387203795e-10 lambda=9482359.244075427 count=1980.0
+!KTrotter: reps:55.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=3.5433107663497635e-05 rep=55.0 sim_error=1.3950042387203795e-10 lambda=9482359.244075427 count=1980.0
+!KTrotter: reps:55.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=3.5433107663497635e-05 rep=55.0 sim_error=1.3950042387203795e-10 lambda=9482359.244075427 count=1980.0
+!KTrotter: reps:55.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=3.5433107663497635e-05 rep=55.0 sim_error=1.3950042387203795e-10 lambda=9482359.244075427 count=1980.0
+!KTrotter: reps:55.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=3.5433107663497635e-05 rep=55.0 sim_error=1.3950042387203795e-10 lambda=9482359.244075427 count=1980.0
+!KTrotter: reps:55.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=3.5433107663497635e-05 rep=55.0 sim_error=1.3950042387203795e-10 lambda=9482359.244075427 count=1980.0
+!KTrotter: reps:55.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=3.5433107663497635e-05 rep=55.0 sim_error=1.3950042387203795e-10 lambda=9482359.244075427 count=1980.0
+!KTrotter: reps:55.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=3.5433107663497635e-05 rep=55.0 sim_error=1.3950042387203795e-10 lambda=9482359.244075427 count=1980.0
+!KTrotter: reps:55.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=3.5433107663497635e-05 rep=55.0 sim_error=1.3950042387203795e-10 lambda=9482359.244075427 count=1980.0
+!KTrotter: reps:55.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=3.5433107663497635e-05 rep=55.0 sim_error=1.3950042387203795e-10 lambda=9482359.244075427 count=1980.0
+Taylor:: Running gate count for time: 3.5433107663497635e-05
+Taylor:: reps:79649300, k_max:6
+Taylor:: counter: {'cx': 400} reps: 79649300
+Taylor:: evo_time=3.5433107663497635e-05 k=6 sim_error=1.3950042387203795e-10 lambda=167.99465711304669 count=318597200
+Taylor:: Running gate count for time: 3.5433107663497635e-05
+Taylor:: reps:79649300, k_max:6
+Taylor:: counter: {'cx': 400} reps: 79649300
+Taylor:: evo_time=3.5433107663497635e-05 k=6 sim_error=1.3950042387203795e-10 lambda=167.99465711304669 count=318597200
+Taylor:: Running gate count for time: 3.5433107663497635e-05
+Taylor:: reps:79649300, k_max:6
+Taylor:: counter: {'cx': 400} reps: 79649300
+Taylor:: evo_time=3.5433107663497635e-05 k=6 sim_error=1.3950042387203795e-10 lambda=167.99465711304669 count=318597200
+Taylor:: Running gate count for time: 3.5433107663497635e-05
+Taylor:: reps:79649300, k_max:6
+Taylor:: counter: {'cx': 400} reps: 79649300
+Taylor:: evo_time=3.5433107663497635e-05 k=6 sim_error=1.3950042387203795e-10 lambda=167.99465711304669 count=318597200
+Taylor:: Running gate count for time: 3.5433107663497635e-05
+Taylor:: reps:79649300, k_max:6
+Taylor:: counter: {'cx': 400} reps: 79649300
+Taylor:: evo_time=3.5433107663497635e-05 k=6 sim_error=1.3950042387203795e-10 lambda=167.99465711304669 count=318597200
+Taylor:: Running gate count for time: 3.5433107663497635e-05
+Taylor:: reps:79649300, k_max:6
+Taylor:: counter: {'cx': 400} reps: 79649300
+Taylor:: evo_time=3.5433107663497635e-05 k=6 sim_error=1.3950042387203795e-10 lambda=167.99465711304669 count=318597200
+Taylor:: Running gate count for time: 3.5433107663497635e-05
+Taylor:: reps:79649300, k_max:6
+Taylor:: counter: {'cx': 400} reps: 79649300
+Taylor:: evo_time=3.5433107663497635e-05 k=6 sim_error=1.3950042387203795e-10 lambda=167.99465711304669 count=318597200
+Taylor:: Running gate count for time: 3.5433107663497635e-05
+Taylor:: reps:79649300, k_max:6
+Taylor:: counter: {'cx': 400} reps: 79649300
+Taylor:: evo_time=3.5433107663497635e-05 k=6 sim_error=1.3950042387203795e-10 lambda=167.99465711304669 count=318597200
+Taylor:: Running gate count for time: 3.5433107663497635e-05
+Taylor:: reps:79649300, k_max:6
+Taylor:: counter: {'cx': 400} reps: 79649300
+Taylor:: evo_time=3.5433107663497635e-05 k=6 sim_error=1.3950042387203795e-10 lambda=167.99465711304669 count=318597200
+Taylor:: Running gate count for time: 3.5433107663497635e-05
+Taylor:: reps:79649300, k_max:6
+Taylor:: counter: {'cx': 400} reps: 79649300
+Taylor:: evo_time=3.5433107663497635e-05 k=6 sim_error=1.3950042387203795e-10 lambda=167.99465711304669 count=318597200
+error=0.01 nu=1133444
+!!!!!!!!!!!!!!!!!!!!Trotter: Running gate count for time: 2.970298194411605e-05
+OrderedDict({'u3': 19, 'cx': 18})
+Trotter: Running gate count for time: 2.970298194411605e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2.970298194411605e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2.970298194411605e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2.970298194411605e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2.970298194411605e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2.970298194411605e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2.970298194411605e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2.970298194411605e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2.970298194411605e-05
+OrderedDict({'u3': 19, 'cx': 18})
+KTrotter: reps:58.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.970298194411605e-05 rep=58.0 sim_error=9.802964337992094e-11 lambda=12354640.987512536 count=2088.0
+!KTrotter: reps:58.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.970298194411605e-05 rep=58.0 sim_error=9.802964337992094e-11 lambda=12354640.987512536 count=2088.0
+!KTrotter: reps:58.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.970298194411605e-05 rep=58.0 sim_error=9.802964337992094e-11 lambda=12354640.987512536 count=2088.0
+!KTrotter: reps:58.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.970298194411605e-05 rep=58.0 sim_error=9.802964337992094e-11 lambda=12354640.987512536 count=2088.0
+!KTrotter: reps:58.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.970298194411605e-05 rep=58.0 sim_error=9.802964337992094e-11 lambda=12354640.987512536 count=2088.0
+!KTrotter: reps:58.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.970298194411605e-05 rep=58.0 sim_error=9.802964337992094e-11 lambda=12354640.987512536 count=2088.0
+!KTrotter: reps:58.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.970298194411605e-05 rep=58.0 sim_error=9.802964337992094e-11 lambda=12354640.987512536 count=2088.0
+!KTrotter: reps:58.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.970298194411605e-05 rep=58.0 sim_error=9.802964337992094e-11 lambda=12354640.987512536 count=2088.0
+!KTrotter: reps:58.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.970298194411605e-05 rep=58.0 sim_error=9.802964337992094e-11 lambda=12354640.987512536 count=2088.0
+!KTrotter: reps:58.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.970298194411605e-05 rep=58.0 sim_error=9.802964337992094e-11 lambda=12354640.987512536 count=2088.0
+Taylor:: Running gate count for time: 2.970298194411605e-05
+Taylor:: reps:113344400, k_max:6
+Taylor:: counter: {'cx': 400} reps: 113344400
+Taylor:: evo_time=2.970298194411605e-05 k=6 sim_error=9.802964337992094e-11 lambda=183.48477965606804 count=453377600
+Taylor:: Running gate count for time: 2.970298194411605e-05
+Taylor:: reps:113344400, k_max:6
+Taylor:: counter: {'cx': 400} reps: 113344400
+Taylor:: evo_time=2.970298194411605e-05 k=6 sim_error=9.802964337992094e-11 lambda=183.48477965606804 count=453377600
+Taylor:: Running gate count for time: 2.970298194411605e-05
+Taylor:: reps:113344400, k_max:6
+Taylor:: counter: {'cx': 400} reps: 113344400
+Taylor:: evo_time=2.970298194411605e-05 k=6 sim_error=9.802964337992094e-11 lambda=183.48477965606804 count=453377600
+Taylor:: Running gate count for time: 2.970298194411605e-05
+Taylor:: reps:113344400, k_max:6
+Taylor:: counter: {'cx': 400} reps: 113344400
+Taylor:: evo_time=2.970298194411605e-05 k=6 sim_error=9.802964337992094e-11 lambda=183.48477965606804 count=453377600
+Taylor:: Running gate count for time: 2.970298194411605e-05
+Taylor:: reps:113344400, k_max:6
+Taylor:: counter: {'cx': 400} reps: 113344400
+Taylor:: evo_time=2.970298194411605e-05 k=6 sim_error=9.802964337992094e-11 lambda=183.48477965606804 count=453377600
+Taylor:: Running gate count for time: 2.970298194411605e-05
+Taylor:: reps:113344400, k_max:6
+Taylor:: counter: {'cx': 400} reps: 113344400
+Taylor:: evo_time=2.970298194411605e-05 k=6 sim_error=9.802964337992094e-11 lambda=183.48477965606804 count=453377600
+Taylor:: Running gate count for time: 2.970298194411605e-05
+Taylor:: reps:113344400, k_max:6
+Taylor:: counter: {'cx': 400} reps: 113344400
+Taylor:: evo_time=2.970298194411605e-05 k=6 sim_error=9.802964337992094e-11 lambda=183.48477965606804 count=453377600
+Taylor:: Running gate count for time: 2.970298194411605e-05
+Taylor:: reps:113344400, k_max:6
+Taylor:: counter: {'cx': 400} reps: 113344400
+Taylor:: evo_time=2.970298194411605e-05 k=6 sim_error=9.802964337992094e-11 lambda=183.48477965606804 count=453377600
+Taylor:: Running gate count for time: 2.970298194411605e-05
+Taylor:: reps:113344400, k_max:6
+Taylor:: counter: {'cx': 400} reps: 113344400
+Taylor:: evo_time=2.970298194411605e-05 k=6 sim_error=9.802964337992094e-11 lambda=183.48477965606804 count=453377600
+Taylor:: Running gate count for time: 2.970298194411605e-05
+Taylor:: reps:113344400, k_max:6
+Taylor:: counter: {'cx': 400} reps: 113344400
+Taylor:: evo_time=2.970298194411605e-05 k=6 sim_error=9.802964337992094e-11 lambda=183.48477965606804 count=453377600
+error=0.01 nu=1529679
+!!!!!!!!!!!!!!!!!!!!Trotter: Running gate count for time: 2.5568182024536594e-05
+OrderedDict({'u3': 19, 'cx': 18})
+Trotter: Running gate count for time: 2.5568182024536594e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2.5568182024536594e-05
+OrderedDict({'u3': 19, 'cx': 18})
+Trotter: Running gate count for time: 2.5568182024536594e-05
+OrderedDict({'u3': 19, 'cx': 18})
+Trotter: Running gate count for time: 2.5568182024536594e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2.5568182024536594e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2.5568182024536594e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2.5568182024536594e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2.5568182024536594e-05
+OrderedDict({'u3': 19, 'cx': 18})
+Trotter: Running gate count for time: 2.5568182024536594e-05
+OrderedDict({'u3': 19, 'cx': 18})
+KTrotter: reps:60.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.5568182024536594e-05 rep=60.0 sim_error=7.263688075152441e-11 lambda=15469646.509159386 count=2160.0
+!KTrotter: reps:60.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.5568182024536594e-05 rep=60.0 sim_error=7.263688075152441e-11 lambda=15469646.509159386 count=2160.0
+!KTrotter: reps:60.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.5568182024536594e-05 rep=60.0 sim_error=7.263688075152441e-11 lambda=15469646.509159386 count=2160.0
+!KTrotter: reps:60.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.5568182024536594e-05 rep=60.0 sim_error=7.263688075152441e-11 lambda=15469646.509159386 count=2160.0
+!KTrotter: reps:60.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.5568182024536594e-05 rep=60.0 sim_error=7.263688075152441e-11 lambda=15469646.509159386 count=2160.0
+!KTrotter: reps:60.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.5568182024536594e-05 rep=60.0 sim_error=7.263688075152441e-11 lambda=15469646.509159386 count=2160.0
+!KTrotter: reps:60.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.5568182024536594e-05 rep=60.0 sim_error=7.263688075152441e-11 lambda=15469646.509159386 count=2160.0
+!KTrotter: reps:60.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.5568182024536594e-05 rep=60.0 sim_error=7.263688075152441e-11 lambda=15469646.509159386 count=2160.0
+!KTrotter: reps:60.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.5568182024536594e-05 rep=60.0 sim_error=7.263688075152441e-11 lambda=15469646.509159386 count=2160.0
+!KTrotter: reps:60.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.5568182024536594e-05 rep=60.0 sim_error=7.263688075152441e-11 lambda=15469646.509159386 count=2160.0
+Taylor:: Running gate count for time: 2.5568182024536594e-05
+Taylor:: reps:152967900, k_max:6
+Taylor:: counter: {'cx': 400} reps: 152967900
+Taylor:: evo_time=2.5568182024536594e-05 k=6 sim_error=7.263688075152441e-11 lambda=197.76531775934114 count=611871600
+Taylor:: Running gate count for time: 2.5568182024536594e-05
+Taylor:: reps:152967900, k_max:6
+Taylor:: counter: {'cx': 400} reps: 152967900
+Taylor:: evo_time=2.5568182024536594e-05 k=6 sim_error=7.263688075152441e-11 lambda=197.76531775934114 count=611871600
+Taylor:: Running gate count for time: 2.5568182024536594e-05
+Taylor:: reps:152967900, k_max:6
+Taylor:: counter: {'cx': 400} reps: 152967900
+Taylor:: evo_time=2.5568182024536594e-05 k=6 sim_error=7.263688075152441e-11 lambda=197.76531775934114 count=611871600
+Taylor:: Running gate count for time: 2.5568182024536594e-05
+Taylor:: reps:152967900, k_max:6
+Taylor:: counter: {'cx': 400} reps: 152967900
+Taylor:: evo_time=2.5568182024536594e-05 k=6 sim_error=7.263688075152441e-11 lambda=197.76531775934114 count=611871600
+Taylor:: Running gate count for time: 2.5568182024536594e-05
+Taylor:: reps:152967900, k_max:6
+Taylor:: counter: {'cx': 400} reps: 152967900
+Taylor:: evo_time=2.5568182024536594e-05 k=6 sim_error=7.263688075152441e-11 lambda=197.76531775934114 count=611871600
+Taylor:: Running gate count for time: 2.5568182024536594e-05
+Taylor:: reps:152967900, k_max:6
+Taylor:: counter: {'cx': 400} reps: 152967900
+Taylor:: evo_time=2.5568182024536594e-05 k=6 sim_error=7.263688075152441e-11 lambda=197.76531775934114 count=611871600
+Taylor:: Running gate count for time: 2.5568182024536594e-05
+Taylor:: reps:152967900, k_max:6
+Taylor:: counter: {'cx': 400} reps: 152967900
+Taylor:: evo_time=2.5568182024536594e-05 k=6 sim_error=7.263688075152441e-11 lambda=197.76531775934114 count=611871600
+Taylor:: Running gate count for time: 2.5568182024536594e-05
+Taylor:: reps:152967900, k_max:6
+Taylor:: counter: {'cx': 400} reps: 152967900
+Taylor:: evo_time=2.5568182024536594e-05 k=6 sim_error=7.263688075152441e-11 lambda=197.76531775934114 count=611871600
+Taylor:: Running gate count for time: 2.5568182024536594e-05
+Taylor:: reps:152967900, k_max:6
+Taylor:: counter: {'cx': 400} reps: 152967900
+Taylor:: evo_time=2.5568182024536594e-05 k=6 sim_error=7.263688075152441e-11 lambda=197.76531775934114 count=611871600
+Taylor:: Running gate count for time: 2.5568182024536594e-05
+Taylor:: reps:152967900, k_max:6
+Taylor:: counter: {'cx': 400} reps: 152967900
+Taylor:: evo_time=2.5568182024536594e-05 k=6 sim_error=7.263688075152441e-11 lambda=197.76531775934114 count=611871600
+error=0.01 nu=1985197
+!!!!!!!!!!!Running second order total:12167 alpha_u:14303625855.763332
+Running first order total:529 alpha_u:5892470.646508728
+Running second order total:12167 alpha_u:14303625855.763332
+Running first order total:529 alpha_u:5892470.646508728
+Running second order total:12167 alpha_u:14303625855.763332
+Running first order total:529 alpha_u:5892470.646508728
+Running second order total:12167 alpha_u:14303625855.763332
+Running first order total:529 alpha_u:5892470.646508728
+Running second order total:12167 alpha_u:14303625855.763332
+Trotter: Running gate count for time: 2.2443896276065076e-05
+OrderedDict({'u3': 19, 'cx': 18})
+Trotter: Running gate count for time: 2.2443896276065076e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2.2443896276065076e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2.2443896276065076e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2.2443896276065076e-05
+OrderedDict({'u3': 19, 'cx': 18})
+Trotter: Running gate count for time: 2.2443896276065076e-05
+OrderedDict({'u3': 19, 'cx': 18})
+Trotter: Running gate count for time: 2.2443896276065076e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2.2443896276065076e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2.2443896276065076e-05
+OrderedDict({'u3': 19, 'cx': 18})
+Trotter: Running gate count for time: 2.2443896276065076e-05
+OrderedDict({'u3': 19, 'cx': 18})
+KTrotter: reps:62.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.2443896276065076e-05 rep=62.0 sim_error=5.5969816149788216e-11 lambda=18809738.363700673 count=2232.0
+!KTrotter: reps:62.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.2443896276065076e-05 rep=62.0 sim_error=5.5969816149788216e-11 lambda=18809738.363700673 count=2232.0
+!KTrotter: reps:62.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.2443896276065076e-05 rep=62.0 sim_error=5.5969816149788216e-11 lambda=18809738.363700673 count=2232.0
+!KTrotter: reps:62.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.2443896276065076e-05 rep=62.0 sim_error=5.5969816149788216e-11 lambda=18809738.363700673 count=2232.0
+!KTrotter: reps:62.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.2443896276065076e-05 rep=62.0 sim_error=5.5969816149788216e-11 lambda=18809738.363700673 count=2232.0
+KTrotter: reps:62.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.2443896276065076e-05 rep=62.0 sim_error=5.5969816149788216e-11 lambda=18809738.363700673 count=2232.0
+!KTrotter: reps:62.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.2443896276065076e-05 rep=62.0 sim_error=5.5969816149788216e-11 lambda=18809738.363700673 count=2232.0
+!KTrotter: reps:62.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.2443896276065076e-05 rep=62.0 sim_error=5.5969816149788216e-11 lambda=18809738.363700673 count=2232.0
+!KTrotter: reps:62.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.2443896276065076e-05 rep=62.0 sim_error=5.5969816149788216e-11 lambda=18809738.363700673 count=2232.0
+!KTrotter: reps:62.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2.2443896276065076e-05 rep=62.0 sim_error=5.5969816149788216e-11 lambda=18809738.363700673 count=2232.0
+Taylor:: Running gate count for time: 2.2443896276065076e-05
+Taylor:: reps:198519700, k_max:6
+Taylor:: counter: {'cx': 400} reps: 198519700
+Taylor:: evo_time=2.2443896276065076e-05 k=6 sim_error=5.5969816149788216e-11 lambda=211.08186354089293 count=794078800
+Taylor:: Running gate count for time: 2.2443896276065076e-05
+Taylor:: reps:198519700, k_max:6
+Taylor:: counter: {'cx': 400} reps: 198519700
+Taylor:: evo_time=2.2443896276065076e-05 k=6 sim_error=5.5969816149788216e-11 lambda=211.08186354089293 count=794078800
+Taylor:: Running gate count for time: 2.2443896276065076e-05
+Taylor:: reps:198519700, k_max:6
+Taylor:: counter: {'cx': 400} reps: 198519700
+Taylor:: evo_time=2.2443896276065076e-05 k=6 sim_error=5.5969816149788216e-11 lambda=211.08186354089293 count=794078800
+Taylor:: Running gate count for time: 2.2443896276065076e-05
+Taylor:: reps:198519700, k_max:6
+Taylor:: counter: {'cx': 400} reps: 198519700
+Taylor:: evo_time=2.2443896276065076e-05 k=6 sim_error=5.5969816149788216e-11 lambda=211.08186354089293 count=794078800
+Taylor:: Running gate count for time: 2.2443896276065076e-05
+Taylor:: reps:198519700, k_max:6
+Taylor:: counter: {'cx': 400} reps: 198519700
+Taylor:: evo_time=2.2443896276065076e-05 k=6 sim_error=5.5969816149788216e-11 lambda=211.08186354089293 count=794078800
+Taylor:: Running gate count for time: 2.2443896276065076e-05
+Taylor:: reps:198519700, k_max:6
+Taylor:: counter: {'cx': 400} reps: 198519700
+Taylor:: evo_time=2.2443896276065076e-05 k=6 sim_error=5.5969816149788216e-11 lambda=211.08186354089293 count=794078800
+Taylor:: Running gate count for time: 2.2443896276065076e-05
+Taylor:: reps:198519700, k_max:6
+Taylor:: counter: {'cx': 400} reps: 198519700
+Taylor:: evo_time=2.2443896276065076e-05 k=6 sim_error=5.5969816149788216e-11 lambda=211.08186354089293 count=794078800
+Taylor:: Running gate count for time: 2.2443896276065076e-05
+Taylor:: reps:198519700, k_max:6
+Taylor:: counter: {'cx': 400} reps: 198519700
+Taylor:: evo_time=2.2443896276065076e-05 k=6 sim_error=5.5969816149788216e-11 lambda=211.08186354089293 count=794078800
+Taylor:: Running gate count for time: 2.2443896276065076e-05
+Taylor:: reps:198519700, k_max:6
+Taylor:: counter: {'cx': 400} reps: 198519700
+Taylor:: evo_time=2.2443896276065076e-05 k=6 sim_error=5.5969816149788216e-11 lambda=211.08186354089293 count=794078800
+Taylor:: Running gate count for time: 2.2443896276065076e-05
+Taylor:: reps:198519700, k_max:6
+Taylor:: counter: {'cx': 400} reps: 198519700
+Taylor:: evo_time=2.2443896276065076e-05 k=6 sim_error=5.5969816149788216e-11 lambda=211.08186354089293 count=794078800
+error=0.01 nu=2500000
+Running first order total:529 alpha_u:6612499.999999998
+Running second order total:12167 alpha_u:17003899426.399956
+Running first order total:529 alpha_u:6612499.999999998
+Running second order total:12167 alpha_u:17003899426.399956
+Running first order total:529 alpha_u:6612499.999999998
+Running second order total:12167 alpha_u:17003899426.399956
+Running first order total:529 alpha_u:6612499.999999998
+Running second order total:12167 alpha_u:17003899426.399956
+Running first order total:529 alpha_u:6612499.999999998
+Running second order total:12167 alpha_u:17003899426.399956
+Running first order total:529 alpha_u:6612499.999999998
+Running second order total:12167 alpha_u:17003899426.399956
+Running first order total:529 alpha_u:6612499.999999998
+Running second order total:12167 alpha_u:17003899426.399956
+Running first order total:529 alpha_u:6612499.999999998
+Running second order total:12167 alpha_u:17003899426.399956
+Running first order total:529 alpha_u:6612499.999999998
+Running second order total:12167 alpha_u:17003899426.399956
+Running first order total:529 alpha_u:6612499.999999998
+Running second order total:12167 alpha_u:17003899426.399956
+Trotter: Running gate count for time: 2e-05
+OrderedDict({'u3': 19, 'cx': 18})
+Trotter: Running gate count for time: 2e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2e-05
+OrderedDict({'u3': 19, 'cx': 18})
+!Trotter: Running gate count for time: 2e-05
+OrderedDict({'u3': 19, 'cx': 18})
+KTrotter: reps:64.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2e-05 rep=64.0 sim_error=4.4444444444444444e-11 lambda=22360685.776783187 count=2304.0
+!KTrotter: reps:64.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2e-05 rep=64.0 sim_error=4.4444444444444444e-11 lambda=22360685.776783187 count=2304.0
+!KTrotter: reps:64.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2e-05 rep=64.0 sim_error=4.4444444444444444e-11 lambda=22360685.776783187 count=2304.0
+!KTrotter: reps:64.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2e-05 rep=64.0 sim_error=4.4444444444444444e-11 lambda=22360685.776783187 count=2304.0
+!KTrotter: reps:64.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2e-05 rep=64.0 sim_error=4.4444444444444444e-11 lambda=22360685.776783187 count=2304.0
+!KTrotter: reps:64.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2e-05 rep=64.0 sim_error=4.4444444444444444e-11 lambda=22360685.776783187 count=2304.0
+!KTrotter: reps:64.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2e-05 rep=64.0 sim_error=4.4444444444444444e-11 lambda=22360685.776783187 count=2304.0
+!KTrotter: reps:64.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2e-05 rep=64.0 sim_error=4.4444444444444444e-11 lambda=22360685.776783187 count=2304.0
+!KTrotter: reps:64.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2e-05 rep=64.0 sim_error=4.4444444444444444e-11 lambda=22360685.776783187 count=2304.0
+!KTrotter: reps:64.0 split:1 count:{'cx': 36, 'u3': 28}
+KTrotter:: evo_time=2e-05 rep=64.0 sim_error=4.4444444444444444e-11 lambda=22360685.776783187 count=2304.0
+Taylor:: Running gate count for time: 2e-05
+Taylor:: reps:250000000, k_max:6
+Taylor:: counter: {'cx': 400} reps: 250000000
+Taylor:: evo_time=2e-05 k=6 sim_error=4.4444444444444444e-11 lambda=223.60681774997894 count=1000000000
+Taylor:: Running gate count for time: 2e-05
+Taylor:: reps:250000000, k_max:6
+Taylor:: counter: {'cx': 400} reps: 250000000
+Taylor:: evo_time=2e-05 k=6 sim_error=4.4444444444444444e-11 lambda=223.60681774997894 count=1000000000
+Taylor:: Running gate count for time: 2e-05
+Taylor:: reps:250000000, k_max:6
+Taylor:: counter: {'cx': 400} reps: 250000000
+Taylor:: evo_time=2e-05 k=6 sim_error=4.4444444444444444e-11 lambda=223.60681774997894 count=1000000000
+Taylor:: Running gate count for time: 2e-05
+Taylor:: reps:250000000, k_max:6
+Taylor:: counter: {'cx': 400} reps: 250000000
+Taylor:: evo_time=2e-05 k=6 sim_error=4.4444444444444444e-11 lambda=223.60681774997894 count=1000000000
+Taylor:: Running gate count for time: 2e-05
+Taylor:: reps:250000000, k_max:6
+Taylor:: counter: {'cx': 400} reps: 250000000
+Taylor:: evo_time=2e-05 k=6 sim_error=4.4444444444444444e-11 lambda=223.60681774997894 count=1000000000
+Taylor:: Running gate count for time: 2e-05
+Taylor:: reps:250000000, k_max:6
+Taylor:: counter: {'cx': 400} reps: 250000000
+Taylor:: evo_time=2e-05 k=6 sim_error=4.4444444444444444e-11 lambda=223.60681774997894 count=1000000000
+Taylor:: Running gate count for time: 2e-05
+Taylor:: reps:250000000, k_max:6
+Taylor:: counter: {'cx': 400} reps: 250000000
+Taylor:: evo_time=2e-05 k=6 sim_error=4.4444444444444444e-11 lambda=223.60681774997894 count=1000000000
+Taylor:: Running gate count for time: 2e-05
+Taylor:: reps:250000000, k_max:6
+Taylor:: counter: {'cx': 400} reps: 250000000
+Taylor:: evo_time=2e-05 k=6 sim_error=4.4444444444444444e-11 lambda=223.60681774997894 count=1000000000
+Taylor:: Running gate count for time: 2e-05
+Taylor:: reps:250000000, k_max:6
+Taylor:: counter: {'cx': 400} reps: 250000000
+Taylor:: evo_time=2e-05 k=6 sim_error=4.4444444444444444e-11 lambda=223.60681774997894 count=1000000000
+Taylor:: Running gate count for time: 2e-05
+Taylor:: reps:250000000, k_max:6
+Taylor:: counter: {'cx': 400} reps: 250000000
+Taylor:: evo_time=2e-05 k=6 sim_error=4.4444444444444444e-11 lambda=223.60681774997894 count=1000000000
+Plots saved with hash: ed57204f
 Parameters saved to: plots/newbenchmark/cx_vs_time/parameters.json

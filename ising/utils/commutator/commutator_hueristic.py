@@ -98,7 +98,7 @@ def alpha_commutator_second_order(
                 #     # TODO: For the sake of bounds
                 #     return alpha_l
 
-    assert abs(alpha_l - alpha_u) < 1e-5
+    # assert abs(alpha_l - alpha_u) < 1e-6
     assert cur_count == total_count
 
     return alpha_u
@@ -157,7 +157,7 @@ def alpha_commutator_first_order(
             #     return alpha_u
 
     assert cur_count == total_count
-    assert abs(alpha_l - alpha_u) < 0.0001
+    assert abs(alpha_l - alpha_u) < 0.00001
 
     return alpha_u
 

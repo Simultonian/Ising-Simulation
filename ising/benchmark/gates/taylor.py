@@ -243,7 +243,7 @@ class TaylorBenchmarkTime:
         Counts the gates analytically rather than via decomposition.
         """
         t_bar = time * self.lambd
-        reps = max(20, int(10 * np.ceil(t_bar) ** 2))
+        reps = max(20, int(10 * np.ceil(t_bar) ** 2 * self.capital_K))
 
         if gate == "cx":
             print(f"Taylor:: Counting cx for reps:{reps}")
@@ -261,7 +261,7 @@ class TaylorBenchmarkTime:
     def simulation_gate_count(self, time: float, k: int) -> dict[str, int]:
         print(f"Taylor:: Running gate count for time: {time}")
         t_bar = time * self.lambd
-        reps = max(20, int(10 * np.ceil(t_bar) ** 2))
+        reps = max(20, int(10 * np.ceil(t_bar) ** 2 * self.capital_K))
 
         if reps < SPLIT_SIZE:
             split = 1
@@ -269,17 +269,23 @@ class TaylorBenchmarkTime:
             split = SPLIT_SIZE
 
         circuit = self.simulation_circuit(t_bar, reps, k, split)
+        # print(f"Circuit depth: {circuit.depth()} gates: {circuit.size()}")
         dqc = self.decomposer.decompose(circuit)
+        # print(f"Decomposed Circuit depth: {dqc.depth()} gates: {dqc.size()}")
+
+        ops = dict(dqc.count_ops())
+        if "cx" not in ops:
+            ops["cx"] = 2 * circuit.depth()
 
         counter = Counter()
-        counter.add(dict(dqc.count_ops()))
+        counter.add(ops)
         print(f"Taylor:: counter: {counter.times(1)} reps: {reps}")
         return counter.times(reps // split)
 
     def controlled_gate_count(self, time: float, k: int) -> dict[str, int]:
         print(f"Taylor:: Running controlled gate count for time: {time}")
         t_bar = time * self.lambd
-        reps = max(20, int(10 * np.ceil(t_bar) ** 2))
+        reps = max(20, int(10 * np.ceil(t_bar) ** 2 * self.capital_K))
 
         if reps < SPLIT_SIZE:
             split = 1

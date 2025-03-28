@@ -29,7 +29,7 @@ from ising.utils import hache
 QUBIT_COUNT = 10
 GAMMA = 1.0
 H_VAL = -0.1
-ERROR = 0.1
+ERROR = 1e-5
 TIME_RANGE = (1, 50)
 TIME_COUNT = 10
 
@@ -60,7 +60,7 @@ def new_gate_counts(system_size, h_val, evolution_time, precision, gamma):
     ham_sim_error = precision / (9 * system_size * nu) # 9 is the observable norm, rest is number of collisions
 
     for ham_int_sparse in ham_ints_sparse:
-        ham_sparse = (np.sqrt(delta_t) * big_ham_sys / system_size) + ham_int_sparse
+        ham_sparse = (delta_t * big_ham_sys / system_size) + 1/np.sqrt(delta_t) * ham_int_sparse
         sorted_pairs = list(
             sorted(
                 [(x, y.real) for (x, y) in zip(ham_sparse.paulis, ham_sparse.coeffs)],
@@ -88,7 +88,7 @@ def new_gate_counts(system_size, h_val, evolution_time, precision, gamma):
         qdrifts.append(QDriftBenchmarkTime(Hamiltonian(sparse_repr=ham_sparse)))
         ktrotters.append(KTrotterBenchmarkTime(Hamiltonian(sparse_repr=ham_sparse), system="", order=2))
 
-    ham_evo_time = np.sqrt(delta_t)
+    ham_evo_time = delta_t
 
     trotter_cx, ktrotter_cx, qdrift_cx, taylor_cx = 0, 0, 0, 0
     for trotter, alpha_com_first in zip(trotters, alpha_com_firsts):
@@ -115,7 +115,8 @@ def new_gate_counts(system_size, h_val, evolution_time, precision, gamma):
                 np.log(lambd * ham_evo_time / ham_sim_error) / np.log(np.log(lambd * ham_evo_time / ham_sim_error))
             )
         )
-        count_taylor = taylor.controlled_gate_count(ham_evo_time, k).get("cx", 0)
+        taylor.capital_K = nu * system_size
+        count_taylor = taylor.simulation_gate_count(ham_evo_time, k).get("cx", 0)
         print(f"Taylor:: evo_time={ham_evo_time} k={k} sim_error={ham_sim_error} lambda={lambd} count={count_taylor}")
         taylor_cx += nu * count_taylor
 
