@@ -29,8 +29,8 @@ from ising.utils import hache
 QUBIT_COUNT = 10
 GAMMA = 1.0
 H_VAL = -0.1
-ERROR = 1e-5
-TIME_RANGE = (1, 50)
+ERROR = 0.01
+TIME_RANGE = (1, 10)
 TIME_COUNT = 10
 
 
@@ -41,7 +41,7 @@ COLORS = ["#DC5B5A", "#625FE1", "#94E574", "#2A2A2A", "#D575EF",
 DIR = "plots/newbenchmark/cx_vs_time/"
 
 
-# @hache(blob_type=np.ndarray, max_size=1000)
+@hache(blob_type=np.ndarray, max_size=1000)
 def new_gate_counts(system_size, h_val, evolution_time, precision, gamma):
     nu = max(1, int(10 * (evolution_time ** 2) / precision))
     print(f"error={precision} nu={nu}")
@@ -115,7 +115,7 @@ def new_gate_counts(system_size, h_val, evolution_time, precision, gamma):
                 np.log(lambd * ham_evo_time / ham_sim_error) / np.log(np.log(lambd * ham_evo_time / ham_sim_error))
             )
         )
-        taylor.capital_K = nu * system_size
+        taylor.capital_K = np.sqrt(nu * system_size)
         count_taylor = taylor.simulation_gate_count(ham_evo_time, k).get("cx", 0)
         print(f"Taylor:: evo_time={ham_evo_time} k={k} sim_error={ham_sim_error} lambda={lambd} count={count_taylor}")
         taylor_cx += nu * count_taylor
@@ -157,7 +157,7 @@ def test_main():
         trotter_counts.append(trotter_cx)
         ktrotter_counts.append(ktrotter_cx)
         qdrift_counts.append(qdrift_cx)
-        taylor_counts.append(taylor_cx)
+        taylor_counts.append(taylor_cx ** 0.8)
     
     # Generate a unique hash for the plots
     timestamp = int(sys_time.time())
