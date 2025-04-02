@@ -159,20 +159,20 @@ def test_main():
         json.dump(all_params, f, indent=4)
     
     # Create plots with overlapping line and scatter
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(10, 8))
     
     # Line and scatter plots overlapping
-    ax = sns.lineplot(x=errors, y=trotter_counts, label='Trotter', color=COLORS[0], ax=ax)
-    ax = sns.scatterplot(x=errors, y=trotter_counts, color=COLORS[0], s=50, ax=ax)
+    ax = sns.lineplot(x=errors, y=trotter_counts, label='Trotter', color=COLORS[0], ax=ax, linewidth=3)
+    ax = sns.scatterplot(x=errors, y=trotter_counts, color=COLORS[0], s=60, ax=ax)
     
-    ax = sns.lineplot(x=errors, y=ktrotter_counts, label='K-Trotter', color=COLORS[1], ax=ax)
-    ax = sns.scatterplot(x=errors, y=ktrotter_counts, color=COLORS[1], s=50, ax=ax)
+    ax = sns.lineplot(x=errors, y=ktrotter_counts, label='K-Trotter', color=COLORS[1], ax=ax, linewidth=3)
+    ax = sns.scatterplot(x=errors, y=ktrotter_counts, color=COLORS[1], s=60, ax=ax)
     
-    ax = sns.lineplot(x=errors, y=qdrift_counts, label='QDrift', color=COLORS[2], ax=ax)
-    ax = sns.scatterplot(x=errors, y=qdrift_counts, color=COLORS[2], s=50, ax=ax)
+    ax = sns.lineplot(x=errors, y=qdrift_counts, label='QDrift', color=COLORS[2], ax=ax, linewidth=3)
+    ax = sns.scatterplot(x=errors, y=qdrift_counts, color=COLORS[2], s=60, ax=ax)
     
-    ax = sns.lineplot(x=errors, y=taylor_counts, label='Taylor', color=COLORS[3], ax=ax)
-    ax = sns.scatterplot(x=errors, y=taylor_counts, color=COLORS[3], s=50, ax=ax)
+    ax = sns.lineplot(x=errors, y=taylor_counts, label='Taylor', color=COLORS[3], ax=ax, linewidth=3)
+    ax = sns.scatterplot(x=errors, y=taylor_counts, color=COLORS[3], s=60, ax=ax)
     
     # Set log scales
     plt.xscale('log')
@@ -183,13 +183,13 @@ def test_main():
     ax.spines["right"].set_visible(False)
     
     # Add labels
-    plt.xlabel('Error', fontsize=14)
-    plt.ylabel('CNOT gate counts per coherent run', fontsize=14)
+    # plt.xlabel('Error', fontsize=17)
+    # plt.ylabel('CNOT gate counts per coherent run', fontsize=17)
     plt.title(f'CX Gate Count vs Error (n={QUBIT_COUNT}, h={H_VAL}, t={TIME}, γ={GAMMA})')
     # plt.grid(True, which="both", ls="--", alpha=0.3)
     plt.gca().invert_xaxis()
-    plt.tight_layout()
-    plt.tick_params(axis='both', which='major', labelsize=12)
+    plt.tight_layout(pad=4.0)
+    plt.tick_params(axis='both', which='major', labelsize=28)
 
     
     # Save with legend
