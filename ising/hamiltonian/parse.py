@@ -17,6 +17,9 @@ def parse(name) -> Hamiltonian:
 
     # eV to Hartree
     gap = abs(float(data["homo"]) - float(data["lumo"])) * 0.0367493
+    
+    # HEHE BOIIIIH
+    # gay_gap = abs(float(data["homo"]) - float(data["lumo"])) * 0.0367493
 
     coeffs = []
     for rl, im in zip(data["real"], data["imag"]):
